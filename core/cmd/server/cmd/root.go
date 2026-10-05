@@ -9,6 +9,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/server"
 	"github.com/1Panel-dev/1Panel/core/utils/common"
 	"github.com/1Panel-dev/1Panel/core/utils/ctl_conf"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 )
@@ -50,12 +51,13 @@ func loadDBConn(dbName string) (*gorm.DB, error) {
 }
 
 func loadBaseDir() (string, error) {
-	baseDir, err := ctl_conf.LoadFromFile("/usr/local/bin/1pctl", "BASE_DIR")
+	configFile := paths.ConfigFile()
+	baseDir, err := ctl_conf.LoadFromFile(configFile, "BASE_DIR")
 	if err != nil {
 		return "", fmt.Errorf("handle load `BASE_DIR` failed, err: %v", err)
 	}
 	if len(baseDir) == 0 {
-		return "", fmt.Errorf("error `BASE_DIR` find in /usr/local/bin/1pctl")
+		return "", fmt.Errorf("error `BASE_DIR` find in %s", configFile)
 	}
 	return baseDir, nil
 }

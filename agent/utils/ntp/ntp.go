@@ -4,10 +4,10 @@ import (
 	"encoding/binary"
 	"fmt"
 	"net"
-	"runtime"
 	"time"
 
 	"github.com/1Panel-dev/1Panel/agent/utils/cmd"
+	"github.com/1Panel-dev/1Panel/pkg/platform/capabilities"
 )
 
 const ntpEpochOffset = 2208988800
@@ -60,25 +60,23 @@ func GetRemoteTime(site string) (time.Time, error) {
 }
 
 func UpdateSystemTime(dateTime string) error {
-	system := runtime.GOOS
-	if system == "linux" {
-		cmdMgr := cmd.NewCommandMgr()
-		if err := cmdMgr.RunWithOptionalSudo("date", "-s", dateTime); err != nil {
-			return fmt.Errorf("update system time failed, %v", err)
-		}
-		return nil
+	if capabilities.IsDarwin() {
+		return capabilities.ErrNotSupportedOnMac
 	}
-	return fmt.Errorf("the current system architecture %v does not support synchronization", system)
+	cmdMgr := cmd.NewCommandMgr()
+	if err := cmdMgr.RunWithOptionalSudo("date", "-s", dateTime); err != nil {
+		return fmt.Errorf("update system time failed, %v", err)
+	}
+	return nil
 }
 
 func UpdateSystemTimeZone(timezone string) error {
-	system := runtime.GOOS
-	if system == "linux" {
-		cmdMgr := cmd.NewCommandMgr()
-		if err := cmdMgr.RunWithOptionalSudo("timedatectl", "set-timezone", timezone); err != nil {
-			return fmt.Errorf("update system time zone failed, %v", err)
-		}
-		return nil
+	if capabilities.IsDarwin() {
+		return capabilities.ErrNotSupportedOnMac
 	}
-	return fmt.Errorf("the current system architecture %v does not support synchronization", system)
+	cmdMgr := cmd.NewCommandMgr()
+	if err := cmdMgr.RunWithOptionalSudo("timedatectl", "set-timezone", timezone); err != nil {
+		return fmt.Errorf("update system time zone failed, %v", err)
+	}
+	return nil
 }

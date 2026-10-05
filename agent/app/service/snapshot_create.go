@@ -18,6 +18,7 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/app/dto"
 	"github.com/1Panel-dev/1Panel/agent/app/model"
 	"github.com/1Panel-dev/1Panel/agent/app/task"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 	"github.com/1Panel-dev/1Panel/agent/constant"
 	"github.com/1Panel-dev/1Panel/agent/global"
 	"github.com/1Panel-dev/1Panel/agent/i18n"
@@ -319,20 +320,20 @@ func snapBaseData(snap snapHelper, targetDir string, withDockerConf bool) error 
 	snap.Task.LogStart(i18n.GetMsgByKey("SnapBaseInfo"))
 
 	if global.IsMaster {
-		err := snap.FileOp.CopyFile("/usr/local/bin/1panel-core", targetDir)
-		snap.Task.LogWithStatus(i18n.GetWithName("SnapCopy", "/usr/local/bin/1panel-core"), err)
+		err := snap.FileOp.CopyFile(paths.CoreBinaryPath(), targetDir)
+		snap.Task.LogWithStatus(i18n.GetWithName("SnapCopy", paths.CoreBinaryPath()), err)
 		if err != nil {
 			return err
 		}
-		err = snap.FileOp.CopyFile("/usr/local/bin/1pctl", targetDir)
-		snap.Task.LogWithStatus(i18n.GetWithName("SnapCopy", "/usr/local/bin/1pctl"), err)
+		err = snap.FileOp.CopyFile(paths.ConfigFile(), targetDir)
+		snap.Task.LogWithStatus(i18n.GetWithName("SnapCopy", paths.ConfigFile()), err)
 		if err != nil {
 			return err
 		}
 	}
 
-	err := snap.FileOp.CopyFile("/usr/local/bin/1panel-agent", targetDir)
-	snap.Task.LogWithStatus(i18n.GetWithName("SnapCopy", "/usr/local/bin/1panel-agent"), err)
+	err := snap.FileOp.CopyFile(paths.AgentBinaryPath(), targetDir)
+	snap.Task.LogWithStatus(i18n.GetWithName("SnapCopy", paths.AgentBinaryPath()), err)
 	if err != nil {
 		return err
 	}

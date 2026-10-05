@@ -31,6 +31,9 @@ type firewallDatabaseSyncAdapter interface {
 }
 
 func (s *FirewallService) SyncPortWhitelist(ctx context.Context) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	firewallWhitelistMu.Lock()
 	defer firewallWhitelistMu.Unlock()
 
@@ -49,6 +52,9 @@ func (s *FirewallService) SyncPortWhitelist(ctx context.Context) error {
 }
 
 func (s *FirewallService) PreviewRuleSync(ctx context.Context, clientIP string, request dto.FirewallRuleSyncRequest) (dto.FirewallRuleSyncPreview, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FirewallRuleSyncPreview{}, err
+	}
 	switch strings.TrimSpace(request.Subsystem) {
 	case "forwarding":
 		service := s.forwardingSync
@@ -74,6 +80,9 @@ func (s *FirewallService) PreviewRuleSync(ctx context.Context, clientIP string, 
 }
 
 func (s *FirewallService) SyncRules(ctx context.Context, clientIP string, request dto.FirewallRuleSyncRequest) (dto.FirewallRuleSyncResult, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FirewallRuleSyncResult{}, err
+	}
 	switch strings.TrimSpace(request.Subsystem) {
 	case "forwarding":
 		service := s.forwardingSync
@@ -93,6 +102,9 @@ func (s *FirewallService) SyncRules(ctx context.Context, clientIP string, reques
 }
 
 func (s *FirewallService) CurrentRuleSyncTask() (dto.FirewallRuleSyncTask, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FirewallRuleSyncTask{}, err
+	}
 	firewallRuleSyncTaskMu.Lock()
 	defer firewallRuleSyncTaskMu.Unlock()
 	return currentFirewallRuleSyncTaskLocked()

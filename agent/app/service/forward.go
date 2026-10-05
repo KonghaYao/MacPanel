@@ -58,6 +58,9 @@ var (
 )
 
 func (s *ForwardingService) LoadBaseInfo() (dto.FirewallSubsystemStatus, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FirewallSubsystemStatus{}, err
+	}
 	selected, _ := settingRepo.GetValueByKey(constant.FirewallForwardingBackendKey)
 	selected = strings.TrimSpace(selected)
 	if selected == "" {
@@ -113,6 +116,9 @@ func (s *ForwardingService) LoadBaseInfo() (dto.FirewallSubsystemStatus, error) 
 }
 
 func (s *ForwardingService) SearchRules(request dto.ForwardRuleSearch) (int64, []dto.ForwardRule, error) {
+	if err := rejectDarwin(); err != nil {
+		return 0, nil, err
+	}
 	if request.Strategy != "" {
 		return 0, nil, nil
 	}
@@ -175,6 +181,9 @@ func (s *ForwardingService) SearchRules(request dto.ForwardRuleSearch) (int64, [
 }
 
 func (s *ForwardingService) OperateRules(request dto.ForwardRuleOperate) (dto.FilterChainOperationResponse, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FilterChainOperationResponse{}, err
+	}
 	count := 0
 	for _, rule := range request.Rules {
 		if rule.Operation == "add" {
@@ -210,6 +219,9 @@ func (s *ForwardingService) OperateRules(request dto.ForwardRuleOperate) (dto.Fi
 }
 
 func (s *ForwardingService) Enable() error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	forwardingMutationMu.Lock()
 	defer forwardingMutationMu.Unlock()
 	manager, err := s.clientFactory()
@@ -236,6 +248,9 @@ func (s *ForwardingService) Enable() error {
 }
 
 func (s *ForwardingService) QueueInitialization(request dto.FirewallInitializationTask) (dto.FilterChainOperationResponse, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FilterChainOperationResponse{}, err
+	}
 	if err := task.CheckScopeTaskIsExecuting(task.TaskScopeFirewall, 0); err != nil {
 		return dto.FilterChainOperationResponse{}, err
 	}

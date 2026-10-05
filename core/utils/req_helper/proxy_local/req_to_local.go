@@ -18,6 +18,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/app/dto"
 	"github.com/1Panel-dev/1Panel/core/global"
 	"github.com/1Panel-dev/1Panel/core/i18n"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 )
 
 func NewLocalClient(reqUrl, reqMethod string, body io.Reader, ctx *gin.Context) (interface{}, error) {
@@ -27,7 +28,7 @@ func NewLocalClient(reqUrl, reqMethod string, body io.Reader, ctx *gin.Context) 
 }
 
 func NewLocalClientWithContext(requestContext context.Context, reqURL, reqMethod string, body io.Reader, ctx *gin.Context, timeout time.Duration) (interface{}, error) {
-	client := newReusableClientWithTimeout("/etc/1panel/agent.sock", timeout)
+	client := newReusableClientWithTimeout(paths.SocketPath(), timeout)
 	defer client.CloseIdleConnections()
 	return client.RequestWithContext(requestContext, reqURL, reqMethod, body, ctx)
 }
@@ -38,7 +39,7 @@ type ReusableClient struct {
 }
 
 func NewReusableClient() *ReusableClient {
-	return newReusableClient("/etc/1panel/agent.sock")
+	return newReusableClient(paths.SocketPath())
 }
 
 func newReusableClient(sockPath string) *ReusableClient {

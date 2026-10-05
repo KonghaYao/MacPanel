@@ -110,6 +110,9 @@ func (u *SSHService) GetSSHInfo() (*dto.SSHInfo, error) {
 }
 
 func (u *SSHService) OperateSSH(operation string) error {
+	if err := rejectDarwinFeature("sshd_config"); err != nil {
+		return err
+	}
 	serviceName, err := loadServiceName()
 	if err != nil {
 		return err
@@ -209,6 +212,9 @@ func loadSSHSocketNames(serviceName string) []string {
 }
 
 func (u *SSHService) Update(req dto.SSHUpdate) error {
+	if err := rejectDarwinFeature("sshd_config"); err != nil {
+		return err
+	}
 	serviceName, err := loadServiceName()
 	if err != nil {
 		return err
@@ -809,6 +815,9 @@ func (u *SSHService) ExportLog(ctx *gin.Context, req dto.SearchSSHLog) (string, 
 }
 
 func (u *SSHService) LoadSSHFile(name string) (string, error) {
+	if err := rejectDarwinFeature("sshd_config"); err != nil {
+		return "", err
+	}
 	var fileName string
 	switch name {
 	case "authKeys":
@@ -850,6 +859,9 @@ func (u *SSHService) LoadSSHFile(name string) (string, error) {
 }
 
 func (u *SSHService) UpdateByFile(req dto.SSHConfUpdate) error {
+	if err := rejectDarwinFeature("sshd_config"); err != nil {
+		return err
+	}
 	var fileName string
 	switch req.Key {
 	case "authKeys":

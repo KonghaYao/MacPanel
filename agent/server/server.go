@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"runtime"
 	"syscall"
 
 	"github.com/gin-gonic/gin"
@@ -31,11 +32,10 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/utils/encrypt"
 	"github.com/1Panel-dev/1Panel/agent/utils/files"
 	"github.com/1Panel-dev/1Panel/agent/utils/re"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 )
 
 const (
-	masterSocketDir          = "/etc/1panel"
-	masterSocketPath         = masterSocketDir + "/agent.sock"
 	masterSocketDirPerm      = 0o700
 	masterSocketFilePerm     = 0o600
 	masterSocketDirPermMask  = 0o077
@@ -53,15 +53,17 @@ func prepareMasterSocketDir(dir string) error {
 	if err != nil {
 		return fmt.Errorf("stat master socket dir %s failed: %w", dir, err)
 	}
-	if info.Mode().Perm()&masterSocketDirPermMask != 0 {
-		return fmt.Errorf("master socket dir %s permission %#o is too permissive", dir, info.Mode().Perm())
-	}
-	if stat, ok := info.Sys().(*syscall.Stat_t); ok {
-		if int(stat.Uid) != os.Geteuid() {
-			return fmt.Errorf(
-				"master socket dir %s owner uid %d does not match current process uid %d",
-				dir, stat.Uid, os.Geteuid(),
-			)
+	if runtime.GOOS != "darwin" {
+		if info.Mode().Perm()&masterSocketDirPermMask != 0 {
+			return fmt.Errorf("master socket dir %s permission %#o is too permissive", dir, info.Mode().Perm())
+		}
+		if stat, ok := info.Sys().(*syscall.Stat_t); ok {
+			if int(stat.Uid) != os.Geteuid() {
+				return fmt.Errorf(
+					"master socket dir %s owner uid %d does not match current process uid %d",
+					dir, stat.Uid, os.Geteuid(),
+				)
+			}
 		}
 	}
 	return nil
@@ -75,18 +77,20 @@ func secureMasterSocket(sockPath string) error {
 	if err != nil {
 		return fmt.Errorf("stat master socket %s failed: %w", sockPath, err)
 	}
-	if info.Mode().Perm()&masterSocketFilePermMask != 0 {
-		return fmt.Errorf("master socket %s permission %#o is too permissive", sockPath, info.Mode().Perm())
-	}
-	stat, ok := info.Sys().(*syscall.Stat_t)
-	if !ok {
-		return nil
-	}
-	if int(stat.Uid) != os.Geteuid() {
-		return fmt.Errorf(
-			"master socket %s owner uid %d does not match current process uid %d",
-			sockPath, stat.Uid, os.Geteuid(),
-		)
+	if runtime.GOOS != "darwin" {
+		if info.Mode().Perm()&masterSocketFilePermMask != 0 {
+			return fmt.Errorf("master socket %s permission %#o is too permissive", sockPath, info.Mode().Perm())
+		}
+		stat, ok := info.Sys().(*syscall.Stat_t)
+		if !ok {
+			return nil
+		}
+		if int(stat.Uid) != os.Geteuid() {
+			return fmt.Errorf(
+				"master socket %s owner uid %d does not match current process uid %d",
+				sockPath, stat.Uid, os.Geteuid(),
+			)
+		}
 	}
 	return nil
 }
@@ -137,20 +141,22 @@ func Start() {
 	}
 
 	if global.IsMaster {
-		global.LOG.Infof("agent startup: master mode, preparing unix socket %s", masterSocketPath)
-		if err := prepareMasterSocketDir(masterSocketDir); err != nil {
+		socketDir := paths.SocketDir()
+		socketPath := paths.SocketPath()
+		global.LOG.Infof("agent startup: master mode, preparing unix socket %s", socketPath)
+		if err := prepareMasterSocketDir(socketDir); err != nil {
 			panic(err)
 		}
-		_ = os.Remove(masterSocketPath)
-		listener, err := net.Listen("unix", masterSocketPath)
+		_ = os.Remove(socketPath)
+		listener, err := net.Listen("unix", socketPath)
 		if err != nil {
 			panic(err)
 		}
-		if err := secureMasterSocket(masterSocketPath); err != nil {
+		if err := secureMasterSocket(socketPath); err != nil {
 			_ = listener.Close()
 			panic(err)
 		}
-		global.LOG.Infof("agent startup: listening on unix socket %s", masterSocketPath)
+		global.LOG.Infof("agent startup: listening on unix socket %s", socketPath)
 		business.Init()
 		global.LOG.Info("agent startup: business initialized")
 		_ = server.Serve(listener)

@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"sync"
 )
@@ -31,6 +32,9 @@ func CheckIllegal(args ...string) bool {
 }
 
 func SudoHandleCmd() string {
+	if runtime.GOOS == "darwin" {
+		return ""
+	}
 	sudoCheckOnce.Do(func() {
 		cmd := exec.Command("sudo", "-n", "ls")
 		if err := cmd.Run(); err == nil {
@@ -41,7 +45,7 @@ func SudoHandleCmd() string {
 }
 
 func WrapWithOptionalSudo(name string, args ...string) (string, []string) {
-	if SudoHandleCmd() == "" {
+	if runtime.GOOS == "darwin" || SudoHandleCmd() == "" {
 		return name, args
 	}
 	return "sudo", append([]string{"-n", name}, args...)
@@ -55,7 +59,7 @@ func ExecCommandWithOptionalSudo(name string, args ...string) *exec.Cmd {
 func WriteFileWithOptionalSudo(name string, data []byte, perm os.FileMode) error {
 	if err := os.WriteFile(name, data, perm); err == nil {
 		return nil
-	} else if SudoHandleCmd() == "" {
+	} else if runtime.GOOS == "darwin" || SudoHandleCmd() == "" {
 		return err
 	}
 	command := exec.Command("sudo", "-n", "tee", name)

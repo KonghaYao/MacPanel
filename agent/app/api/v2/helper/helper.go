@@ -16,6 +16,7 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/app/dto"
 	"github.com/1Panel-dev/1Panel/agent/constant"
 	"github.com/1Panel-dev/1Panel/agent/i18n"
+	"github.com/1Panel-dev/1Panel/pkg/platform/capabilities"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 )
@@ -51,6 +52,10 @@ func ErrorWithDetailAndData(ctx *gin.Context, code int, msgKey string, err error
 }
 
 func InternalServer(ctx *gin.Context, err error) {
+	if capabilities.IsNotSupportedOnMac(err) {
+		capabilities.RespondNotSupportedOnDarwin(ctx)
+		return
+	}
 	ErrorWithDetail(ctx, http.StatusInternalServerError, "ErrInternalServer", err)
 }
 

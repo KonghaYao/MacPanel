@@ -20,6 +20,7 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/utils/cmd"
 	"github.com/1Panel-dev/1Panel/agent/utils/controller"
 	"github.com/1Panel-dev/1Panel/agent/utils/files"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 	"github.com/pkg/errors"
 )
 
@@ -323,13 +324,13 @@ func backupBeforeRecover(name string, itemHelper *snapRecoverHelper) error {
 	}
 
 	if global.IsMaster {
-		err = itemHelper.FileOp.CopyFile("/usr/local/bin/1pctl", baseDir)
-		itemHelper.Task.LogWithStatus(i18n.GetWithName("SnapCopy", "/usr/local/bin/1pctl"), err)
+		err = itemHelper.FileOp.CopyFile(paths.ConfigFile(), baseDir)
+		itemHelper.Task.LogWithStatus(i18n.GetWithName("SnapCopy", paths.ConfigFile()), err)
 		if err != nil {
 			return err
 		}
-		err = itemHelper.FileOp.CopyFile("/usr/local/bin/1panel-core", baseDir)
-		itemHelper.Task.LogWithStatus(i18n.GetWithName("SnapCopy", "/usr/local/bin/1panel-core"), err)
+		err = itemHelper.FileOp.CopyFile(paths.CoreBinaryPath(), baseDir)
+		itemHelper.Task.LogWithStatus(i18n.GetWithName("SnapCopy", paths.CoreBinaryPath()), err)
 		if err != nil {
 			return err
 		}
@@ -340,8 +341,8 @@ func backupBeforeRecover(name string, itemHelper *snapRecoverHelper) error {
 			return err
 		}
 	}
-	err = itemHelper.FileOp.CopyFile("/usr/local/bin/1panel-agent", baseDir)
-	itemHelper.Task.LogWithStatus(i18n.GetWithName("SnapCopy", "/usr/local/bin/1panel-agent"), err)
+	err = itemHelper.FileOp.CopyFile(paths.AgentBinaryPath(), baseDir)
+	itemHelper.Task.LogWithStatus(i18n.GetWithName("SnapCopy", paths.AgentBinaryPath()), err)
 	if err != nil {
 		return err
 	}
@@ -413,13 +414,13 @@ func recoverBaseData(src string, itemHelper *snapRecoverHelper) error {
 	itemHelper.Task.Log("---------------------- 6 / 11 ----------------------")
 	itemHelper.Task.LogStart(i18n.GetMsgByKey("SnapBaseInfo"))
 	if global.IsMaster {
-		err := itemHelper.FileOp.CopyFile(path.Join(src, "1pctl"), "/usr/local/bin")
-		itemHelper.Task.LogWithStatus(i18n.GetWithName("SnapCopy", "/usr/local/bin/1pctl"), err)
+		err := itemHelper.FileOp.CopyFile(path.Join(src, "1pctl"), paths.BinDir())
+		itemHelper.Task.LogWithStatus(i18n.GetWithName("SnapCopy", paths.ConfigFile()), err)
 		if err != nil {
 			return err
 		}
-		err = itemHelper.FileOp.CopyFile(path.Join(src, "1panel-core"), "/usr/local/bin")
-		itemHelper.Task.LogWithStatus(i18n.GetWithName("SnapCopy", "/usr/local/bin/1panel-core"), err)
+		err = itemHelper.FileOp.CopyFile(path.Join(src, "1panel-core"), paths.BinDir())
+		itemHelper.Task.LogWithStatus(i18n.GetWithName("SnapCopy", paths.CoreBinaryPath()), err)
 		if err != nil {
 			return err
 		}
@@ -434,8 +435,8 @@ func recoverBaseData(src string, itemHelper *snapRecoverHelper) error {
 			}
 		}
 	}
-	err := itemHelper.FileOp.CopyFile(path.Join(src, "1panel-agent"), "/usr/local/bin")
-	itemHelper.Task.LogWithStatus(i18n.GetWithName("SnapCopy", "/usr/local/bin/1panel-agent"), err)
+	err := itemHelper.FileOp.CopyFile(path.Join(src, "1panel-agent"), paths.BinDir())
+	itemHelper.Task.LogWithStatus(i18n.GetWithName("SnapCopy", paths.AgentBinaryPath()), err)
 	if err != nil {
 		return err
 	}

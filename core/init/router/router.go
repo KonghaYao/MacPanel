@@ -102,6 +102,10 @@ func Routers() *gin.Engine {
 		router.InitRouter(PrivateGroup)
 	}
 
+	PlatformGroup := Router.Group("/api/v2/platform")
+	PlatformGroup.Use(middleware.SetPasswordPublicKey())
+	(&rou.PlatformRouter{}).InitRouter(PlatformGroup)
+
 	Router.NoRoute(func(c *gin.Context) {
 		if !security.HandleNotRoute(c) {
 			return

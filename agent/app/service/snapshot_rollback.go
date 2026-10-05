@@ -14,6 +14,7 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/global"
 	"github.com/1Panel-dev/1Panel/agent/i18n"
 	"github.com/1Panel-dev/1Panel/agent/utils/files"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 )
 
 func (u *SnapshotService) SnapshotRollback(req dto.SnapshotRecover) error {
@@ -38,25 +39,25 @@ func (u *SnapshotService) SnapshotRollback(req dto.SnapshotRecover) error {
 
 		FileOp := files.NewFileOp()
 		taskItem.AddSubTask(
-			i18n.GetWithName("SnapCopy", "/usr/local/bin/1pctl"),
+			i18n.GetWithName("SnapCopy", paths.ConfigFile()),
 			func(t *task.Task) error {
-				return FileOp.CopyFile(path.Join(baseDir, "1pctl"), "/usr/local/bin")
+				return FileOp.CopyFile(path.Join(baseDir, "1pctl"), paths.BinDir())
 			},
 			nil,
 		)
 		if global.IsMaster {
 			taskItem.AddSubTask(
-				i18n.GetWithName("SnapCopy", "/usr/local/bin/1panel-core"),
+				i18n.GetWithName("SnapCopy", paths.CoreBinaryPath()),
 				func(t *task.Task) error {
-					return FileOp.CopyFile(path.Join(baseDir, "1panel"), "/usr/local/bin")
+					return FileOp.CopyFile(path.Join(baseDir, "1panel"), paths.BinDir())
 				},
 				nil,
 			)
 		}
 		taskItem.AddSubTask(
-			i18n.GetWithName("SnapCopy", "/usr/local/bin/1panel-agent"),
+			i18n.GetWithName("SnapCopy", paths.AgentBinaryPath()),
 			func(t *task.Task) error {
-				return FileOp.CopyFile(path.Join(baseDir, "1panel-agent"), "/usr/local/bin")
+				return FileOp.CopyFile(path.Join(baseDir, "1panel-agent"), paths.BinDir())
 			},
 			nil,
 		)

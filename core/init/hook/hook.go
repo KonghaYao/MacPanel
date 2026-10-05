@@ -11,6 +11,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/utils/common"
 	"github.com/1Panel-dev/1Panel/core/utils/ctl_conf"
 	"github.com/1Panel-dev/1Panel/core/utils/encrypt"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 	"github.com/1Panel-dev/1Panel/core/utils/xpack"
 )
 
@@ -88,8 +89,8 @@ func handleUserInfo(tags string, settingRepo repo.ISettingRepo) {
 		}
 	}
 
-	_ = ctl_conf.RemoveValueFromFile("/usr/local/bin/1pctl", "CHANGE_USER_INFO", global.CONF.Base.ChangeUserInfo)
-	_ = ctl_conf.UpdateInFile("/usr/local/bin/1pctl", "ORIGINAL_PASSWORD", "**********")
+	_ = ctl_conf.RemoveValueFromFile(paths.ConfigFile(), "CHANGE_USER_INFO", global.CONF.Base.ChangeUserInfo)
+	_ = ctl_conf.UpdateInFile(paths.ConfigFile(), "ORIGINAL_PASSWORD", "**********")
 }
 
 func generateKey() {

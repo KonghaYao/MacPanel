@@ -13,6 +13,9 @@ func ShouldProxyToAgent(reqPath string) bool {
 	if strings.HasPrefix(reqPath, "/api/v2/core") && !strings.HasPrefix(reqPath, "/api/v2/core/xpack") {
 		return false
 	}
+	if strings.HasPrefix(reqPath, "/api/v2/platform") {
+		return false
+	}
 	return true
 }
 

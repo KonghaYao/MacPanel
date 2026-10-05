@@ -892,6 +892,9 @@ func executeStaticNginxModuleBuild(install model.AppInstall, modules []dto.Nginx
 }
 
 func executeNginxModuleBuild(install model.AppInstall, reqModules []string, force bool, mirror string, parentTask *task.Task, reload bool) error {
+	if err := rejectDarwinFeature("openresty_diagnose"); err != nil {
+		return err
+	}
 	modules, err := loadNginxModules(install)
 	if err != nil {
 		return err

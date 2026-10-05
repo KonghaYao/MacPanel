@@ -176,6 +176,9 @@ func (n NginxService) UpdateConfigFile(req request.NginxConfigFileUpdate) error 
 }
 
 func (n NginxService) Build(req request.NginxBuildReq) error {
+	if err := rejectDarwinFeature("openresty_diagnose"); err != nil {
+		return err
+	}
 	nginxInstall, err := getAppInstallByKey(constant.AppOpenresty)
 	if err != nil {
 		return err
@@ -354,6 +357,9 @@ func applyNginxModuleUpdate(modules []dto.NginxModule, req request.NginxModuleUp
 }
 
 func (n NginxService) UpdateModule(req request.NginxModuleUpdate) error {
+	if err := rejectDarwinFeature("openresty_diagnose"); err != nil {
+		return err
+	}
 	nginxInstall, err := getAppInstallByKey(constant.AppOpenresty)
 	if err != nil {
 		return err

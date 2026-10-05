@@ -4,23 +4,27 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 )
 
-const defaultFile = "/usr/local/bin/1pctl"
+func configFile() string {
+	return paths.ConfigFile()
+}
 
 func Load(key string) string {
-	info, err := LoadFromFile(defaultFile, key)
+	info, err := LoadFromFile(configFile(), key)
 	if err != nil {
 		panic(err)
 	}
 	if len(info) == 0 || info == `""` {
-		panic(fmt.Sprintf("error `%s` find in %s", key, defaultFile))
+		panic(fmt.Sprintf("error `%s` find in %s", key, configFile()))
 	}
 	return info
 }
 
 func LoadWithoutPanic(key string) string {
-	info, err := LoadFromFile(defaultFile, key)
+	info, err := LoadFromFile(configFile(), key)
 	if err != nil {
 		return ""
 	}

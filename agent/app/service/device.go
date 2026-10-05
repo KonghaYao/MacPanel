@@ -82,6 +82,9 @@ func (u *DeviceService) LoadBaseInfo() (dto.DeviceBaseInfo, error) {
 }
 
 func (u *DeviceService) LoadTimeZone() ([]string, error) {
+	if err := rejectDarwinFeature("ntp_sync"); err != nil {
+		return nil, err
+	}
 	std, err := cmd.NewCommandMgr(cmd.WithTimeout(10*time.Minute)).RunWithStdout("timedatectl", "list-timezones")
 	if err != nil {
 		return []string{}, err
@@ -115,6 +118,12 @@ func (u *DeviceService) CheckDNS(key, value string) (bool, error) {
 }
 
 func (u *DeviceService) Update(key, value string) error {
+	switch key {
+	case "TimeZone", "Ntp", "LocalTime":
+		if err := rejectDarwinFeature("ntp_sync"); err != nil {
+			return err
+		}
+	}
 	switch key {
 	case "TimeZone":
 		if cmd.CheckIllegal(value) {
@@ -235,6 +244,9 @@ func (u *DeviceService) UpdatePasswd(req dto.ChangePasswd) error {
 }
 
 func (u *DeviceService) UpdateSwap(req dto.SwapHelper) error {
+	if err := rejectDarwinFeature("swap"); err != nil {
+		return err
+	}
 	taskItem, err := task.NewTaskWithOps(req.Path, task.TaskSwapSet, task.TaskScopeSystem, req.TaskID, 1)
 	if err != nil {
 		global.LOG.Errorf("new task for create container failed, err: %v", err)

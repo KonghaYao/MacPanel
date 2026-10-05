@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/utils/controller"
 	"github.com/1Panel-dev/1Panel/core/utils/ctl_conf"
 	"github.com/1Panel-dev/1Panel/core/utils/files"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 
 	"github.com/spf13/cobra"
 )
@@ -26,11 +28,11 @@ var restoreCmd = &cobra.Command{
 	Use: "restore",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		i18n.UseI18nForCmd(language)
-		if !isRoot() {
+		if !isRoot() && runtime.GOOS != "darwin" {
 			fmt.Println(i18n.GetMsgWithMapForCmd("SudoHelper", map[string]interface{}{"cmd": "sudo 1pctl restore"}))
 			return nil
 		}
-		baseDir, err := ctl_conf.LoadFromFile("/usr/local/bin/1pctl", "BASE_DIR")
+		baseDir, err := ctl_conf.LoadFromFile(paths.ConfigFile(), "BASE_DIR")
 		if err != nil {
 			return fmt.Errorf("handle load `BASE_DIR` failed, err: %v", err)
 		}
@@ -47,26 +49,26 @@ var restoreCmd = &cobra.Command{
 		tmpPath = path.Join(upgradeDir, tmpPath, "original")
 
 		fmt.Println(i18n.GetMsgWithMapForCmd("RestoreStep1", map[string]interface{}{"name": tmpPath}))
-		if err := files.CopyItem(false, true, path.Join(tmpPath, "1panel-agent"), "/usr/local/bin"); err != nil {
+		if err := files.CopyItem(false, true, path.Join(tmpPath, "1panel-agent"), paths.BinDir()); err != nil {
 			return err
 		}
-		if err := files.CopyItem(false, true, path.Join(tmpPath, "1panel-core"), "/usr/local/bin"); err != nil {
+		if err := files.CopyItem(false, true, path.Join(tmpPath, "1panel-core"), paths.BinDir()); err != nil {
 			return err
 		}
-		if err := files.CopyItem(true, true, path.Join(tmpPath, "lang"), "/usr/local/bin"); err != nil {
+		if err := files.CopyItem(true, true, path.Join(tmpPath, "lang"), paths.BinDir()); err != nil {
 			return err
 		}
 		if err := files.CopyItem(false, true, path.Join(tmpPath, "GeoIP.mmdb"), path.Join(baseDir, "1panel/geo")); err != nil {
 			return err
 		}
-		_, _ = cmdUtils.NewCommandMgr().RunWithStdout("chmod", "755", "/usr/local/bin/1panel-agent", "/usr/local/bin/1panel-core")
+		_, _ = cmdUtils.NewCommandMgr().RunWithStdout("chmod", "755", paths.AgentBinaryPath(), paths.CoreBinaryPath())
 
 		fmt.Println(i18n.GetMsgByKeyForCmd("RestoreStep2"))
-		if err := files.CopyItem(false, true, path.Join(tmpPath, "1pctl"), "/usr/local/bin"); err != nil {
+		if err := files.CopyItem(false, true, path.Join(tmpPath, "1pctl"), paths.BinDir()); err != nil {
 			return err
 		}
-		_, _ = cmdUtils.NewCommandMgr().RunWithStdout("chmod", "755", "/usr/local/bin/1pctl")
-		_, _ = cmdUtils.NewCommandMgr().RunWithStdout("cp", "-r", path.Join(tmpPath, "lang"), "/usr/local/bin")
+		_, _ = cmdUtils.NewCommandMgr().RunWithStdout("chmod", "755", paths.ConfigFile())
+		_, _ = cmdUtils.NewCommandMgr().RunWithStdout("cp", "-r", path.Join(tmpPath, "lang"), paths.BinDir())
 		geoPath := path.Join(global.CONF.Base.InstallDir, "1panel/geo")
 		_ = os.MkdirAll(geoPath, os.ModePerm)
 		_, _ = cmdUtils.NewCommandMgr().RunWithStdout("cp", path.Join(tmpPath, "GeoIP.mmdb"), geoPath+"/")

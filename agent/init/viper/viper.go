@@ -9,6 +9,7 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/cmd/server/conf"
 	"github.com/1Panel-dev/1Panel/agent/global"
 	"github.com/1Panel-dev/1Panel/agent/utils/files"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 	"github.com/1Panel-dev/1Panel/agent/utils/xpack"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
@@ -16,6 +17,9 @@ import (
 )
 
 func Init() {
+	if err := paths.Bootstrap(""); err != nil {
+		panic(err)
+	}
 	mode := ""
 	fileOp := files.NewFileOp()
 	v := viper.NewWithOptions()
@@ -28,9 +32,13 @@ func Init() {
 	if config.Base.Mode != "" {
 		mode = config.Base.Mode
 	}
-	if mode == "dev" && fileOp.Stat("/opt/1panel/conf/app.yaml") {
+	devConfFile := paths.LinuxDevConfFile()
+	if paths.IsDarwin() {
+		devConfFile = path.Join(paths.ConfDir(), "app.yaml")
+	}
+	if mode == "dev" && fileOp.Stat(devConfFile) {
 		v.SetConfigName("app")
-		v.AddConfigPath(path.Join("/opt/1panel/conf"))
+		v.AddConfigPath(paths.ConfDir())
 		if err := v.ReadInConfig(); err != nil {
 			panic(fmt.Errorf("Fatal error config file: %s \n", err))
 		}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/1Panel-dev/1Panel/agent/global"
 	"github.com/1Panel-dev/1Panel/agent/utils/files"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 )
 
 func Init() {
@@ -30,7 +31,7 @@ func Init() {
 	global.Dir.CustomAppResourceDir, _ = fileOp.CreateDirWithPath(true, path.Join(baseDir, "1panel/resource/apps/custom"))
 	global.Dir.OfflineAppResourceDir, _ = fileOp.CreateDirWithPath(true, path.Join(baseDir, "1panel/resource/offline"))
 	global.Dir.RuntimeDir, _ = fileOp.CreateDirWithPath(true, path.Join(baseDir, "1panel/runtime"))
-	global.Dir.RecycleBinDir, _ = fileOp.CreateDirWithPath(true, "/.1panel_clash")
+	global.Dir.RecycleBinDir, _ = fileOp.CreateDirWithPath(true, paths.RecycleBinDir(baseDir))
 	global.Dir.SSLLogDir, _ = fileOp.CreateDirWithPath(true, path.Join(baseDir, "1panel/log/ssl"))
 	global.Dir.McpDir, _ = fileOp.CreateDirWithPath(true, path.Join(baseDir, "1panel/mcp"))
 	global.Dir.ConvertLogDir, _ = fileOp.CreateDirWithPath(true, path.Join(baseDir, "1panel/log/convert"))

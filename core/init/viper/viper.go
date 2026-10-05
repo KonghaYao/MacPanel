@@ -9,13 +9,17 @@ import (
 	"github.com/1Panel-dev/1Panel/core/cmd/server/conf"
 	"github.com/1Panel-dev/1Panel/core/global"
 	"github.com/1Panel-dev/1Panel/core/utils/ctl_conf"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
 
 func Init() {
-	baseDir := "/opt"
+	if err := paths.Bootstrap(""); err != nil {
+		panic(err)
+	}
+	baseDir := paths.LinuxDefaultBaseDir()
 	port := "9999"
 	mode := ""
 	version := "v2.0.0"
@@ -30,10 +34,14 @@ func Init() {
 	if config.Base.Mode != "" {
 		mode = config.Base.Mode
 	}
-	_, err := os.Stat("/opt/1panel/conf/app.yaml")
+	devConfFile := paths.LinuxDevConfFile()
+	if paths.IsDarwin() {
+		devConfFile = path.Join(paths.ConfDir(), "app.yaml")
+	}
+	_, err := os.Stat(devConfFile)
 	if mode == "dev" && err == nil {
 		v.SetConfigName("app")
-		v.AddConfigPath(path.Join("/opt/1panel/conf"))
+		v.AddConfigPath(paths.ConfDir())
 		if err := v.ReadInConfig(); err != nil {
 			panic(fmt.Errorf("fatal error config file: %s", err))
 		}
@@ -61,7 +69,7 @@ func Init() {
 	if err := v.Unmarshal(&serverConfig); err != nil {
 		panic(err)
 	}
-	_, err = os.Stat("/opt/1panel/conf/app.yaml")
+	_, err = os.Stat(devConfFile)
 	if mode == "dev" && err == nil {
 		if serverConfig.Base.InstallDir != "" {
 			baseDir = serverConfig.Base.InstallDir

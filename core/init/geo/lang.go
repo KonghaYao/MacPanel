@@ -10,6 +10,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/global"
 	"github.com/1Panel-dev/1Panel/core/utils/cmd"
 	fileUtils "github.com/1Panel-dev/1Panel/core/utils/files"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 )
 
 func Init() {
@@ -18,7 +19,7 @@ func Init() {
 
 func initLang() {
 	geoPath := path.Join(global.CONF.Base.InstallDir, "1panel/geo/GeoIP.mmdb")
-	isLangExist := fileUtils.Stat("/usr/local/bin/lang/zh.sh")
+	isLangExist := fileUtils.Stat(path.Join(paths.LangDir(), "zh.sh"))
 	isGeoExist := fileUtils.Stat(geoPath)
 	if isLangExist && isGeoExist {
 		return
@@ -61,7 +62,7 @@ func initLang() {
 			downloadLangFromRemote()
 			return
 		}
-		if err := cmd.NewCommandMgr().Run("cp", "-r", path.Join(tmpPath, "lang"), "/usr/local/bin/"); err != nil {
+		if err := cmd.NewCommandMgr().Run("cp", "-r", path.Join(tmpPath, "lang"), paths.BinDir()+"/"); err != nil {
 			global.LOG.Errorf("load lang from package failed, %v", err)
 			return
 		}
@@ -108,20 +109,21 @@ func loadRestorePath(upgradeDir string) (string, error) {
 }
 
 func downloadLangFromRemote() {
-	path := fmt.Sprintf("%s/language/lang.tar.gz", global.ResourceURL())
-	if err := fileUtils.DownloadFile(path, "/usr/local/bin/lang.tar.gz"); err != nil {
+	remotePath := fmt.Sprintf("%s/language/lang.tar.gz", global.ResourceURL())
+	langArchive := path.Join(paths.BinDir(), "lang.tar.gz")
+	if err := fileUtils.DownloadFile(remotePath, langArchive); err != nil {
 		global.LOG.Errorf("download lang.tar.gz failed, err: %v", err)
 		return
 	}
-	if !fileUtils.Stat("/usr/local/bin/lang.tar.gz") {
+	if !fileUtils.Stat(langArchive) {
 		global.LOG.Error("download lang.tar.gz failed, no such file")
 		return
 	}
-	if err := cmd.NewCommandMgr().Run("tar", "zxvfC", "/usr/local/bin/lang.tar.gz", "/usr/local/bin/"); err != nil {
+	if err := cmd.NewCommandMgr().Run("tar", "zxvfC", langArchive, paths.BinDir()+"/"); err != nil {
 		global.LOG.Errorf("decompress lang.tar.gz failed, %v", err)
 		return
 	}
-	_ = os.Remove("/usr/local/bin/lang.tar.gz")
+	_ = os.Remove(langArchive)
 	global.LOG.Info("download lang successful")
 }
 func downloadGeoFromRemote(targetPath string) {

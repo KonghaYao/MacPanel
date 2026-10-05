@@ -23,6 +23,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/utils/controller"
 	"github.com/1Panel-dev/1Panel/core/utils/ctl_conf"
 	"github.com/1Panel-dev/1Panel/core/utils/files"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 	"github.com/1Panel-dev/1Panel/core/utils/req_helper"
 	upgradeUtil "github.com/1Panel-dev/1Panel/core/utils/upgrade"
 	"github.com/1Panel-dev/1Panel/core/utils/xpack"
@@ -203,31 +204,31 @@ func (u *UpgradeService) Upgrade(req dto.Upgrade) error {
 
 		global.LOG.Info("backup original data successful, now start to upgrade!")
 
-		if err := files.CopyFileWithRename(path.Join(tmpDir, "1panel-core"), "/usr/local/bin/1panel-core"); err != nil {
+		if err := files.CopyFileWithRename(path.Join(tmpDir, "1panel-core"), paths.CoreBinaryPath()); err != nil {
 			global.LOG.Errorf("upgrade 1panel-core failed, err: %v", err)
 			_ = settingRepo.Update("SystemStatus", "Free")
 			u.handleRollback(originalDir, 1, svcInfo)
 			return
 		}
-		if err := files.CopyFileWithRename(path.Join(tmpDir, "1panel-agent"), "/usr/local/bin/1panel-agent"); err != nil {
+		if err := files.CopyFileWithRename(path.Join(tmpDir, "1panel-agent"), paths.AgentBinaryPath()); err != nil {
 			global.LOG.Errorf("upgrade 1panel-agent failed, err: %v", err)
 			_ = settingRepo.Update("SystemStatus", "Free")
 			u.handleRollback(originalDir, 1, svcInfo)
 			return
 		}
 
-		if err := files.CopyFileWithRename(path.Join(tmpDir, "1pctl"), "/usr/local/bin/1pctl"); err != nil {
+		if err := files.CopyFileWithRename(path.Join(tmpDir, "1pctl"), paths.ConfigFile()); err != nil {
 			global.LOG.Errorf("upgrade 1pctl failed, err: %v", err)
 			_ = settingRepo.Update("SystemStatus", "Free")
 			u.handleRollback(originalDir, 2, svcInfo)
 			return
 		}
-		if err := ctl_conf.UpdateInFile("/usr/local/bin/1pctl", "BASE_DIR", global.CONF.Base.InstallDir); err != nil {
+		if err := ctl_conf.UpdateInFile(paths.ConfigFile(), "BASE_DIR", global.CONF.Base.InstallDir); err != nil {
 			global.LOG.Errorf("upgrade basedir in 1pctl failed, err: %v", err)
 			u.handleRollback(originalDir, 2, svcInfo)
 			return
 		}
-		if err := ctl_conf.UpdateInFile("/usr/local/bin/1pctl", "LANGUAGE", oldLang); err != nil {
+		if err := ctl_conf.UpdateInFile(paths.ConfigFile(), "LANGUAGE", oldLang); err != nil {
 			global.LOG.Errorf("upgrade basedir in 1pctl failed, err: %v", err)
 			u.handleRollback(originalDir, 2, svcInfo)
 			return
@@ -247,7 +248,7 @@ func (u *UpgradeService) Upgrade(req dto.Upgrade) error {
 			return
 		}
 
-		if err := files.CopyItem(true, true, path.Join(tmpDir, "lang"), "/usr/local/bin"); err != nil {
+		if err := files.CopyItem(true, true, path.Join(tmpDir, "lang"), paths.BinDir()); err != nil {
 			global.LOG.Errorf("Update language files failed: %v", err)
 			_ = settingRepo.Update("SystemStatus", "Free")
 			u.handleRollback(originalDir, 4, svcInfo)
@@ -464,16 +465,16 @@ func checkUpgradeSpace() error {
 }
 
 func (u *UpgradeService) handleBackup(originalDir string, svcInfo serviceInfo) error {
-	if err := files.CopyItem(false, true, "/usr/local/bin/1panel-core", originalDir); err != nil {
+	if err := files.CopyItem(false, true, paths.CoreBinaryPath(), originalDir); err != nil {
 		return err
 	}
-	if err := files.CopyItem(false, true, "/usr/local/bin/1panel-agent", originalDir); err != nil {
+	if err := files.CopyItem(false, true, paths.AgentBinaryPath(), originalDir); err != nil {
 		return err
 	}
-	if err := files.CopyItem(false, true, "/usr/local/bin/1pctl", originalDir); err != nil {
+	if err := files.CopyItem(false, true, paths.ConfigFile(), originalDir); err != nil {
 		return err
 	}
-	if err := files.CopyItem(true, true, "/usr/local/bin/lang", originalDir); err != nil {
+	if err := files.CopyItem(true, true, paths.LangDir(), originalDir); err != nil {
 		return err
 	}
 	if err := files.CopyItem(false, true, path.Join(svcInfo.basePath, svcInfo.coreName), originalDir); err != nil {
@@ -499,16 +500,16 @@ func (u *UpgradeService) handleRollback(originalDir string, errStep int, svcInfo
 			global.LOG.Errorf("rollback 1panel db failed, err: %v", err)
 		}
 	}
-	if err := files.CopyFileWithRename(path.Join(originalDir, "1panel-core"), "/usr/local/bin/1panel-core"); err != nil {
+	if err := files.CopyFileWithRename(path.Join(originalDir, "1panel-core"), paths.CoreBinaryPath()); err != nil {
 		global.LOG.Errorf("rollback 1panel-core failed, err: %v", err)
 	}
-	if err := files.CopyFileWithRename(path.Join(originalDir, "1panel-agent"), "/usr/local/bin/1panel-agent"); err != nil {
+	if err := files.CopyFileWithRename(path.Join(originalDir, "1panel-agent"), paths.AgentBinaryPath()); err != nil {
 		global.LOG.Errorf("rollback 1panel-agent failed, err: %v", err)
 	}
 	if errStep == 1 {
 		return
 	}
-	if err := files.CopyFileWithRename(path.Join(originalDir, "1pctl"), "/usr/local/bin/1pctl"); err != nil {
+	if err := files.CopyFileWithRename(path.Join(originalDir, "1pctl"), paths.ConfigFile()); err != nil {
 		global.LOG.Errorf("rollback 1pctl failed, err: %v", err)
 	}
 	if errStep == 2 {
@@ -523,7 +524,7 @@ func (u *UpgradeService) handleRollback(originalDir string, errStep int, svcInfo
 	if errStep == 3 {
 		return
 	}
-	if err := files.CopyItem(true, true, path.Join(originalDir, "lang"), "/usr/local/bin"); err != nil {
+	if err := files.CopyItem(true, true, path.Join(originalDir, "lang"), paths.BinDir()); err != nil {
 		global.LOG.Errorf("rollback language files failed, err: %v", err)
 	}
 	if err := files.CopyFileWithRename(path.Join(originalDir, "GeoIP.mmdb"), path.Join(global.CONF.Base.InstallDir, "1panel/geo/GeoIP.mmdb")); err != nil {

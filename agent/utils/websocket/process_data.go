@@ -14,6 +14,7 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/utils/common"
 	"github.com/1Panel-dev/1Panel/agent/utils/files"
 	agentPsutil "github.com/1Panel-dev/1Panel/agent/utils/psutil"
+	"github.com/1Panel-dev/1Panel/pkg/platform/capabilities"
 	"github.com/shirou/gopsutil/v4/host"
 	"github.com/shirou/gopsutil/v4/net"
 	"github.com/shirou/gopsutil/v4/process"
@@ -492,9 +493,11 @@ func getNetConnections(config NetConfig) (res []byte, err error) {
 }
 
 func getProcessNameWithContext(ctx context.Context, pid int32) (string, error) {
-	data, err := os.ReadFile(fmt.Sprintf("/proc/%d/comm", pid))
-	if err == nil && len(data) > 0 {
-		return strings.TrimSpace(string(data)), nil
+	if !capabilities.IsDarwin() {
+		data, err := os.ReadFile(fmt.Sprintf("/proc/%d/comm", pid))
+		if err == nil && len(data) > 0 {
+			return strings.TrimSpace(string(data)), nil
+		}
 	}
 	p, err := process.NewProcessWithContext(ctx, pid)
 	if err != nil {

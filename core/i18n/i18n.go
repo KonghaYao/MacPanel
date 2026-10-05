@@ -9,6 +9,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/app/repo"
 	"github.com/1Panel-dev/1Panel/core/global"
 	"github.com/1Panel-dev/1Panel/core/utils/ctl_conf"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 	"github.com/gin-gonic/gin"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
@@ -211,12 +212,13 @@ func getLanguageFromDBInternal() string {
 	return lang
 }
 func getLanguageFrom1pctl() string {
-	info, err := ctl_conf.LoadFromFile("/usr/local/bin/1pctl", "LANGUAGE")
+	configFile := paths.ConfigFile()
+	info, err := ctl_conf.LoadFromFile(configFile, "LANGUAGE")
 	if err != nil {
 		panic(err)
 	}
 	if len(info) == 0 || info == `""` {
-		panic("error `LANGUAGE` find in /usr/local/bin/1pctl")
+		panic(fmt.Sprintf("error `LANGUAGE` find in %s", configFile))
 	}
 	return info
 }

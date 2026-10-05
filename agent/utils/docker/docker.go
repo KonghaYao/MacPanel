@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -25,13 +26,30 @@ import (
 
 var ErrUnavailable = errors.New("Docker is unavailable")
 
+func ResolveDockerHost(configured string) string {
+	if host := strings.TrimSpace(configured); host != "" {
+		return host
+	}
+	if host := strings.TrimSpace(os.Getenv("DOCKER_HOST")); host != "" {
+		return host
+	}
+	if home, err := os.UserHomeDir(); err == nil {
+		desktopSock := filepath.Join(home, ".docker", "run", "docker.sock")
+		if _, err := os.Stat(desktopSock); err == nil {
+			return "unix://" + desktopSock
+		}
+	}
+	if _, err := os.Stat("/var/run/docker.sock"); err == nil {
+		return "unix:///var/run/docker.sock"
+	}
+	return "unix:///var/run/docker.sock"
+}
+
 func NewDockerClient() (*client.Client, error) {
 	var settingItem model.Setting
 	_ = global.DB.Where("key = ?", "DockerSockPath").First(&settingItem).Error
-	if len(settingItem.Value) == 0 {
-		settingItem.Value = "unix:///var/run/docker.sock"
-	}
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithHost(settingItem.Value), client.WithAPIVersionNegotiation())
+	host := ResolveDockerHost(settingItem.Value)
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithHost(host), client.WithAPIVersionNegotiation())
 	if err != nil {
 		return nil, err
 	}
@@ -41,10 +59,8 @@ func NewDockerClient() (*client.Client, error) {
 func NewClient() (Client, error) {
 	var settingItem model.Setting
 	_ = global.DB.Where("key = ?", "DockerSockPath").First(&settingItem).Error
-	if len(settingItem.Value) == 0 {
-		settingItem.Value = "unix:///var/run/docker.sock"
-	}
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithHost(settingItem.Value), client.WithAPIVersionNegotiation())
+	host := ResolveDockerHost(settingItem.Value)
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithHost(host), client.WithAPIVersionNegotiation())
 	if err != nil {
 		return Client{}, err
 	}

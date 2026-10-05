@@ -11,9 +11,10 @@ import (
 
 	"github.com/1Panel-dev/1Panel/core/utils/clientip"
 	"github.com/1Panel-dev/1Panel/core/utils/publicshare"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 )
 
-const SockPath = "/etc/1panel/agent.sock"
+var SockPath = paths.SocketPath()
 
 var (
 	LocalAgentProxy *httputil.ReverseProxy

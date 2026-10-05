@@ -80,6 +80,9 @@ func applyDockerFirewallBackendConfig(daemonMap map[string]interface{}, backend,
 }
 
 func (u *DockerService) UpdateFirewallBackend(backend string) error {
+	if err := rejectDarwinDockerServiceControl(); err != nil {
+		return err
+	}
 	version := loadDockerEngineVersion(context.Background())
 	if backend == constant.FirewallProviderNftables && !dockerNftablesSupported(version) {
 		return fmt.Errorf("Docker Engine %s or later is required for the nftables firewall backend", dockerNftablesMinVersion)
@@ -253,6 +256,11 @@ func (u *DockerService) LoadDockerConf() (*dto.DaemonJsonConf, error) {
 }
 
 func (u *DockerService) UpdateConf(req dto.SettingUpdate, withRestart bool) error {
+	if withRestart {
+		if err := rejectDarwinDockerServiceControl(); err != nil {
+			return err
+		}
+	}
 	err := createIfNotExistDaemonJsonFile()
 	if err != nil {
 		return err
@@ -376,6 +384,9 @@ func createIfNotExistDaemonJsonFile() error {
 }
 
 func (u *DockerService) UpdateLogOption(req dto.LogOption) error {
+	if err := rejectDarwinDockerServiceControl(); err != nil {
+		return err
+	}
 	err := createIfNotExistDaemonJsonFile()
 	if err != nil {
 		return err
@@ -407,6 +418,9 @@ func (u *DockerService) UpdateLogOption(req dto.LogOption) error {
 }
 
 func (u *DockerService) UpdateIpv6Option(req dto.Ipv6Option) error {
+	if err := rejectDarwinDockerServiceControl(); err != nil {
+		return err
+	}
 	err := createIfNotExistDaemonJsonFile()
 	if err != nil {
 		return err
@@ -446,6 +460,9 @@ func (u *DockerService) UpdateIpv6Option(req dto.Ipv6Option) error {
 }
 
 func (u *DockerService) UpdateConfByFile(req dto.DaemonJsonUpdateByFile) error {
+	if err := rejectDarwinDockerServiceControl(); err != nil {
+		return err
+	}
 	err := createIfNotExistDaemonJsonFile()
 	if err != nil {
 		return err
@@ -470,6 +487,9 @@ func (u *DockerService) UpdateConfByFile(req dto.DaemonJsonUpdateByFile) error {
 }
 
 func (u *DockerService) OperateDocker(req dto.DockerOperation) error {
+	if err := rejectDarwinDockerServiceControl(); err != nil {
+		return err
+	}
 	service := "docker"
 	if req.Operation == "stop" {
 		isSocketActive, _ := controller.CheckExist("docker.socket")

@@ -35,6 +35,9 @@ type FirewallSettingService struct{}
 var firewallWhitelistMu sync.Mutex
 
 func (s *FirewallSettingService) CreatePortWhitelist(ctx context.Context, request dto.FirewallPortWhitelistCreate) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	firewallWhitelistMu.Lock()
 	defer firewallWhitelistMu.Unlock()
 	firewallRuleMutationMu.Lock()
@@ -62,6 +65,9 @@ func (s *FirewallSettingService) CreatePortWhitelist(ctx context.Context, reques
 }
 
 func (s *FirewallSettingService) UpdatePortWhitelist(ctx context.Context, request dto.FirewallPortWhitelistUpdate) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	firewallWhitelistMu.Lock()
 	defer firewallWhitelistMu.Unlock()
 	firewallRuleMutationMu.Lock()
@@ -93,6 +99,9 @@ func (s *FirewallSettingService) UpdatePortWhitelist(ctx context.Context, reques
 }
 
 func (s *FirewallSettingService) DeletePortWhitelist(ctx context.Context, request dto.FirewallPortWhitelistDelete) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	if request.Rule == nil {
 		return fmt.Errorf("select one firewall port whitelist rule to delete")
 	}
@@ -127,6 +136,9 @@ func (s *FirewallSettingService) DeletePortWhitelist(ctx context.Context, reques
 }
 
 func (s *FirewallSettingService) Load(ctx context.Context) (dto.FirewallSettings, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FirewallSettings{}, err
+	}
 	result := dto.FirewallSettings{PingStatus: firewall.LoadPingStatus()}
 
 	installed := make(map[string]bool)
@@ -256,6 +268,9 @@ func (s *FirewallSettingService) Load(ctx context.Context) (dto.FirewallSettings
 }
 
 func (s *FirewallSettingService) Operate(ctx context.Context, request dto.FirewallBackendOperation) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	if err := lockFirewallLifecycleIdle(); err != nil {
 		return err
 	}

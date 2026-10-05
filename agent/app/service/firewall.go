@@ -89,6 +89,9 @@ type preparedManagedUpdate struct {
 }
 
 func (s *FirewallService) UpdatePanelPort(ctx context.Context, oldPort, port uint) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	if oldPort == 0 || oldPort > 65535 || port == 0 || port > 65535 {
 		return fmt.Errorf("invalid panel port transition %d -> %d", oldPort, port)
 	}
@@ -102,6 +105,9 @@ func (s *FirewallService) UpdatePanelPort(ctx context.Context, oldPort, port uin
 }
 
 func (s *FirewallService) LoadBaseInfo(chainGroup string) (dto.FirewallSubsystemStatus, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FirewallSubsystemStatus{}, err
+	}
 	status := dto.FirewallSubsystemStatus{Version: "-", Name: "-", Backend: "-"}
 	status.LifecycleTaskID = currentFirewallLifecycleTaskID()
 	selected, _ := settingRepo.GetValueByKey(constant.FirewallSystemBackendKey)
@@ -145,6 +151,9 @@ func (s *FirewallService) LoadBaseInfo(chainGroup string) (dto.FirewallSubsystem
 }
 
 func (s *FirewallService) QueueFirewallOperation(request dto.FirewallLifecycleOperation) (dto.FirewallLifecycleOperationResponse, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FirewallLifecycleOperationResponse{}, err
+	}
 	response := dto.FirewallLifecycleOperationResponse{}
 	if request.Operation == "disableBanPing" || request.Operation == "enableBanPing" {
 		return response, s.OperateFirewall(request)
@@ -220,6 +229,9 @@ func (s *FirewallService) QueueFirewallOperation(request dto.FirewallLifecycleOp
 }
 
 func (s *FirewallService) OperateFilterChain(request dto.FilterChainOperation) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	client, err := NewSelectedSystemFirewallClient()
 	if err != nil {
 		return err
@@ -238,6 +250,9 @@ func (s *FirewallService) OperateFilterChain(request dto.FilterChainOperation) e
 }
 
 func (s *FirewallService) QueueFilterChainInitialization(request dto.FilterChainOperation) (dto.FilterChainOperationResponse, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FilterChainOperationResponse{}, err
+	}
 	if request.Operate != string(firewall.BaseOperationInit) {
 		return dto.FilterChainOperationResponse{}, fmt.Errorf("only filter chain initialization can be queued")
 	}
@@ -280,6 +295,9 @@ func (s *FirewallService) QueueFilterChainInitialization(request dto.FilterChain
 }
 
 func (s *FirewallService) Reset(ctx context.Context, request dto.FirewallRuleReset) (dto.FirewallRuleResetResponse, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FirewallRuleResetResponse{}, err
+	}
 	if err := lockFirewallLifecycleIdle(); err != nil {
 		return dto.FirewallRuleResetResponse{}, err
 	}
@@ -365,6 +383,9 @@ func (s *FirewallService) Reset(ctx context.Context, request dto.FirewallRuleRes
 }
 
 func (s *FirewallService) Inventory(ctx context.Context, request dto.FirewallRuleInventory) (dto.FirewallRuleInventoryResponse, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FirewallRuleInventoryResponse{}, err
+	}
 	requestedScopes := request.Scopes
 	if len(requestedScopes) == 0 && request.Scope.Provider != "" {
 		requestedScopes = []filter.Scope{request.Scope}
@@ -452,6 +473,9 @@ func (s *FirewallService) Inventory(ctx context.Context, request dto.FirewallRul
 }
 
 func (s *FirewallService) LoadFirewallNativeDetail(ctx context.Context, request dto.FirewallNativeDetail) (string, error) {
+	if err := rejectDarwin(); err != nil {
+		return "", err
+	}
 	provider := filter.Provider(strings.ToLower(strings.TrimSpace(string(request.Provider))))
 	nativeKind := filter.NativeKind(strings.ToLower(strings.TrimSpace(string(request.NativeKind))))
 	switch provider {
@@ -481,6 +505,9 @@ func (s *FirewallService) LoadFirewallNativeDetail(ctx context.Context, request 
 }
 
 func (s *FirewallService) Adopt(ctx context.Context, request dto.FirewallRuleAdopt) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	firewallRuleMutationMu.Lock()
 	defer firewallRuleMutationMu.Unlock()
 	if err := s.checkSelectedProvider(ctx, request.Scope.Provider); err != nil {
@@ -519,6 +546,9 @@ func (s *FirewallService) Adopt(ctx context.Context, request dto.FirewallRuleAdo
 }
 
 func (s *FirewallService) Create(ctx context.Context, request dto.FirewallRuleCreate) (dto.FirewallRuleCreateResponse, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FirewallRuleCreateResponse{}, err
+	}
 	if len(request.Items) > filter.MaxAtomicExpansion {
 		return dto.FirewallRuleCreateResponse{}, fmt.Errorf("create or import at most %d rules per batch (after expansion)", filter.MaxAtomicExpansion)
 	}
@@ -553,6 +583,9 @@ func (s *FirewallService) Create(ctx context.Context, request dto.FirewallRuleCr
 }
 
 func (s *FirewallService) Delete(ctx context.Context, request dto.FirewallRuleDelete) (dto.FirewallRuleDeleteResponse, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FirewallRuleDeleteResponse{}, err
+	}
 	if err := ctx.Err(); err != nil {
 		return dto.FirewallRuleDeleteResponse{}, err
 	}
@@ -589,6 +622,9 @@ func (s *FirewallService) Delete(ctx context.Context, request dto.FirewallRuleDe
 }
 
 func (s *FirewallService) Update(ctx context.Context, clientIP string, request dto.FirewallRuleUpdate) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	firewallRuleMutationMu.Lock()
 	defer firewallRuleMutationMu.Unlock()
 	metadata := request.Description != nil || request.OrderIndex != nil || request.Priority != nil
@@ -607,6 +643,9 @@ func (s *FirewallService) Update(ctx context.Context, clientIP string, request d
 }
 
 func (s *FirewallService) Reorder(ctx context.Context, clientIP string, request dto.FirewallRuleReorder) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	firewallRuleMutationMu.Lock()
 	defer firewallRuleMutationMu.Unlock()
 	return s.updateRuleOrder(ctx, request.UUID, request.TargetPosition, request.Priority, nil)
@@ -623,6 +662,9 @@ func currentFirewallLifecycleTaskID() string {
 }
 
 func (s *FirewallService) OperateFirewall(request dto.FirewallLifecycleOperation) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	switch request.Operation {
 	case "disableBanPing":
 		if err := firewall.UpdatePingStatus("0"); err != nil {

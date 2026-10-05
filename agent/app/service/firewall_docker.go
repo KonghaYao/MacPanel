@@ -59,6 +59,9 @@ type IDockerPortGuardService interface {
 }
 
 func (s *DockerPortGuardService) LoadOverview(ctx context.Context) (dto.DockerPortGuardList, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.DockerPortGuardList{}, err
+	}
 	policies, err := s.policies.ListManaged(ctx)
 	if err != nil {
 		return dto.DockerPortGuardList{}, err
@@ -97,6 +100,9 @@ func (s *DockerPortGuardService) LoadOverview(ctx context.Context) (dto.DockerPo
 }
 
 func (s *DockerPortGuardService) LoadPublishedPorts(ctx context.Context) ([]dto.DockerPortGuardContainer, error) {
+	if err := rejectDarwin(); err != nil {
+		return nil, err
+	}
 	cli, err := s.client()
 	if err != nil {
 		return nil, buserr.WithDetail("ErrDockerFailed", err.Error(), err)
@@ -122,6 +128,9 @@ func (s *DockerPortGuardService) LoadPublishedPorts(ctx context.Context) ([]dto.
 }
 
 func (s *DockerPortGuardService) Operate(ctx context.Context, request dto.DockerPortGuardOperation) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	dockerPortGuardServiceMu.Lock()
 	defer dockerPortGuardServiceMu.Unlock()
 	switch request.Operation {
@@ -174,6 +183,9 @@ func (s *DockerPortGuardService) Operate(ctx context.Context, request dto.Docker
 }
 
 func (s *DockerPortGuardService) QueueInitialization(request dto.DockerPortGuardOperation) (dto.FilterChainOperationResponse, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FilterChainOperationResponse{}, err
+	}
 	if request.Operation != "initialize" {
 		return dto.FilterChainOperationResponse{}, fmt.Errorf("only Docker port guard initialization can be queued")
 	}
@@ -226,6 +238,9 @@ func (s *DockerPortGuardService) QueueInitialization(request dto.DockerPortGuard
 }
 
 func (s *DockerPortGuardService) DeletePolicies(request dto.DockerPortGuardPolicyBatchDelete) (dto.FilterChainOperationResponse, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FilterChainOperationResponse{}, err
+	}
 	uuids, err := normalizeDockerFirewallUUIDs(request.UUIDs)
 	if err != nil {
 		return dto.FilterChainOperationResponse{}, err
@@ -248,6 +263,9 @@ func (s *DockerPortGuardService) DeletePolicies(request dto.DockerPortGuardPolic
 }
 
 func (s *DockerPortGuardService) UpsertPolicies(request dto.DockerPortGuardPolicyBatch) (dto.FilterChainOperationResponse, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.FilterChainOperationResponse{}, err
+	}
 	if len(request.Policies) > filter.MaxAtomicExpansion {
 		return dto.FilterChainOperationResponse{}, fmt.Errorf("create or import at most %d rules per batch (after expansion)", filter.MaxAtomicExpansion)
 	}

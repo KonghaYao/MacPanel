@@ -29,6 +29,9 @@ func NewIDiskService() IDiskService {
 }
 
 func (s *DiskService) GetCompleteDiskInfo() (*response.CompleteDiskInfo, error) {
+	if err := rejectDarwin(); err != nil {
+		return nil, err
+	}
 	var diskInfos []response.DiskBasicInfo
 	cmdMgr := cmd.NewCommandMgr(cmd.WithTimeout(20 * time.Second))
 	output, err := cmdMgr.RunWithStdout("lsblk", "-J", "-o", "NAME,SIZE,TYPE,MOUNTPOINT,FSTYPE,MODEL,SERIAL,TRAN,ROTA")
@@ -52,6 +55,9 @@ func (s *DiskService) GetCompleteDiskInfo() (*response.CompleteDiskInfo, error) 
 }
 
 func (s *DiskService) PartitionDisk(req request.DiskPartitionRequest) (string, error) {
+	if err := rejectDarwin(); err != nil {
+		return "", err
+	}
 	if cmd.CheckIllegal(req.Device, req.Filesystem, req.MountPoint, req.Label) {
 		return "", buserr.New("ErrCmdIllegal")
 	}
@@ -109,6 +115,9 @@ func (s *DiskService) PartitionDisk(req request.DiskPartitionRequest) (string, e
 }
 
 func (s *DiskService) MountDisk(req request.DiskMountRequest) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	if cmd.CheckIllegal(req.Device, req.MountPoint, req.Filesystem) {
 		return buserr.New("ErrCmdIllegal")
 	}
@@ -152,6 +161,9 @@ func (s *DiskService) MountDisk(req request.DiskMountRequest) error {
 }
 
 func (s *DiskService) UnmountDisk(req request.DiskUnmountRequest) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	if cmd.CheckIllegal(req.MountPoint) {
 		return buserr.New("ErrCmdIllegal")
 	}

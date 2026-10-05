@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/1Panel-dev/1Panel/pkg/platform/capabilities"
 	"github.com/shirou/gopsutil/v4/cpu"
 )
 
@@ -207,6 +208,9 @@ func (c *CPUInfoState) GetLogicalCores(forceRefresh bool) (int, error) {
 }
 
 func readProcStat() ([]byte, error) {
+	if capabilities.IsDarwin() {
+		return nil, capabilities.ErrNotSupportedOnMac
+	}
 	return os.ReadFile("/proc/stat")
 }
 

@@ -30,6 +30,9 @@ func NewIFail2BanService() IFail2BanService {
 }
 
 func (u *Fail2BanService) LoadBaseInfo() (dto.Fail2BanBaseInfo, error) {
+	if err := rejectDarwin(); err != nil {
+		return dto.Fail2BanBaseInfo{}, err
+	}
 	var baseInfo dto.Fail2BanBaseInfo
 	client, err := toolbox.NewFail2Ban()
 	if err != nil {
@@ -75,6 +78,9 @@ func (u *Fail2BanService) LoadBaseInfo() (dto.Fail2BanBaseInfo, error) {
 }
 
 func (u *Fail2BanService) Search(req dto.Fail2BanSearch) ([]string, error) {
+	if err := rejectDarwin(); err != nil {
+		return nil, err
+	}
 	var list []string
 	client, err := toolbox.NewFail2Ban()
 	if err != nil {
@@ -94,6 +100,9 @@ func (u *Fail2BanService) Search(req dto.Fail2BanSearch) ([]string, error) {
 }
 
 func (u *Fail2BanService) Operate(operation string) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	client, err := toolbox.NewFail2Ban()
 	if err != nil {
 		return err
@@ -102,6 +111,9 @@ func (u *Fail2BanService) Operate(operation string) error {
 }
 
 func (u *Fail2BanService) UpdateConf(req dto.Fail2BanUpdate) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	if req.Key == "banaction" {
 		if req.Value == "firewallcmd-ipset" || req.Value == "ufw" {
 			itemName := "ufw"
@@ -180,6 +192,9 @@ func (u *Fail2BanService) UpdateConf(req dto.Fail2BanUpdate) error {
 }
 
 func (u *Fail2BanService) UpdateConfByFile(req dto.UpdateByFile) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	file, err := os.OpenFile(defaultFail2BanPath, os.O_WRONLY|os.O_TRUNC, 0640)
 	if err != nil {
 		return err
@@ -200,6 +215,9 @@ func (u *Fail2BanService) UpdateConfByFile(req dto.UpdateByFile) error {
 }
 
 func (u *Fail2BanService) OperateSSHD(req dto.Fail2BanSet) error {
+	if err := rejectDarwin(); err != nil {
+		return err
+	}
 	if req.Operate == "ignore" {
 		if err := u.UpdateConf(dto.Fail2BanUpdate{Key: "ignoreip", Value: strings.Join(req.IPs, ",")}); err != nil {
 			return err

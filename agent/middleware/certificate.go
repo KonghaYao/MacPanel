@@ -11,6 +11,7 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/global"
 	"github.com/1Panel-dev/1Panel/agent/utils/cmd"
 	"github.com/1Panel-dev/1Panel/agent/utils/xpack"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,7 +31,7 @@ func Certificate() gin.HandlerFunc {
 			return
 		}
 		masterProxyID := c.Request.Header.Get("Proxy-Id")
-		proxyID, err := cmd.NewCommandMgr(cmd.WithTimeout(20*time.Second)).RunWithStdout("cat", "/etc/1panel/.nodeProxyID")
+		proxyID, err := cmd.NewCommandMgr(cmd.WithTimeout(20*time.Second)).RunWithStdout("cat", paths.NodeProxyIDPath())
 		if err == nil && len(proxyID) != 0 && strings.TrimSpace(proxyID) != strings.TrimSpace(masterProxyID) {
 			helper.InternalServer(c, fmt.Errorf("err proxy id"))
 			return
