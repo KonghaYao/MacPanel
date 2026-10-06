@@ -34,7 +34,7 @@
                     :class="{ selected: selectedIcon === app.id }"
                     @click.stop="openApp(app.id)"
                 >
-                    <span class="tile" :style="{ background: app.tint }">
+                    <span class="tile">
                         <Glyph :name="app.glyph" />
                     </span>
                     <span>{{ t(app.titleKey) }}</span>
@@ -354,10 +354,10 @@ onBeforeUnmount(() => {
     height: 56px;
     margin: 0 auto 6px;
     border-radius: 14px;
-    display: grid;
-    place-items: center;
+    overflow: hidden;
+    display: block;
     box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        0 1px 2px rgba(0, 0, 0, 0.18),
         0 8px 16px rgba(0, 0, 0, 0.18);
 }
 

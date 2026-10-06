@@ -12,7 +12,7 @@
                     @click="open(app.id)"
                     @animationend="onBounceEnd(app.id)"
                 >
-                    <span class="tile" :style="{ background: app.tint }">
+                    <span class="tile">
                         <Glyph :name="app.glyph" />
                     </span>
                     <span class="tip">{{ t(app.titleKey) }}</span>
@@ -138,21 +138,9 @@ const onBounceEnd = (id: string) => {
     width: 52px;
     height: 52px;
     border-radius: 13px;
-    display: grid;
-    place-items: center;
+    overflow: hidden;
+    display: block;
     position: relative;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.38),
-        0 2px 6px rgba(0, 0, 0, 0.28);
-}
-
-.tile::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.32), transparent 46%);
-    pointer-events: none;
 }
 
 .tip {
