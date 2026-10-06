@@ -98,6 +98,14 @@ func RunDir() string {
 	return SocketDir()
 }
 
+func PidFile() string {
+	return filepath.Join(RunDir(), "macpanel.pid")
+}
+
+func DaemonLogFile() string {
+	return filepath.Join(RunDir(), "macpanel.log")
+}
+
 func ConfigDir() string {
 	if runtime.GOOS == "darwin" {
 		return filepath.Join(BaseDir(), "config")

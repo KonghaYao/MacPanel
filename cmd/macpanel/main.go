@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	agentServer "github.com/1Panel-dev/1Panel/agent/server"
@@ -26,6 +28,9 @@ func waitForSocket(path string, timeout time.Duration) error {
 }
 
 func runUnified() {
+	writeDaemonPID()
+	defer removeDaemonPID()
+
 	sock := paths.SocketPath()
 
 	go func() {
@@ -36,17 +41,37 @@ func runUnified() {
 		fmt.Fprintf(os.Stderr, "warning: %v (starting core anyway)\n", err)
 	}
 
+	if isDaemonChild() {
+		sigCh := make(chan os.Signal, 1)
+		signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
+		go func() {
+			<-sigCh
+			removeDaemonPID()
+			os.Exit(0)
+		}()
+	}
+
 	coreServer.Start()
 }
 
 func main() {
+	var daemon bool
+
 	root := &cobra.Command{
 		Use:   "macpanel",
 		Short: "MacPanel unified server (core + agent)",
 		Run: func(cmd *cobra.Command, args []string) {
+			if daemon && !isDaemonChild() {
+				if err := startDaemon(); err != nil {
+					fmt.Fprintf(os.Stderr, "daemon: %v\n", err)
+					os.Exit(1)
+				}
+				return
+			}
 			runUnified()
 		},
 	}
+	root.Flags().BoolVarP(&daemon, "daemon", "d", false, "Run in background (macOS only)")
 
 	root.AddCommand(&cobra.Command{
 		Use:   "core",

@@ -57,9 +57,20 @@ mise use -g "github:KonghaYao/MacPanel[bin=macpanel]@0.2.0"
 
 ### 运行 / Run
 
+前台运行（终端需保持打开，Ctrl+C 会停止服务）：
+
 ```bash
 macpanel
 ```
+
+后台运行（推荐）：
+
+```bash
+macpanel -d
+# 或: nohup macpanel &
+```
+
+后台模式会写入 PID 文件 `~/Library/Application Support/MacPanel/run/macpanel.pid`，日志写入同目录下的 `macpanel.log`。
 
 启动后在浏览器访问 [http://127.0.0.1:9999](http://127.0.0.1:9999)。
 
