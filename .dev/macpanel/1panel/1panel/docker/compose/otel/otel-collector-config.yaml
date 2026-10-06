@@ -1,0 +1,44 @@
+# OTLP (:4317 gRPC, :4318 HTTP) -> OpenObserve org API
+# Docs: https://openobserve.ai/docs/ingestion/traces/opentelemetry
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 5s
+    send_batch_size: 8192
+
+exporters:
+  otlphttp/openobserve:
+    endpoint: http://openobserve:5080/api/${env:OO_ORG}
+    headers:
+      Authorization: "Basic ${env:OO_BASIC_AUTH}"
+    compression: gzip
+    tls:
+      insecure: true
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/openobserve]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/openobserve]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/openobserve]

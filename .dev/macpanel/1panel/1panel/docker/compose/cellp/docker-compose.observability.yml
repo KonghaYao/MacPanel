@@ -1,0 +1,3 @@
+# DEPRECATED — observability moved to ../otel (standalone docker-compose.yml).
+# Do not use: docker compose -f docker-compose.yml -f docker-compose.observability.yml
+# See OBSERVABILITY.md and ../otel/README.md

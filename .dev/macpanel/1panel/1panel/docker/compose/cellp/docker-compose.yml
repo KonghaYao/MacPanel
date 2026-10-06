@@ -1,0 +1,97 @@
+# cellp single-machine stack (external S3 + cellpd control plane).
+# Per-version celld processes are spawned by cellpd at runtime — not separate compose services.
+#
+# S3 (RustFS/MinIO/etc.) is expected to already be running and reachable from this network.
+# Point S3_ENDPOINT / OFFSHOOT_S3_ENDPOINT at it.
+#
+# Quick start: docker compose up -d
+
+networks:
+  default:
+  1panel-network:
+    external: true
+
+services:
+  cellpd:
+    image: ghcr.io/konghayao/cellp:a67a90c
+    ports:
+      - "${GATEWAY_PORT:-8787}:8787"
+      - "${PLATFORM_PORT:-8790}:8790"
+      - "5190:5190"
+    env_file:
+      - .env
+    environment:
+      GATEWAY_PORT: "8787"
+      PLATFORM_PORT: "8790"
+      CELLD_PORT: "${CELLD_PORT:-8792}"
+      GATEWAY_URL: ${GATEWAY_URL:-http://127.0.0.1:8787}
+      PLATFORM_URL: ${PLATFORM_URL:-http://127.0.0.1:8790}
+
+      CELLP_REGISTRY_DB: /data/registry/cellp-registry.sqlite
+      CELLP_DEPLOY_TOKEN: ${CELLP_DEPLOY_TOKEN:-dev-local-token}
+      CELLP_ADMIN_TOKEN: ${CELLP_ADMIN_TOKEN:-dev-local-token}
+
+      # --- S3 (external) ---
+      S3_ENDPOINT: ${S3_ENDPOINT:-http://1Panel-rustfs-R3pn:9000}
+      AWS_ACCESS_KEY_ID: ${RUSTFS_ACCESS_KEY:-rustfsadmin}
+      AWS_SECRET_ACCESS_KEY: ${RUSTFS_SECRET_KEY:-rustfsadmin}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY:-rustfsadmin}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY:-rustfsadmin}
+
+      CELLD_BUCKET: ${CELLD_BUCKET:-s3://cellp-celld/demo-app}
+      CELLP_ARTIFACTS_BUCKET: ${CELLP_ARTIFACTS_BUCKET:-cellp-artifacts}
+      ARTIFACTS_DIR: /data/artifacts
+
+      OFFSHOOT_STORE: ${OFFSHOOT_STORE:-s3://cellp-offshoot}
+      OFFSHOOT_S3_ENDPOINT: ${OFFSHOOT_S3_ENDPOINT:-${S3_ENDPOINT:-http://1Panel-rustfs-R3pn:9000}}
+      OFFSHOOT_S3_PATH_STYLE: "1"
+      OFFSHOOT_CHECKOUTS: /data/offshoot-checkouts
+
+      # Embedded Node Agent (AD-15)
+      CELLP_ELASTIC_CERT_DIR: ${CELLP_ELASTIC_CERT_DIR:-/data/certs/elastic}
+      CELLP_AGENT_EMBEDDED: ${CELLP_AGENT_EMBEDDED:-1}
+      CELLP_AGENT_NODE_ID: ${CELLP_AGENT_NODE_ID:-local-dev-node}
+      CELLP_AGENT_BIND_ADDR: ${CELLP_AGENT_BIND_ADDR:-127.0.0.1:19443}
+      CELLP_AGENT_ADVERTISE_URL: ${CELLP_AGENT_ADVERTISE_URL:-https://127.0.0.1:19443}
+      CELLP_AGENT_ALLOW_PRIVATE_NAT: ${CELLP_AGENT_ALLOW_PRIVATE_NAT:-false}
+      CELLP_AGENT_NODE_IDENTITY_URI: ${CELLP_AGENT_NODE_IDENTITY_URI:-spiffe://cellp/local/node/local-dev-node}
+      CELLP_AGENT_CONTROLLER_IDENTITY_URI: ${CELLP_AGENT_CONTROLLER_IDENTITY_URI:-spiffe://cellp/local/controller/main}
+      CELLP_AGENT_ALLOWED_CONTROLLER_URIS: ${CELLP_AGENT_ALLOWED_CONTROLLER_URIS:-spiffe://cellp/local/controller/main}
+      CELLP_AGENT_SERVER_CERT_FILE: ${CELLP_AGENT_SERVER_CERT_FILE:-/data/certs/elastic/agent-server.pem}
+      CELLP_AGENT_SERVER_KEY_FILE: ${CELLP_AGENT_SERVER_KEY_FILE:-/data/certs/elastic/agent-server-key.pem}
+      CELLP_AGENT_SERVER_CA_FILE: ${CELLP_AGENT_SERVER_CA_FILE:-/data/certs/elastic/ca.pem}
+      CELLP_AGENT_CLIENT_CERT_FILE: ${CELLP_AGENT_CLIENT_CERT_FILE:-/data/certs/elastic/agent-client.pem}
+      CELLP_AGENT_CLIENT_KEY_FILE: ${CELLP_AGENT_CLIENT_KEY_FILE:-/data/certs/elastic/agent-client-key.pem}
+      CELLP_AGENT_CLIENT_CA_FILE: ${CELLP_AGENT_CLIENT_CA_FILE:-/data/certs/elastic/ca.pem}
+      CELLP_AGENT_TLS_SERVER_NAME: ${CELLP_AGENT_TLS_SERVER_NAME:-127.0.0.1}
+      CELLP_AGENT_CERT_DENYLIST_FILE: ${CELLP_AGENT_CERT_DENYLIST_FILE:-/data/certs/elastic/denylist.pem}
+      CELLP_AGENT_CAPACITY_UNITS: ${CELLP_AGENT_CAPACITY_UNITS:-8}
+      CELLP_AGENT_ZONE: ${CELLP_AGENT_ZONE:-local-dev}
+      CELLP_AGENT_HEARTBEAT_TTL: ${CELLP_AGENT_HEARTBEAT_TTL:-30s}
+      CELLP_AGENT_HEARTBEAT_INTERVAL: ${CELLP_AGENT_HEARTBEAT_INTERVAL:-10s}
+      CELLP_AGENT_RECONCILE_INTERVAL: ${CELLP_AGENT_RECONCILE_INTERVAL:-5s}
+      CELLP_AGENT_MAX_BODY_BYTES: ${CELLP_AGENT_MAX_BODY_BYTES:-1048576}
+      CELLP_AGENT_REPLAY_MAX_ENTRIES: ${CELLP_AGENT_REPLAY_MAX_ENTRIES:-4096}
+    networks:
+      - default
+      - 1panel-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - cellp-registry:/data/registry
+      - cellp-artifacts:/data/artifacts
+      - cellp-offshoot-checkouts:/data/offshoot-checkouts
+      - ./data/certs/elastic:/data/certs/elastic:ro
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8790/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 25s
+    restart: unless-stopped
+
+volumes:
+  cellp-registry:
+  cellp-artifacts:
+  cellp-offshoot-checkouts:

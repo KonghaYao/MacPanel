@@ -647,10 +647,6 @@ const handleStatusDropdownVisibleChange = (containerID: string, visible: boolean
 };
 
 const goDashboard = async (port: any) => {
-    if (port.indexOf('127.0.0.1') !== -1) {
-        MsgWarning(i18n.global.t('container.unExposedPort'));
-        return;
-    }
     if (port.indexOf(':') === -1) {
         MsgWarning(i18n.global.t('commons.msg.errPort'));
         return;

@@ -1,0 +1,84 @@
+# Standalone production OTEL stack: OpenObserve + OTel Collector (contrib).
+# Deploy from this directory only (not merged into cellp compose).
+#
+# otel-collector joins external 1panel-network so cellpd can use
+# CELLP_OTEL_COLLECTOR=http://otel-collector:4318
+
+name: otel
+
+networks:
+  otel-internal:
+    driver: bridge
+  1panel-network:
+    external: true
+
+services:
+  openobserve:
+    image: public.ecr.aws/zinclabs/openobserve:v1.0.4
+    container_name: openobserve
+    environment:
+      ZO_ROOT_USER_EMAIL: ${OO_ROOT_EMAIL:?set OO_ROOT_EMAIL in .env}
+      ZO_ROOT_USER_PASSWORD: ${OO_ROOT_PASSWORD:?set OO_ROOT_PASSWORD in .env}
+      ZO_DATA_DIR: /data
+    volumes:
+      - openobserve-data:/data
+    ports:
+      - "127.0.0.1:${OPENOBSERVE_UI_PORT:-5080}:5080"
+    networks:
+      - otel-internal
+    # Distroless image has no wget/curl; host can curl http://127.0.0.1:5080/healthz
+    healthcheck:
+      disable: true
+    deploy:
+      resources:
+        limits:
+          cpus: "2.00"
+          memory: 4096M
+        reservations:
+          cpus: "0.50"
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+    restart: unless-stopped
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.115.1
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    environment:
+      OO_BASIC_AUTH: ${OO_BASIC_AUTH:?set OO_BASIC_AUTH in .env (base64 of email:password)}
+      OO_ORG: ${OO_ORG:-default}
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "127.0.0.1:${OTEL_COLLECTOR_GRPC_PORT:-4317}:4317"
+      - "127.0.0.1:${OTEL_COLLECTOR_HTTP_PORT:-4318}:4318"
+    depends_on:
+      openobserve:
+        condition: service_started
+    networks:
+      - otel-internal
+      - 1panel-network
+    healthcheck:
+      disable: true
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 1024M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+    restart: unless-stopped
+
+volumes:
+  openobserve-data:
+    name: macpanel-openobserve-data

@@ -728,10 +728,6 @@ const filteredPorts = computed(() => {
 });
 
 const goDashboard = async (port: string) => {
-    if (port.indexOf('127.0.0.1') !== -1) {
-        MsgWarning(i18n.global.t('container.unExposedPort'));
-        return;
-    }
     if (port.indexOf(':') === -1) {
         MsgWarning(i18n.global.t('commons.msg.errPort'));
         return;
