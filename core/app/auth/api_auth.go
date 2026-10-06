@@ -124,7 +124,19 @@ func LoadAPIAuthConfig(_ *gin.Context) (APIAuthConfig, error) {
 }
 
 func GetAPIClientIP(c *gin.Context, trustedProxies string) string {
+	remoteIP := net.ParseIP(common.GetRealClientIP(c))
+	if remoteIP != nil && remoteIP.IsLoopback() {
+		trustedProxies = appendLoopbackTrustedProxies(trustedProxies)
+	}
 	return common.ResolveClientIP(c, trustedProxies)
+}
+
+func appendLoopbackTrustedProxies(trustedProxies string) string {
+	entries := []string{"127.0.0.1", "::1"}
+	if trimmed := strings.TrimSpace(trustedProxies); trimmed != "" {
+		entries = append([]string{trimmed}, entries...)
+	}
+	return strings.Join(entries, "\n")
 }
 
 func NormalizeAPITrustedProxies(value string) (string, error) {

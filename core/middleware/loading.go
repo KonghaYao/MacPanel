@@ -8,6 +8,10 @@ import (
 
 func GlobalLoading() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if c.Request.URL.Path == "/mcp" {
+			c.Next()
+			return
+		}
 		settingRepo := repo.NewISettingRepo()
 		status, err := settingRepo.GetValueByKey("SystemStatus")
 		if err != nil {

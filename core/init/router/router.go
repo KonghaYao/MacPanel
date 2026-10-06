@@ -16,6 +16,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/global"
 	"github.com/1Panel-dev/1Panel/core/i18n"
 	"github.com/1Panel-dev/1Panel/core/init/swagger"
+	coremcp "github.com/1Panel-dev/1Panel/core/mcp"
 	"github.com/1Panel-dev/1Panel/core/middleware"
 	rou "github.com/1Panel-dev/1Panel/core/router"
 	"github.com/1Panel-dev/1Panel/core/utils/security"
@@ -77,6 +78,7 @@ func Routers() *gin.Engine {
 	Router.Use(i18n.UseI18n())
 	Router.Use(middleware.WhiteAllow())
 	Router.Use(middleware.BindDomain())
+	coremcp.RegisterRoutes(Router)
 
 	swaggerRouter := Router.Group("1panel")
 	docs.SwaggerInfo.BasePath = "/api/v2"
