@@ -408,6 +408,7 @@ UserEmptyList: "No users found"
 UserInfo: "Get panel information"
 UserInfoAddr: "Panel address: "
 UserInfoPassHelp: "Tip: To change the password, you can execute the command: "
+UserInfoViewHelp: "Tip: You can also run {{ .cmd }} to view login information"
 
 # command line - restore
 RestoreCommands: "Roll back 1Panel service and data"

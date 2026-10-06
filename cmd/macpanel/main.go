@@ -52,6 +52,10 @@ func runUnified() {
 		}()
 	}
 
+	if err := adminCmd.PrintUserInfo(os.Stdout, ""); err != nil {
+		fmt.Fprintf(os.Stderr, "warning: print login info failed: %v\n", err)
+	}
+
 	coreServer.Start()
 }
 
@@ -122,6 +126,9 @@ func main() {
 		Use:   "core",
 		Short: "Start core server only",
 		Run: func(cmd *cobra.Command, args []string) {
+			if err := adminCmd.PrintUserInfo(os.Stdout, ""); err != nil {
+				fmt.Fprintf(os.Stderr, "warning: print login info failed: %v\n", err)
+			}
 			coreServer.Start()
 		},
 	})

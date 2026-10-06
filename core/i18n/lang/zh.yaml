@@ -408,6 +408,7 @@ UserEmptyList: "暂无用户"
 UserInfo: "获取面板信息"
 UserInfoAddr: "面板地址: "
 UserInfoPassHelp: "提示: 修改密码可执行命令: "
+UserInfoViewHelp: "提示: 也可执行 {{ .cmd }} 查看登录信息"
 
 # 命令行 - 回滚
 RestoreCommands: "回滚 1Panel 服务及数据"
