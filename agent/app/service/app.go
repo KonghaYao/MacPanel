@@ -558,6 +558,9 @@ func (a AppService) installWithHooks(req request.AppInstallCreate, executeScript
 	}
 
 	installApp := func(t *task.Task) error {
+		if err = patchRustFSComposeForInstall(app, appInstall); err != nil {
+			return err
+		}
 		if err = copyData(t, app, appDetail, appInstall, req); err != nil {
 			return err
 		}
@@ -567,6 +570,9 @@ func (a AppService) installWithHooks(req request.AppInstallCreate, executeScript
 			}
 		}
 		if executeScript || req.UseLifecycleScripts {
+			if err = patchRustFSInitScriptForInstall(app, appInstall); err != nil {
+				return err
+			}
 			if err = runScript(t, appInstall, "init"); err != nil {
 				return err
 			}
