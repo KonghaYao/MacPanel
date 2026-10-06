@@ -256,3 +256,64 @@ export const deleteCheckDatabase = (id: number) => {
 export const deleteDatabase = (params: Database.DatabaseDelete) => {
     return http.post(`/databases/db/del`, params);
 };
+
+export const listS3RustFS = () => {
+    return http.get<Database.S3RustFSList>(`/databases/s3/rustfs`);
+};
+export const connectS3RustFS = (appInstallId: number) => {
+    return http.post<Database.S3Connection>(`/databases/s3/rustfs/connect`, { appInstallId });
+};
+export const listS3Connections = () => {
+    return http.get<Database.S3Connection[]>(`/databases/s3/conn`);
+};
+export const createS3Connection = (params: Database.S3ConnectionCreate) => {
+    let request = deepCopy(params) as Database.S3ConnectionCreate;
+    encodeBase64Fields(request, ['secretKey']);
+    return http.post(`/databases/s3/conn`, request);
+};
+export const updateS3Connection = (params: Database.S3ConnectionCreate & { id: number }) => {
+    let request = deepCopy(params) as Database.S3ConnectionCreate & { id: number };
+    if (request.secretKey) {
+        encodeBase64Fields(request, ['secretKey']);
+    }
+    return http.post(`/databases/s3/conn/update`, request);
+};
+export const deleteS3Connection = (id: number) => {
+    return http.post(`/databases/s3/conn/del`, { id });
+};
+export const testS3Connection = (id: number) => {
+    return http.post(`/databases/s3/conn/test`, { id }, TimeoutEnum.T_40S);
+};
+export const listS3Buckets = (id: number) => {
+    return http.post<Database.S3BucketInfo[]>(`/databases/s3/buckets`, { id }, TimeoutEnum.T_40S);
+};
+export const createS3Bucket = (id: number, bucket: string, region?: string) => {
+    return http.post(`/databases/s3/buckets/create`, { id, bucket, region });
+};
+export const deleteS3Bucket = (id: number, bucket: string) => {
+    return http.post(`/databases/s3/buckets/del`, { id, bucket });
+};
+export const listS3Objects = (id: number, bucket: string, prefix: string) => {
+    return http.post<Database.S3ObjectList>(`/databases/s3/objects`, { id, bucket, prefix }, TimeoutEnum.T_40S);
+};
+export const createS3Folder = (id: number, bucket: string, prefix: string, name: string) => {
+    return http.post(`/databases/s3/folder`, { id, bucket, prefix, name });
+};
+export const deleteS3Objects = (id: number, bucket: string, keys: string[]) => {
+    return http.post(`/databases/s3/objects/del`, { id, bucket, keys }, TimeoutEnum.T_5M);
+};
+export const previewS3Object = (id: number, bucket: string, key: string) => {
+    return http.post<Database.S3Preview>(`/databases/s3/objects/preview`, { id, bucket, key }, TimeoutEnum.T_40S);
+};
+export const downloadS3Object = (id: number, bucket: string, key: string) => {
+    return http.download<BlobPart>(
+        `/databases/s3/objects/download`,
+        { id, bucket, key },
+        { responseType: 'blob', timeout: TimeoutEnum.T_10M },
+    );
+};
+export const uploadS3Object = (params: FormData) => {
+    return http.upload(`/databases/s3/objects/upload`, params, {
+        timeout: TimeoutEnum.T_10M,
+    });
+};

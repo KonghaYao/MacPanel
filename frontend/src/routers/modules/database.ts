@@ -145,6 +145,18 @@ const databaseRouter = {
                         permission: 'database_view',
                     },
                 },
+                {
+                    path: 's3',
+                    name: 'S3',
+                    component: () => import('@/views/database/s3/index.vue'),
+                    hidden: true,
+                    meta: {
+                        activeMenu: '/databases',
+                        parent: 'menu.database',
+                        title: 'S3',
+                        permission: 'database_view',
+                    },
+                },
             ],
         },
     ],

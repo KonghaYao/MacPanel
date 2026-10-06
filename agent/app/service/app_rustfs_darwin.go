@@ -13,15 +13,17 @@ import (
 )
 
 const (
-	rustfsDataMountTarget   = "/data"
+	rustfsDataMountTarget  = "/data"
 	rustfsNamedVolumeSuffix = "-data"
-	rustfsNamedVolumeRef    = "${CONTAINER_NAME}" + rustfsNamedVolumeSuffix + ":" + rustfsDataMountTarget
-	rustfsNamedVolumeName   = "${CONTAINER_NAME}" + rustfsNamedVolumeSuffix
-	rustfsDarwinInitScript  = "#!/bin/bash\n\n# RustFS data uses a Docker named volume on macOS; host chown is unsupported.\n"
+	rustfsDarwinInitScript = "#!/bin/bash\n\n# RustFS data uses a Docker named volume on macOS; host chown is unsupported.\n"
 )
 
+func rustfsNamedVolumeName(containerName string) string {
+	return containerName + rustfsNamedVolumeSuffix
+}
+
 func patchRustFSComposeForInstallPlatform(appInstall *model.AppInstall) error {
-	patched, err := patchRustFSComposeYAML(appInstall.DockerCompose)
+	patched, err := patchRustFSComposeYAML(appInstall.DockerCompose, appInstall.ContainerName)
 	if err != nil {
 		return err
 	}
@@ -38,7 +40,13 @@ func patchRustFSInitScriptForInstallPlatform(appInstall *model.AppInstall) error
 	return fileOp.WriteFile(initPath, strings.NewReader(rustfsDarwinInitScript), constant.DirPerm)
 }
 
-func patchRustFSComposeYAML(compose string) (string, error) {
+func patchRustFSComposeYAML(compose string, containerName string) (string, error) {
+	if containerName == "" {
+		return compose, nil
+	}
+	volumeName := rustfsNamedVolumeName(containerName)
+	volumeRef := volumeName + ":" + rustfsDataMountTarget
+
 	var composeMap map[string]interface{}
 	if err := yaml.Unmarshal([]byte(compose), &composeMap); err != nil {
 		return "", err
@@ -63,7 +71,7 @@ func patchRustFSComposeYAML(compose string) (string, error) {
 			if !ok || !isRustFSDataBindMount(volumeStr) {
 				continue
 			}
-			volumes[i] = rustfsNamedVolumeRef
+			volumes[i] = volumeRef
 			patched = true
 		}
 		serviceMap["volumes"] = volumes
@@ -76,7 +84,7 @@ func patchRustFSComposeYAML(compose string) (string, error) {
 	if topVolumes == nil {
 		topVolumes = make(map[string]interface{})
 	}
-	topVolumes[rustfsNamedVolumeName] = map[string]interface{}{}
+	topVolumes[volumeName] = map[string]interface{}{}
 	composeMap["volumes"] = topVolumes
 
 	out, err := yaml.Marshal(composeMap)

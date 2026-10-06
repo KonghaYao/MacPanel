@@ -34,6 +34,7 @@ var (
 	mongodbService    = service.NewIMongodbService()
 	databaseService   = service.NewIDatabaseService()
 	redisService      = service.NewIRedisService()
+	s3Service         = service.NewIS3Service()
 
 	cronjobService = service.NewICronjobService()
 

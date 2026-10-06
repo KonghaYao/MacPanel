@@ -25,5 +25,9 @@ const buttons = [
         label: 'MongoDB',
         path: '/databases/mongodb',
     },
+    {
+        label: 'S3',
+        path: '/databases/s3',
+    },
 ];
 </script>

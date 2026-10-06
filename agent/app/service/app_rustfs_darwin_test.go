@@ -19,18 +19,25 @@ networks:
 `
 
 func TestPatchRustFSComposeYAML(t *testing.T) {
-	patched, err := patchRustFSComposeYAML(rustfsSampleCompose)
+	const containerName = "1Panel-rustfs-abcd"
+	volumeName := rustfsNamedVolumeName(containerName)
+	volumeRef := volumeName + ":/data"
+
+	patched, err := patchRustFSComposeYAML(rustfsSampleCompose, containerName)
 	if err != nil {
 		t.Fatalf("patch compose: %v", err)
 	}
 	if strings.Contains(patched, "./data:/data") {
 		t.Fatalf("expected bind mount to be replaced, got %q", patched)
 	}
-	if !strings.Contains(patched, rustfsNamedVolumeRef) {
-		t.Fatalf("expected named volume mount %q in %q", rustfsNamedVolumeRef, patched)
+	if strings.Contains(patched, "${CONTAINER_NAME}-data") {
+		t.Fatalf("expected concrete volume name, not env var substitution in %q", patched)
 	}
-	if !strings.Contains(patched, rustfsNamedVolumeName+":") {
-		t.Fatalf("expected top-level named volume %q in %q", rustfsNamedVolumeName, patched)
+	if !strings.Contains(patched, volumeRef) {
+		t.Fatalf("expected named volume mount %q in %q", volumeRef, patched)
+	}
+	if !strings.Contains(patched, volumeName+":") {
+		t.Fatalf("expected top-level named volume %q in %q", volumeName, patched)
 	}
 }
 

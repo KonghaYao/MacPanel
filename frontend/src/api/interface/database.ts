@@ -471,4 +471,87 @@ export namespace Database {
         type: string;
         name: string;
     }
+
+    export interface S3Connection {
+        id: number;
+        createdAt: Date;
+        name: string;
+        source: 'rustfs' | 'manual';
+        appInstallId: number;
+        appName: string;
+        status: string;
+        endpoint: string;
+        accessKey: string;
+        secretKey: string;
+        region: string;
+        bucket: string;
+        useSSL: boolean;
+        pathStyle: boolean;
+        description: string;
+        apiPort: number;
+        consolePort: number;
+    }
+
+    export interface S3ConnectionCreate {
+        name: string;
+        source: 'rustfs' | 'manual';
+        appInstallId?: number;
+        endpoint?: string;
+        accessKey?: string;
+        secretKey?: string;
+        region?: string;
+        bucket?: string;
+        useSSL?: boolean;
+        pathStyle?: boolean;
+        description?: string;
+    }
+
+    export interface S3RustFSInstall {
+        appInstallId: number;
+        name: string;
+        status: string;
+        version: string;
+        endpoint: string;
+        accessKey: string;
+        secretKey: string;
+        apiPort: number;
+        consolePort: number;
+        connected: boolean;
+        connId: number;
+        error: string;
+    }
+
+    export interface S3RustFSList {
+        installed: boolean;
+        items: S3RustFSInstall[];
+    }
+
+    export interface S3BucketInfo {
+        name: string;
+        creationDate: Date;
+    }
+
+    export interface S3ObjectItem {
+        key: string;
+        name: string;
+        prefix: boolean;
+        size: number;
+        lastModified: Date;
+        etag: string;
+    }
+
+    export interface S3ObjectList {
+        prefix: string;
+        objects: S3ObjectItem[];
+    }
+
+    export interface S3Preview {
+        key: string;
+        size: number;
+        contentType: string;
+        kind: 'image' | 'text' | 'none';
+        tooLarge: boolean;
+        content: string;
+        encoding: string;
+    }
 }

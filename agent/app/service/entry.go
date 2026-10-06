@@ -25,6 +25,7 @@ var (
 	databaseRepo          = repo.NewIDatabaseRepo()
 	databaseUserRepo      = repo.NewIDatabaseUserRepo()
 	databaseUserGrantRepo = repo.NewIDatabaseUserGrantRepo()
+	s3ConnectionRepo      = repo.NewIS3ConnectionRepo()
 
 	imageRepoRepo = repo.NewIImageRepoRepo()
 	composeRepo   = repo.NewIComposeTemplateRepo()

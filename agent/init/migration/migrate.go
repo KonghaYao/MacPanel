@@ -115,6 +115,7 @@ func agentDBMigrations() []*gormigrate.Migration {
 		migrations.AddVLLMMonitor,
 		migrations.AddMonitorSettings,
 		migrations.FixDarwinLocalSSHConn,
+		migrations.AddS3ConnectionTable,
 	}
 }
 

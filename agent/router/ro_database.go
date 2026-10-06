@@ -79,5 +79,22 @@ func (s *DatabaseRouter) InitRouter(Router *gin.RouterGroup) {
 		cmdRouter.POST("/mongodb/privileges/change", baseApi.ChangeMongodbPrivileges)
 		cmdRouter.POST("/mongodb/del/check", baseApi.DeleteCheckMongodb)
 		cmdRouter.POST("/mongodb/del", baseApi.DeleteMongodb)
+
+		cmdRouter.GET("/s3/rustfs", baseApi.ListS3RustFS)
+		cmdRouter.POST("/s3/rustfs/connect", baseApi.ConnectS3RustFS)
+		cmdRouter.GET("/s3/conn", baseApi.ListS3Connections)
+		cmdRouter.POST("/s3/conn", baseApi.CreateS3Connection)
+		cmdRouter.POST("/s3/conn/update", baseApi.UpdateS3Connection)
+		cmdRouter.POST("/s3/conn/del", baseApi.DeleteS3Connection)
+		cmdRouter.POST("/s3/conn/test", baseApi.TestS3Connection)
+		cmdRouter.POST("/s3/buckets", baseApi.ListS3Buckets)
+		cmdRouter.POST("/s3/buckets/create", baseApi.CreateS3Bucket)
+		cmdRouter.POST("/s3/buckets/del", baseApi.DeleteS3Bucket)
+		cmdRouter.POST("/s3/objects", baseApi.ListS3Objects)
+		cmdRouter.POST("/s3/folder", baseApi.CreateS3Folder)
+		cmdRouter.POST("/s3/objects/del", baseApi.DeleteS3Objects)
+		cmdRouter.POST("/s3/objects/preview", baseApi.PreviewS3Object)
+		cmdRouter.POST("/s3/objects/download", baseApi.DownloadS3Object)
+		cmdRouter.POST("/s3/objects/upload", baseApi.UploadS3Object)
 	}
 }
