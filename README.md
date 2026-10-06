@@ -50,7 +50,7 @@ Release 就绪后，通过 mise 从 GitHub Release 安装：
 
 ```bash
 # mise 从 GitHub Release 安装（Release 就绪后）
-mise use -g "github:KonghaYao/MacPanel[bin=macpanel]@0.1.0"
+mise use -g "github:KonghaYao/MacPanel[bin=macpanel]@0.2.0"
 ```
 
 下载地址：[GitHub Releases](https://github.com/KonghaYao/MacPanel/releases)
