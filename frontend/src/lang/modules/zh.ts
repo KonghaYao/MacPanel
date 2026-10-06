@@ -4450,6 +4450,9 @@ const message = {
         model: '设备型号',
         diskType: '磁盘类型',
         serial: '序列号',
+
+        macosReadOnlyHint: 'macOS 仅展示 APFS 卷与磁盘容量信息，分区、格式化、挂载等操作请使用「磁盘工具」。',
+        macosSystemDiskHelper: '提示：系统磁盘及 APFS 卷为只读展示，请使用「磁盘工具」进行管理。',
         noFail: '挂载失败不影响系统启动',
     },
     xpack: {

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -26,32 +25,6 @@ type IDiskService interface {
 
 func NewIDiskService() IDiskService {
 	return &DiskService{}
-}
-
-func (s *DiskService) GetCompleteDiskInfo() (*response.CompleteDiskInfo, error) {
-	if err := rejectDarwin(); err != nil {
-		return nil, err
-	}
-	var diskInfos []response.DiskBasicInfo
-	cmdMgr := cmd.NewCommandMgr(cmd.WithTimeout(20 * time.Second))
-	output, err := cmdMgr.RunWithStdout("lsblk", "-J", "-o", "NAME,SIZE,TYPE,MOUNTPOINT,FSTYPE,MODEL,SERIAL,TRAN,ROTA")
-	if err == nil {
-		diskInfos, err = parseLsblkJsonOutput(output)
-		if err == nil {
-			result := organizeDiskInfo(diskInfos)
-			return &result, nil
-		}
-	}
-	output, err = cmdMgr.RunWithStdout("lsblk", "-P", "-o", "NAME,SIZE,TYPE,MOUNTPOINT,FSTYPE,MODEL,SERIAL,TRAN,ROTA")
-	if err != nil {
-		return nil, fmt.Errorf("failed to run lsblk command: %v", err)
-	}
-	diskInfos, err = parseLsblkOutput(output)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse lsblk output: %v", err)
-	}
-	result := organizeDiskInfo(diskInfos)
-	return &result, nil
 }
 
 func (s *DiskService) PartitionDisk(req request.DiskPartitionRequest) (string, error) {

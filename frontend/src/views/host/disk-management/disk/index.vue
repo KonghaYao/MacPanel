@@ -1,6 +1,7 @@
 <template>
     <div>
         <DiskRouter />
+        <el-alert v-if="isDarwin" class="mt-2" :title="$t('disk.macosReadOnlyHint')" type="info" :closable="false" />
         <MainDiv class="mt-2" :height-diff="140" v-loading="loading">
             <div v-if="diskInfo?.systemDisks">
                 <DiskCard
@@ -43,6 +44,9 @@ import { listDisks } from '@/api/modules/host';
 import DiskRouter from '@/views/host/disk-management/index.vue';
 import DiskCard from '@/views/host/disk-management/components/disk-card.vue';
 import Partition from '@/views/host/disk-management/partition/index.vue';
+
+const { platformOS } = useGlobalStore();
+const isDarwin = computed(() => platformOS.value === 'darwin');
 
 const loading = ref(false);
 const partitionRef = ref();

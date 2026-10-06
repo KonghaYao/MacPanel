@@ -5,7 +5,8 @@
                 <div>
                     <h3 class="disk-title text-lg">
                         <span class="disk-title__name">
-                            {{ $t('home.disk') }}{{ $t('commons.table.name') }}: {{ diskInfo.device }}
+                            {{ $t('home.disk') }}{{ $t('commons.table.name') }}:
+                            {{ isDarwin && diskInfo.model ? diskInfo.model : diskInfo.device }}
                         </span>
                         <el-tag size="small" type="warning" v-if="scope === 'system'">
                             {{ $t('disk.systemDisk') }}
@@ -47,6 +48,7 @@
                         </el-text>
                         <div
                             v-if="
+                                !isDarwin &&
                                 scope == 'unpartitioned' &&
                                 diskInfo.partitions == undefined &&
                                 diskInfo.mountPoint == ''
@@ -74,7 +76,7 @@
                     :min-width="columnMinWidth(100, 120)"
                 >
                     <template #default="{ row }">
-                        <span class="font-medium">{{ row.device.split('/').pop() }}</span>
+                        <span class="font-medium">{{ volumeLabel(row) }}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="size" :label="$t('container.size')" :min-width="columnMinWidth(40, 80)" />
@@ -103,7 +105,7 @@
                         <el-tag size="small" type="info" v-if="row.filesystem != ''">{{ row.filesystem }}</el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column :label="$t('commons.table.operate')" width="150">
+                <el-table-column v-if="!isDarwin" :label="$t('commons.table.operate')" width="150">
                     <template #default="{ row }">
                         <el-text type="info" v-if="scope === 'system'">{{ $t('disk.cannotOperate') }}</el-text>
                         <el-button
@@ -122,7 +124,7 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <el-text v-if="scope === 'system'">{{ $t('disk.systemDiskHelper') }}</el-text>
+            <el-text v-if="scope === 'system'">{{ isDarwin ? $t('disk.macosSystemDiskHelper') : $t('disk.systemDiskHelper') }}</el-text>
         </div>
         <div v-if="diskInfo.partitions == undefined && diskInfo.mountPoint != ''">
             <el-table :data="[diskInfo]" class="w-full" :scrollbar-always-on="isMobile">
@@ -132,7 +134,7 @@
                     :min-width="columnMinWidth(100, 120)"
                 >
                     <template #default="{ row }">
-                        <span class="font-medium">{{ row.device.split('/').pop() }}</span>
+                        <span class="font-medium">{{ volumeLabel(row) }}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="size" :label="$t('container.size')" :min-width="columnMinWidth(40, 80)" />
@@ -161,7 +163,7 @@
                         <el-tag size="small" type="info" v-if="row.filesystem != ''">{{ row.filesystem }}</el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column :label="$t('commons.table.operate')" width="150">
+                <el-table-column v-if="!isDarwin" :label="$t('commons.table.operate')" width="150">
                     <template #default="{ row }">
                         <el-text type="info" v-if="scope === 'system'">{{ $t('disk.cannotOperate') }}</el-text>
                         <el-button
@@ -192,7 +194,8 @@ import { MsgSuccess } from '@/utils/message';
 import { useGlobalStore } from '@/composables/useGlobalStore';
 
 const emit = defineEmits(['partition', 'search', 'mount']);
-const { isMobile } = useGlobalStore();
+const { isMobile, platformOS } = useGlobalStore();
+const isDarwin = computed(() => platformOS.value === 'darwin');
 
 defineProps({
     diskInfo: {
@@ -210,6 +213,13 @@ const handlePartition = (diskInfo: Host.DiskInfo) => {
 };
 
 const columnMinWidth = (desktop: number, mobile: number) => (isMobile.value ? mobile : desktop);
+
+const volumeLabel = (row: Host.DiskBasicInfo) => {
+    if (isDarwin.value && row.model) {
+        return row.model;
+    }
+    return row.device.split('/').pop() || row.device;
+};
 
 const mount = (diskInfo: Host.DiskInfo) => {
     emit('mount', diskInfo);

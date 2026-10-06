@@ -4722,6 +4722,11 @@ const message = {
         model: 'Device Model',
         diskType: 'Disk Type',
         serial: 'Serial Number',
+
+        macosReadOnlyHint:
+            'On macOS this page shows APFS volumes and capacity only. Use Disk Utility for partition, format, and mount operations.',
+        macosSystemDiskHelper:
+            'System disks and APFS volumes are read-only here. Use Disk Utility to manage them.',
         noFail: 'Mount failure does not affect system startup',
     },
     xpack: {

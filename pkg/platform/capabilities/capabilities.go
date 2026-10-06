@@ -84,7 +84,7 @@ func darwinFeatures() FeatureMap {
 	return FeatureMap{
 		Firewall:          false,
 		Fail2ban:          false,
-		DiskManagement:    false,
+		DiskManagement:    true,
 		Fstab:             false,
 		Swap:              false,
 		NtpSync:           false,
