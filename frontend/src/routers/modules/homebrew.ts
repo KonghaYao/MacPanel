@@ -11,6 +11,7 @@ const homebrewRouter = {
         icon: 'p-appstore',
         permission: 'homebrew_view',
         platformFeature: 'homebrew',
+        hideInSidebar: true,
     },
     children: [
         {
@@ -22,6 +23,8 @@ const homebrewRouter = {
                 icon: 'p-appstore',
                 permission: 'homebrew_view',
                 platformFeature: 'homebrew',
+                activeMenu: '/apps',
+                parent: 'menu.app',
             },
         },
     ],

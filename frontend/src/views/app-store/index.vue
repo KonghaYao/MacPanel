@@ -34,6 +34,11 @@ let buttons = [
         label: i18n.global.t('commons.button.set'),
         path: '/apps/setting',
     },
+    {
+        label: i18n.global.t('menu.homebrew'),
+        path: '/homebrew/index',
+        permission: 'homebrew_view',
+    },
 ];
 
 const search = () => {
