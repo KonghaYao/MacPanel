@@ -74,6 +74,9 @@ const GlobalStore = defineStore('GlobalState', {
         masterAlias: '',
         currentNode: 'local',
         currentNodeAddr: '',
+        platformOS: '',
+        platformFeatures: {},
+        platformCapabilitiesLoaded: false,
     }),
     getters: {
         isDarkTheme: (state) =>
@@ -127,7 +130,17 @@ const GlobalStore = defineStore('GlobalState', {
             this.masterOnlyPermissions = [];
             this.nodeRoles = [];
             this.isAdmin = false;
+            this.platformOS = '';
+            this.platformFeatures = {};
+            this.platformCapabilitiesLoaded = false;
             setMasterOnlyPermissionCodes([]);
+        },
+        setPlatformCapabilities(payload: { os: string; features: Record<string, boolean> }) {
+            this.platformOS = payload.os || '';
+            this.platformFeatures = payload.features || {};
+        },
+        setPlatformCapabilitiesLoaded(loaded: boolean) {
+            this.platformCapabilitiesLoaded = loaded;
         },
         hasPermission(permission: string) {
             setMasterOnlyPermissionCodes(this.masterOnlyPermissions);

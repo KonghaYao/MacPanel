@@ -2,6 +2,7 @@ import { getUserInfo } from '@/api/modules/auth';
 import { getEnterpriseUserInfo } from '@/extensions/xpack';
 import type { RouteMeta } from 'vue-router';
 import { GlobalStore } from '@/store';
+import { hasPlatformFeature, syncPlatformCapabilities } from '@/utils/platform';
 
 export type PermissionMetaValue = string | string[];
 
@@ -9,6 +10,7 @@ type RouteAccessMeta = {
     adminOnly?: boolean;
     protectedRoleOnly?: boolean;
     permission?: PermissionMetaValue;
+    platformFeature?: string;
 };
 
 type RouteAccessTarget = {
@@ -28,6 +30,7 @@ export const syncAuthInfo = async (currentNode?: string) => {
             masterOnlyPermissions: res.data.masterOnlyPermissions || [],
             nodeRoles: res.data.nodeRoles || [],
         });
+        await syncPlatformCapabilities({ force: true });
         return res.data;
     }
     const res = await getEnterpriseUserInfo(currentNode ?? storeCurrentNode);
@@ -37,7 +40,12 @@ export const syncAuthInfo = async (currentNode?: string) => {
         masterOnlyPermissions: res.data.masterOnlyPermissions || [],
         nodeRoles: res.data.nodeRoles || [],
     });
+    await syncPlatformCapabilities({ force: true });
     return res.data;
+};
+
+export const hasPlatformFeatureAccess = (feature?: string) => {
+    return hasPlatformFeature(feature);
 };
 
 export const hasPermission = (permission: string) => {
@@ -77,6 +85,14 @@ export const hasRoutePermissionAccess = (route: RouteAccessTarget) => {
     return route.matched.every((record) => hasPermissionMetaAccess(record.meta?.permission));
 };
 
+export const hasRoutePlatformAccess = (route: RouteAccessTarget) => {
+    return route.matched.every((record) => hasPlatformFeatureAccess(record.meta?.platformFeature));
+};
+
 export const hasRouteAccess = (route: RouteAccessTarget) => {
-    return route.matched.every((record) => hasRouteRoleAccess(record.meta)) && hasRoutePermissionAccess(route);
+    return (
+        route.matched.every((record) => hasRouteRoleAccess(record.meta)) &&
+        hasRoutePermissionAccess(route) &&
+        hasRoutePlatformAccess(route)
+    );
 };

@@ -75,6 +75,9 @@ export interface GlobalState {
     masterAlias: string;
     currentNode: string;
     currentNodeAddr: string;
+    platformOS: string;
+    platformFeatures: Record<string, boolean>;
+    platformCapabilitiesLoaded: boolean;
 }
 
 export interface MenuState {

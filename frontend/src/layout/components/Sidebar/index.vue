@@ -38,13 +38,14 @@ import { menuList } from '@/routers/router';
 import { MenuStore } from '@/store';
 import { getSettingBaseInfo } from '@/api/modules/setting';
 import PrimaryMenu from '@/assets/images/menu-bg.svg?component';
-import { hasPermissionMetaAccess, hasRouteRoleAccess } from '@/utils/rbac';
+import { hasPermissionMetaAccess, hasPlatformFeatureAccess, hasRouteRoleAccess } from '@/utils/rbac';
+import { syncPlatformCapabilities } from '@/utils/platform';
 import { useGlobalStore } from '@/composables/useGlobalStore';
 
 const route = useRoute();
 const router = useRouter();
 const menuStore = MenuStore();
-const { currentNode, isAdmin, menuAccordion, permissions } = useGlobalStore();
+const { currentNode, isAdmin, menuAccordion, permissions, platformFeatures, platformOS } = useGlobalStore();
 const version = ref();
 
 const activeMenu = computed(() => {
@@ -143,6 +144,9 @@ function setDefaultMenuList() {
 
 function allowMenuItem(item: RouteRecordRaw) {
     if (!hasRouteRoleAccess(item.meta)) {
+        return false;
+    }
+    if (!hasPlatformFeatureAccess(item.meta?.platformFeature as string | undefined)) {
         return false;
     }
     return hasPermissionMetaAccess(item.meta?.permission as string | string[] | undefined);
@@ -280,15 +284,13 @@ function adjustAndCleanMenu(menuItem, list) {
     return newMenu;
 }
 
-onMounted(() => {
+onMounted(async () => {
+    await syncPlatformCapabilities().catch(() => undefined);
     screenWidth.value = document.body.clientWidth;
     if (!isCollapse.value && screenWidth.value < 1200) {
         menuStore.setCollapse();
     }
-    if (!menuStore.menuList || menuStore.menuList.length === 0) {
-        menuStore.setMenuList(buildAuthVisibleMenuList(menuList));
-    }
-    search();
+    await search();
 });
 
 onBeforeUnmount(() => {
@@ -296,10 +298,11 @@ onBeforeUnmount(() => {
 });
 
 watch(
-    () => [currentNode.value, isAdmin.value, permissions.value.join('|')],
+    () => [currentNode.value, isAdmin.value, permissions.value.join('|'), JSON.stringify(platformFeatures.value)],
     () => {
         search();
     },
+    { flush: 'post' },
 );
 </script>
 
