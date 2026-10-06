@@ -47,32 +47,21 @@ To pin a specific version instead of latest, replace `@latest` with the version 
 
 ## Run
 
-**Foreground** — terminal must stay open; Ctrl+C stops the service:
+Foreground (debug): `macpanel` — keeps the process in the terminal; Ctrl+C stops it.
 
-```bash
-macpanel
-```
-
-**Background** (recommended) — survives closing the terminal:
+Background service:
 
 ```bash
 macpanel start
-# or: macpanel -d
-# or: macpanel --daemon
+macpanel stop
+macpanel restart
+macpanel status
 ```
 
-Service control:
-
-```bash
-macpanel status    # show running/stopped and pid
-macpanel stop      # stop background instance
-macpanel restart   # stop then start
-```
-
-Background mode writes:
-
-- PID: `~/Library/Application Support/MacPanel/run/macpanel.pid`
-- Log: `~/Library/Application Support/MacPanel/run/macpanel.log`
+| | |
+|---|---|
+| PID file | `~/Library/Application Support/MacPanel/run/macpanel.pid` |
+| Log file | `~/Library/Application Support/MacPanel/run/macpanel.log` |
 
 Open [http://127.0.0.1:9999](http://127.0.0.1:9999) in your browser after startup.
 
