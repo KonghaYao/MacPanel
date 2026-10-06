@@ -55,26 +55,41 @@ mise use -g "github:KonghaYao/MacPanel[bin=macpanel]@0.2.0"
 
 下载地址：[GitHub Releases](https://github.com/KonghaYao/MacPanel/releases)
 
-### 运行 / Run
+### Run
 
-前台运行（终端需保持打开，Ctrl+C 会停止服务）：
+**Foreground** — terminal must stay open; Ctrl+C stops the service:
 
 ```bash
 macpanel
 ```
 
-后台运行（推荐）：
+**Background** (recommended) — survives closing the terminal:
 
 ```bash
 macpanel -d
-# 或: nohup macpanel &
+# or: macpanel --daemon
 ```
 
-后台模式会写入 PID 文件 `~/Library/Application Support/MacPanel/run/macpanel.pid`，日志写入同目录下的 `macpanel.log`。
+Daemon mode writes:
 
-启动后在浏览器访问 [http://127.0.0.1:9999](http://127.0.0.1:9999)。
+- PID: `~/Library/Application Support/MacPanel/run/macpanel.pid`
+- Log: `~/Library/Application Support/MacPanel/run/macpanel.log`
 
-配置文件路径：
+Stop a background instance:
+
+```bash
+kill $(cat ~/Library/Application\ Support/MacPanel/run/macpanel.pid)
+```
+
+Alternative without built-in daemon mode:
+
+```bash
+nohup macpanel &
+```
+
+Open [http://127.0.0.1:9999](http://127.0.0.1:9999) in your browser after startup.
+
+Config file:
 
 ```
 ~/Library/Application Support/MacPanel/config/1pctl
