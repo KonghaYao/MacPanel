@@ -1,36 +1,15 @@
 <template>
-    <div>
-        <DialogPro v-model="open" :title="$t('app.checkTitle')" size="small">
-            <el-alert :closable="false" :title="$t('setting.systemIPWarning')" type="info">
-                <el-link icon="Position" @click="jumpToPath(router, '/settings/panel')" type="primary">
-                    {{ $t('firewall.quickJump') }}
-                </el-link>
-            </el-alert>
-            <template #footer>
-                <span class="dialog-footer">
-                    <el-button @click="open = false">{{ $t('commons.button.cancel') }}</el-button>
-                </span>
-            </template>
-        </DialogPro>
-    </div>
+    <div></div>
 </template>
 <script lang="ts" setup>
-import { ref } from 'vue';
 import { getAgentSettingInfo } from '@/api/modules/setting';
 import i18n from '@/lang';
 import { MsgError, MsgWarning } from '@/utils/message';
-import { jumpToPath } from '@/utils/router';
-import { useRouter } from 'vue-router';
-import { useGlobalStore } from '@/composables/useGlobalStore';
-const { currentNodeAddr, isMaster } = useGlobalStore();
-const router = useRouter();
-
-const open = ref();
 
 interface DialogProps {
     port: any;
     ip: string;
-    protocol: string;
+    protocol?: string;
     path?: string;
     query?: string;
     hash?: string;
@@ -41,18 +20,23 @@ const acceptParams = async (params: DialogProps): Promise<void> => {
         MsgError(i18n.global.t('commons.msg.errPort'));
         return;
     }
-    let protocol = params.protocol === 'https' ? 'https' : 'http';
     const res = await getAgentSettingInfo();
-    if (!res.data.systemIP) {
-        if (!isMaster.value || currentNodeAddr.value != '127.0.0.1') {
-            res.data.systemIP = currentNodeAddr.value;
-        } else {
-            open.value = true;
-            return;
-        }
+    const useWebAddress = !res.data.systemIP;
+    const host = useWebAddress ? window.location.hostname : res.data.systemIP;
+    if (!host) {
+        MsgWarning(i18n.global.t('setting.systemIPWarning'));
+        return;
     }
-    const buildUrl = (host: string) => {
-        let url = `${protocol}://${host}:${params.port}`;
+    let protocol = 'http';
+    if (params.protocol === 'https') {
+        protocol = 'https';
+    } else if (params.protocol === 'http') {
+        protocol = 'http';
+    } else if (useWebAddress) {
+        protocol = window.location.protocol === 'https:' ? 'https' : 'http';
+    }
+    const buildUrl = (targetHost: string) => {
+        let url = `${protocol}://${targetHost}:${params.port}`;
         if (params.path) {
             url += params.path.startsWith('/') ? params.path : `/${params.path}`;
         }
@@ -64,18 +48,18 @@ const acceptParams = async (params: DialogProps): Promise<void> => {
         }
         return url;
     };
-    if (res.data.systemIP.indexOf(':') === -1) {
+    if (host.indexOf(':') === -1) {
         if (params.ip && params.ip === 'ipv6') {
             MsgWarning(i18n.global.t('setting.systemIPWarning1', ['IPv4']));
             return;
         }
-        window.open(buildUrl(res.data.systemIP), '_blank');
+        window.open(buildUrl(host), '_blank');
     } else {
         if (params.ip && params.ip === 'ipv4') {
             MsgWarning(i18n.global.t('setting.systemIPWarning1', ['IPv6']));
             return;
         }
-        window.open(buildUrl(`[${res.data.systemIP}]`), '_blank');
+        window.open(buildUrl(`[${host}]`), '_blank');
     }
 };
 

@@ -240,6 +240,43 @@
                                         <Status :key="row.state" :status="row.state"></Status>
                                     </template>
                                 </el-table-column>
+                                <el-table-column
+                                    :label="$t('commons.table.port')"
+                                    min-width="160"
+                                    prop="ports"
+                                >
+                                    <template #default="{ row }">
+                                        <div v-if="row.ports?.length" class="compose-port-list">
+                                            <el-tooltip
+                                                v-for="item in row.ports.slice(0, 2)"
+                                                :key="item"
+                                                :hide-after="20"
+                                                :content="item"
+                                                placement="top"
+                                            >
+                                                <el-button
+                                                    v-if="item.indexOf('->') !== -1"
+                                                    @click="goDashboard(item)"
+                                                    icon="Position"
+                                                    plain
+                                                    size="small"
+                                                >
+                                                    {{ item }}
+                                                </el-button>
+                                                <el-button v-else plain size="small">{{ item }}</el-button>
+                                            </el-tooltip>
+                                            <el-button
+                                                v-if="row.ports.length > 2"
+                                                plain
+                                                size="small"
+                                                @click="openPorts(row)"
+                                            >
+                                                +{{ row.ports.length - 2 }}
+                                            </el-button>
+                                        </div>
+                                        <span v-else>-</span>
+                                    </template>
+                                </el-table-column>
                                 <el-table-column :label="$t('container.source')" show-overflow-tooltip prop="resource">
                                     <template #default="{ row }">
                                         <div v-if="row.hasLoad">
@@ -517,6 +554,33 @@
         <ContainerLogDialog ref="containerLogDialogRef" :highlightDiff="210" />
         <Backups ref="dialogBackupRef" @close="search(true)" />
         <Uploads ref="uploadRef" @close="search(true)" />
+
+        <DialogPro
+            v-model="portsDialogVisible"
+            :title="`${$t('commons.table.port')} - ${portsDialogContainer}`"
+            size="small"
+        >
+            <template #content>
+                <div class="compose-port-dialog-filters">
+                    <el-input v-model="portFilter" clearable :placeholder="$t('commons.button.search')" />
+                    <el-checkbox border v-model="showIPv6Ports">IPv6</el-checkbox>
+                </div>
+                <div v-if="filteredPorts.length" class="compose-port-dialog">
+                    <el-tooltip v-for="item in filteredPorts" :key="item" :content="item" placement="top">
+                        <el-button
+                            :icon="item.indexOf('->') !== -1 ? 'Position' : undefined"
+                            plain
+                            size="small"
+                            @click="item.indexOf('->') !== -1 && goDashboard(item)"
+                        >
+                            {{ item }}
+                        </el-button>
+                    </el-tooltip>
+                </div>
+                <el-empty v-else :image-size="80" />
+            </template>
+        </DialogPro>
+        <PortJumpDialog ref="dialogPortJumpRef" />
     </div>
 </template>
 
@@ -532,6 +596,7 @@ import ContainerLogDialog from '@/components/log/container-drawer/index.vue';
 import DeleteDialog from '@/views/container/compose/delete/index.vue';
 import Backups from '@/components/backup/index.vue';
 import Uploads from '@/components/upload/index.vue';
+import PortJumpDialog from '@/components/port-jump/index.vue';
 import {
     composeOperate,
     composePin,
@@ -549,7 +614,7 @@ import DockerStatus from '@/views/container/docker-status/index.vue';
 import i18n from '@/lang';
 import { Container } from '@/api/interface/container';
 import { routerToFileWithPath } from '@/utils/router';
-import { MsgError, MsgSuccess } from '@/utils/message';
+import { MsgError, MsgSuccess, MsgWarning } from '@/utils/message';
 import { computeCPU, computeSize2, computeSizeForDocker } from '@/utils/size';
 import { newUUID } from '@/utils/id';
 import { Rules } from '@/global/form-rules';
@@ -573,6 +638,12 @@ const terminalDialogRef = ref();
 const containerLogDialogRef = ref();
 const dialogBackupRef = ref();
 const uploadRef = ref();
+const dialogPortJumpRef = ref();
+const portsDialogVisible = ref(false);
+const selectedPorts = ref<string[]>([]);
+const portsDialogContainer = ref('');
+const portFilter = ref('');
+const showIPv6Ports = ref(true);
 
 const searchName = ref('');
 const includeAppStore = ref(localStorage.getItem('includeAppStore') !== 'false');
@@ -640,6 +711,48 @@ const tableData = computed(() => {
         };
     });
 });
+
+const isIPv6Port = (port: string) => {
+    const address = port.split('->')[0] || port;
+    return address.includes('[') || (address.match(/:/g)?.length || 0) > 1;
+};
+
+const filteredPorts = computed(() => {
+    const keyword = portFilter.value.trim().toLowerCase();
+    return selectedPorts.value.filter((port) => {
+        if (!showIPv6Ports.value && isIPv6Port(port)) {
+            return false;
+        }
+        return !keyword || port.toLowerCase().includes(keyword);
+    });
+});
+
+const goDashboard = async (port: string) => {
+    if (port.indexOf('127.0.0.1') !== -1) {
+        MsgWarning(i18n.global.t('container.unExposedPort'));
+        return;
+    }
+    if (port.indexOf(':') === -1) {
+        MsgWarning(i18n.global.t('commons.msg.errPort'));
+        return;
+    }
+    const portEx = port.match(/:(\d+)/)?.[1];
+    if (!portEx) {
+        MsgWarning(i18n.global.t('commons.msg.errPort'));
+        return;
+    }
+    const matches = port.match(new RegExp(':', 'g'));
+    const ip = matches && matches.length > 1 ? 'ipv6' : 'ipv4';
+    dialogPortJumpRef.value.acceptParams({ port: portEx, ip: ip });
+};
+
+const openPorts = (row: Container.ComposeContainer) => {
+    selectedPorts.value = row.ports || [];
+    portsDialogContainer.value = row.name;
+    portFilter.value = '';
+    showIPv6Ports.value = true;
+    portsDialogVisible.value = true;
+};
 
 const loadFrom = (row: any) => {
     switch (row.createdBy) {
@@ -1097,5 +1210,60 @@ const onOpenLog = (row: any) => {
 }
 .round-btn {
     padding: 4px 8px;
+}
+
+.compose-port-list,
+.compose-port-dialog {
+    display: flex;
+    justify-content: flex-start;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.compose-port-list {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+
+    :deep(.el-button) {
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    :deep(.el-button > span) {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    :deep(.el-button + .el-button) {
+        margin-left: 0;
+    }
+}
+
+.compose-port-dialog-filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    .el-input {
+        flex: 1;
+    }
+}
+
+.compose-port-dialog {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    text-align: left;
+
+    :deep(.el-button) {
+        width: 100%;
+        margin-left: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 }
 </style>

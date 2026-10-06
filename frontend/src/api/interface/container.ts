@@ -349,6 +349,7 @@ export namespace Container {
         createTime: string;
         containerID: string;
         state: string;
+        ports: Array<string>;
     }
     export interface ComposeCreate {
         taskID: string;
