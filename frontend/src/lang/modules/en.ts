@@ -7426,6 +7426,43 @@ const message = {
         outputSuccess: 'Output generated successfully',
         importButton: 'Import from Template',
     },
+
+    desktop: {
+        entry: 'Mac Desktop',
+        appName: 'MacPanel',
+        backToPanel: 'Classic Panel',
+        aboutTitle: 'About MacPanel',
+        aboutBody: 'A Mac desktop for MacPanel. Open panel apps from the Dock; each app stays in its own window.',
+        noWindows: 'No open windows',
+        menus: {
+            file: 'File',
+            window: 'Window',
+            help: 'Help',
+            about: 'About MacPanel',
+            settings: 'Settings...',
+            closeWindow: 'Close Window',
+            minimize: 'Minimize',
+            zoom: 'Zoom',
+            helpDocs: 'MacPanel Help',
+        },
+        apps: {
+            containers: 'Containers',
+            images: 'Images',
+            appStore: 'App Store',
+            monitor: 'Monitor',
+            terminal: 'Terminal',
+            files: 'Files',
+            database: 'Database',
+            website: 'Website',
+            firewall: 'Firewall',
+            settings: 'Settings',
+            homebrew: 'Homebrew',
+            gpu: 'GPU',
+            cronjob: 'Cron Jobs',
+            logs: 'Logs',
+            toolbox: 'Toolbox',
+        },
+    },
 };
 
 export default {
