@@ -335,11 +335,7 @@ func (c Client) BuildImageWithProcessAndOptions(task *task.Task, tar io.ReadClos
 }
 
 func (c Client) PullImageWithProcess(task *task.Task, imageName string) error {
-	options := image.PullOptions{}
-	if authStr, ok := loadRegistryAuthFromDockerConfig(imageName); ok {
-		options.RegistryAuth = authStr
-	}
-	return c.PullImageWithProcessAndOptions(task, imageName, options)
+	return c.PullImageWithProcessAndOptions(task, imageName, NewPullOptions(imageName, ""))
 }
 
 func logProcess(progress map[string]interface{}, task *task.Task) {

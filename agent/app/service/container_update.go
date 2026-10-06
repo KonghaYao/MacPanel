@@ -41,7 +41,7 @@ func (u *ContainerService) ContainerUpdate(req dto.ContainerOperate) error {
 		defer client.Close()
 		taskItem.AddSubTask(i18n.GetWithName("ContainerImagePull", req.Image), func(t *task.Task) error {
 			if !checkImageExist(client, req.Image) || req.ForcePull {
-				if err := pullImages(taskItem, client, req.Image); err != nil {
+				if err := pullImages(taskItem, client, req.Image, ""); err != nil {
 					if !req.ForcePull {
 						return err
 					}
@@ -108,7 +108,7 @@ func (u *ContainerService) ContainerUpgrade(req dto.ContainerUpgrade) error {
 		taskItem.AddSubTask(i18n.GetWithName("ContainerImagePull", req.Image), func(t *task.Task) error {
 			taskItem.LogStart(i18n.GetWithName("ContainerImagePull", req.Image))
 			if !checkImageExist(client, req.Image) || req.ForcePull {
-				if err := pullImages(taskItem, client, req.Image); err != nil {
+				if err := pullImages(taskItem, client, req.Image, ""); err != nil {
 					if !req.ForcePull {
 						return err
 					}

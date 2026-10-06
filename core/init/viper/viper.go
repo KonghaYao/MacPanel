@@ -51,7 +51,7 @@ func Init() {
 		version = ctl_conf.Load("ORIGINAL_VERSION")
 		username = ctl_conf.Load("ORIGINAL_USERNAME")
 		password = ctl_conf.Load("ORIGINAL_PASSWORD")
-		entrance = ctl_conf.Load("ORIGINAL_ENTRANCE")
+		entrance = ctl_conf.LoadWithoutPanic("ORIGINAL_ENTRANCE")
 		language = ctl_conf.Load("LANGUAGE")
 		edition = ctl_conf.LoadWithoutPanic("PANEL_EDITION")
 

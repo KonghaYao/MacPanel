@@ -124,16 +124,8 @@ func pullComposeImages(filePath string, forcePull bool, task *task.Task, project
 			pullErr = docker.PullImage(image)
 		}
 		if pullErr != nil {
-			errMsg := ""
 			errOur := pullErr.Error()
-			if errOur != "" {
-				if strings.Contains(errOur, "no such host") {
-					errMsg = i18n.GetMsgByKey("ErrNoSuchHost") + ":"
-				}
-				if strings.Contains(errOur, "Error response from daemon") {
-					errMsg = i18n.GetMsgByKey("PullImageTimeout") + ":"
-				}
-			}
+			errMsg := docker.PullErrorPrefix(errOur)
 			message := errMsg + errOur
 			installErr := errors.New(message)
 			if task != nil {

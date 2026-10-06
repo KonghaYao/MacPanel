@@ -18,6 +18,14 @@
                 <el-input-tag v-else v-model="form.imageName" />
                 <span class="input-help">{{ $t('container.imagePullHelper') }}</span>
             </el-form-item>
+            <el-form-item :label="$t('container.imagePullPlatform')">
+                <el-select v-model="form.platform" style="width: 100%">
+                    <el-option :label="$t('container.imagePullPlatformAuto')" value="auto" />
+                    <el-option :label="$t('container.imagePullPlatformArm64')" value="linux/arm64" />
+                    <el-option :label="$t('container.imagePullPlatformAmd64')" value="linux/amd64" />
+                </el-select>
+                <span class="input-help">{{ $t('container.imagePullPlatformHelper') }}</span>
+            </el-form-item>
         </el-form>
         <template #footer>
             <span class="dialog-footer">
@@ -49,6 +57,7 @@ const form = reactive({
     fromRepo: true,
     repoID: null as number,
     imageName: [],
+    platform: 'auto',
 });
 const verifyImage = (rule: any, value: any, callback: any) => {
     if (!value || value.length === 0) {
@@ -84,6 +93,7 @@ const acceptParams = async (params: DialogProps): Promise<void> => {
     drawerVisible.value = true;
     form.fromRepo = true;
     form.imageName = [];
+    form.platform = 'auto';
     repos.value = params.repos;
     form.repoID = 1;
     for (const item of repos.value) {

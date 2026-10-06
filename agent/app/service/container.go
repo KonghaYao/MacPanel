@@ -507,7 +507,7 @@ func (u *ContainerService) ContainerCreate(req dto.ContainerOperate, inThread bo
 
 	taskItem.AddSubTask(i18n.GetWithName("ContainerImagePull", req.Image), func(t *task.Task) error {
 		if !checkImageExist(client, req.Image) || req.ForcePull {
-			if err := pullImages(taskItem, client, req.Image); err != nil {
+			if err := pullImages(taskItem, client, req.Image, ""); err != nil {
 				if !req.ForcePull {
 					return err
 				}
@@ -1675,7 +1675,7 @@ func checkImageLike(client *client.Client, imageName string) bool {
 	return false
 }
 
-func pullImages(task *task.Task, client *client.Client, imageName string) error {
+func pullImages(task *task.Task, client *client.Client, imageName string, platform string) error {
 	dockerCli := docker.NewClientWithExist(client)
 	repos, err := imageRepoRepo.List()
 	if err != nil {
@@ -1683,7 +1683,8 @@ func pullImages(task *task.Task, client *client.Client, imageName string) error 
 	}
 	imageRepo := selectImageRepo(imageName, repos)
 	if imageRepo == nil || !imageRepo.Auth {
-		return dockerCli.PullImageWithProcess(task, imageName)
+		options := docker.NewPullOptions(imageName, platform)
+		return dockerCli.PullImageWithProcessAndOptions(task, imageName, options)
 	}
 
 	options := image.PullOptions{}
@@ -1696,6 +1697,7 @@ func pullImages(task *task.Task, client *client.Client, imageName string) error 
 		return err
 	}
 	options.RegistryAuth = base64.URLEncoding.EncodeToString(encodedJSON)
+	docker.ApplyPullPlatform(&options, platform)
 	return dockerCli.PullImageWithProcessAndOptions(task, imageName, options)
 }
 

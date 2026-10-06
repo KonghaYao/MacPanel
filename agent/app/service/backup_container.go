@@ -587,7 +587,7 @@ func stepRecreateContainer(recoverCtx *containerRecoverContext, taskItem *task.T
 		return err
 	}
 	if !checkImageExist(recoverCtx.client, config.Image) {
-		if err := pullImages(taskItem, recoverCtx.client, config.Image); err != nil {
+		if err := pullImages(taskItem, recoverCtx.client, config.Image, ""); err != nil {
 			return err
 		}
 	}

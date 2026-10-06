@@ -238,6 +238,7 @@ export namespace Container {
         taskID: string;
         repoID: number;
         imageName: Array<string>;
+        platform?: string;
     }
     export interface ImageTag {
         sourceID: string;

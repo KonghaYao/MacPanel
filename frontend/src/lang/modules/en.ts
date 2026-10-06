@@ -1861,6 +1861,11 @@ const message = {
         imagePull: 'Pull',
         imagePullHelper:
             'Supports selecting multiple images to pull, press Enter after entering each image to continue',
+        imagePullPlatform: 'Platform',
+        imagePullPlatformAuto: 'Auto (host default)',
+        imagePullPlatformArm64: 'linux/arm64',
+        imagePullPlatformAmd64: 'linux/amd64 (emulated)',
+        imagePullPlatformHelper: 'If pull fails with no arm64 manifest, try linux/amd64',
         imagePush: 'Push',
         imagePushHelper:
             'Detected that this image has multiple tags. Please confirm that the image name used for pushing is: {0}',

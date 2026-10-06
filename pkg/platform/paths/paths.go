@@ -13,6 +13,9 @@ const macPanelDirName = "MacPanel"
 
 func BaseDir() string {
 	if runtime.GOOS == "darwin" {
+		if override := os.Getenv("MACPANEL_HOME"); override != "" {
+			return override
+		}
 		home, err := os.UserHomeDir()
 		if err != nil {
 			panic(fmt.Sprintf("resolve home dir: %v", err))
@@ -20,6 +23,13 @@ func BaseDir() string {
 		return filepath.Join(home, "Library", "Application Support", macPanelDirName)
 	}
 	return ""
+}
+
+func defaultPort() string {
+	if port := os.Getenv("MACPANEL_PORT"); port != "" {
+		return port
+	}
+	return "9999"
 }
 
 func ConfigFile() string {
@@ -164,14 +174,14 @@ func Bootstrap(version string) error {
 		return err
 	}
 	content := fmt.Sprintf(`BASE_DIR=%s
-ORIGINAL_PORT=9999
+ORIGINAL_PORT=%s
 ORIGINAL_VERSION=%s
 ORIGINAL_USERNAME=admin
 ORIGINAL_PASSWORD=%s
 ORIGINAL_ENTRANCE=
 LANGUAGE=zh
 PANEL_EDITION=standard
-`, DataDir(), version, password)
+`, DataDir(), defaultPort(), version, password)
 	if err := os.WriteFile(ConfigFile(), []byte(content), 0o600); err != nil {
 		return fmt.Errorf("write config %s: %w", ConfigFile(), err)
 	}

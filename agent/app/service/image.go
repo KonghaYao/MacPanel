@@ -278,12 +278,17 @@ func (u *ImageService) ImagePull(req dto.ImagePull) error {
 		taskItem.AddSubTask(i18n.GetWithName("ImagePull", itemName), func(t *task.Task) error {
 			taskItem.Logf("----------------- %s -----------------", itemName)
 			if req.RepoID == 0 {
-				pullErr := pullImages(taskItem, client, item)
+				pullErr := pullImages(taskItem, client, item, req.Platform)
+				if pullErr != nil {
+					if prefix := docker.PullErrorPrefix(pullErr.Error()); prefix != "" {
+						pullErr = fmt.Errorf("%s %s", prefix, pullErr.Error())
+					}
+				}
 				taskItem.LogWithStatus(i18n.GetMsgByKey("TaskPull"), pullErr)
 				return pullErr
 			}
 
-			options := image.PullOptions{}
+			options := docker.NewPullOptions(item, req.Platform)
 			imageName := item
 			repo, repoErr := imageRepoRepo.Get(repo.WithByID(req.RepoID))
 			taskItem.LogWithStatus(i18n.GetMsgByKey("ImageRepoAuthFromDB"), repoErr)
@@ -305,6 +310,11 @@ func (u *ImageService) ImagePull(req dto.ImagePull) error {
 			imageName = repo.DownloadUrl + "/" + item
 			dockerCli := docker.NewClientWithExist(client)
 			pullErr := dockerCli.PullImageWithProcessAndOptions(taskItem, imageName, options)
+			if pullErr != nil {
+				if prefix := docker.PullErrorPrefix(pullErr.Error()); prefix != "" {
+					pullErr = fmt.Errorf("%s %s", prefix, pullErr.Error())
+				}
+			}
 			taskItem.LogWithStatus(i18n.GetMsgByKey("TaskPull"), pullErr)
 			if pullErr != nil {
 				return pullErr

@@ -9,6 +9,7 @@ import (
 	"os"
 	"runtime"
 	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -157,6 +158,7 @@ func Start() {
 			panic(err)
 		}
 		global.LOG.Infof("agent startup: listening on unix socket %s", socketPath)
+		db.WaitAndInitCoreDB(60 * time.Second)
 		business.Init()
 		global.LOG.Info("agent startup: business initialized")
 		_ = server.Serve(listener)

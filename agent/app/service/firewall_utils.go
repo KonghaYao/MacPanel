@@ -28,6 +28,7 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/utils/docker"
 	"github.com/1Panel-dev/1Panel/agent/utils/firewall"
 	dockerfirewall "github.com/1Panel-dev/1Panel/agent/utils/firewall/docker_guard"
+	"github.com/1Panel-dev/1Panel/core/utils/ctl_conf"
 	"github.com/1Panel-dev/1Panel/agent/utils/firewall/filter"
 	filterfirewalld "github.com/1Panel-dev/1Panel/agent/utils/firewall/filter/providers/firewalld"
 	filteriptables "github.com/1Panel-dev/1Panel/agent/utils/firewall/filter/providers/iptables"
@@ -123,9 +124,19 @@ func LoadPanelPort() string {
 	if !global.IsMaster {
 		return global.CONF.Base.Port
 	}
-	var portSetting model.Setting
-	_ = global.CoreDB.Where("key = ?", "ServerPort").First(&portSetting).Error
-	return portSetting.Value
+	if global.CoreDB != nil {
+		var portSetting model.Setting
+		if err := global.CoreDB.Where("key = ?", "ServerPort").First(&portSetting).Error; err == nil && portSetting.Value != "" {
+			return portSetting.Value
+		}
+	}
+	if global.CONF.Base.Port != "" {
+		return global.CONF.Base.Port
+	}
+	if port := ctl_conf.LoadWithoutPanic("ORIGINAL_PORT"); port != "" {
+		return port
+	}
+	return "9999"
 }
 
 func (s *FirewallService) syncPortWhitelist(ctx context.Context, provider filter.Provider, ports []firewall.PortWhitelist) ([]filter.FirewallRule, error) {

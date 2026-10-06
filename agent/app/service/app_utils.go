@@ -1109,12 +1109,7 @@ func upApp(task *task.Task, appInstall *model.AppInstall, pullImages, useLifecyc
 				if err = dockerCLi.PullImageWithProcess(task, image); err != nil {
 					errOur := err.Error()
 					if errOur != "" {
-						if strings.Contains(errOur, "no such host") {
-							errMsg = i18n.GetMsgByKey("ErrNoSuchHost") + ":"
-						}
-						if strings.Contains(errOur, "Error response from daemon") {
-							errMsg = i18n.GetMsgByKey("PullImageTimeout") + ":"
-						}
+						errMsg = docker.PullErrorPrefix(errOur)
 					}
 					appInstall.Message = errMsg + errOur
 					installErr := errors.New(appInstall.Message)
