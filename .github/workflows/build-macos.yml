@@ -12,15 +12,7 @@ on:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - runner: macos-latest
-            goarch: arm64
-          - runner: macos-13
-            goarch: amd64
-    runs-on: ${{ matrix.runner }}
+    runs-on: macos-latest
 
     steps:
       - name: Checkout
@@ -51,17 +43,15 @@ jobs:
           npm run build:pro
 
       - name: Build macpanel binary
-        env:
-          GOARCH: ${{ matrix.goarch }}
         run: |
           go work sync
           mkdir -p build
-          cd cmd/macpanel && CGO_ENABLED=0 GOOS=darwin GOARCH=${GOARCH} go build -trimpath -ldflags '-s -w' -o ../../build/macpanel .
+          cd cmd/macpanel && CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags '-s -w' -o ../../build/macpanel .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macpanel-darwin-${{ matrix.goarch }}
+          name: macpanel-darwin-arm64
           path: build/macpanel
           if-no-files-found: error
 
@@ -72,26 +62,16 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download arm64 artifact
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: macpanel-darwin-arm64
-          path: artifacts/arm64
-
-      - name: Download amd64 artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: macpanel-darwin-amd64
-          path: artifacts/amd64
+          path: artifacts
 
       - name: Prepare release assets
-        run: |
-          mv artifacts/arm64/macpanel artifacts/arm64/macpanel-darwin-arm64
-          mv artifacts/amd64/macpanel artifacts/amd64/macpanel-darwin-amd64
+        run: mv artifacts/macpanel artifacts/macpanel-darwin-arm64
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            artifacts/arm64/macpanel-darwin-arm64
-            artifacts/amd64/macpanel-darwin-amd64
+          files: artifacts/macpanel-darwin-arm64

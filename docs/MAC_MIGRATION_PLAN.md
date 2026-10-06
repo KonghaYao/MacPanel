@@ -666,10 +666,10 @@ make build_macpanel          # frontend + darwin 统一二进制
 | 项 | 说明 |
 |----|------|
 | 触发 | push 到 `main` / `dev-v2`、PR、`workflow_dispatch` |
-| 矩阵 | `macos-latest` (arm64)、`macos-13` (amd64) |
+| Runner | `macos-latest` (arm64) |
 | 步骤 | checkout → Go 1.26.6 → Node 20 → `npm ci` + `build:pro` → `go build cmd/macpanel` |
 | 产物 | Artifact `macpanel-darwin-{arch}` |
-| 发布 | tag `v*` 时自动 attach 双架构二进制到 Release |
+| 发布 | tag `v*` 时自动 attach arm64 二进制到 Release |
 
 ---
 
