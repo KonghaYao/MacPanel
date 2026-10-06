@@ -35,6 +35,56 @@
 
 ---
 
+## MacPanel (macOS)
+
+**MacPanel** 是 1Panel 的 macOS 移植版，提供统一的 `macpanel` 二进制（Apple Silicon / Intel 通用）。
+
+### 前置条件 / Prerequisites
+
+1. 安装 [mise](https://mise.jdx.dev/) 并在 shell 中启用（见 [Getting Started](https://mise.jdx.dev/getting-started.html)）。
+2. 仅支持 **macOS**（Apple Silicon 或 Intel）。
+
+### 安装 / Install（mise + GitHub Release）
+
+Release 就绪后，通过 mise 从 GitHub Release 安装：
+
+```bash
+# mise 从 GitHub Release 安装（Release 就绪后）
+mise use -g "github:KonghaYao/MacPanel[bin=macpanel]@0.1.0"
+```
+
+下载地址：[GitHub Releases](https://github.com/KonghaYao/MacPanel/releases)
+
+### 运行 / Run
+
+```bash
+macpanel
+```
+
+启动后在浏览器访问 [http://127.0.0.1:9999](http://127.0.0.1:9999)。
+
+配置文件路径：
+
+```
+~/Library/Application Support/MacPanel/config/1pctl
+```
+
+### Docker
+
+容器相关功能需要 **Docker Desktop**。MacPanel 不会替你安装 Docker，请自行安装并启动 Docker Desktop。
+
+### 开发者本地构建 / Development build
+
+在仓库根目录：
+
+```bash
+mise install          # 安装 Go 1.26.6、Node 20（见 .mise.toml）
+make build_macpanel   # 构建统一二进制 build/macpanel
+./build/macpanel
+```
+
+---
+
 ## What is 1Panel?
 
 1Panel is a modern, open-source Linux server management panel and a lightweight AI management platform. Through an intuitive web interface, it provides users with comprehensive, one-stop server management capabilities:
