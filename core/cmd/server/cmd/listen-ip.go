@@ -45,7 +45,7 @@ var listenIpv6Cmd = &cobra.Command{
 
 func updateBindInfo(protocol string) error {
 	if !isRoot() {
-		fmt.Println(i18n.GetMsgWithMapForCmd("SudoHelper", map[string]interface{}{"cmd": "sudo 1pctl listen-ip ipv6"}))
+		fmt.Println(adminHelperCmd("listen-ip " + protocol))
 		return nil
 	}
 	db, err := loadDBConn("core.db")

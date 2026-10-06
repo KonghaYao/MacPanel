@@ -42,7 +42,7 @@ var resetMFACmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		i18n.UseI18nForCmd(language)
 		if !isRoot() {
-			fmt.Println(i18n.GetMsgWithMapForCmd("SudoHelper", map[string]interface{}{"cmd": "sudo 1pctl reset mfa"}))
+			fmt.Println(adminHelperCmd("reset mfa"))
 			return nil
 		}
 		if isEnterprise() && len(strings.TrimSpace(resetMFAUserNameFlag)) == 0 {
@@ -81,7 +81,7 @@ var resetSSLCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		i18n.UseI18nForCmd(language)
 		if !isRoot() {
-			fmt.Println(i18n.GetMsgWithMapForCmd("SudoHelper", map[string]interface{}{"cmd": "sudo 1pctl reset https"}))
+			fmt.Println(adminHelperCmd("reset https"))
 			return nil
 		}
 		db, err := loadDBConn("core.db")
@@ -100,7 +100,7 @@ var resetEntranceCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		i18n.UseI18nForCmd(language)
 		if !isRoot() {
-			fmt.Println(i18n.GetMsgWithMapForCmd("SudoHelper", map[string]interface{}{"cmd": "sudo 1pctl reset entrance"}))
+			fmt.Println(adminHelperCmd("reset entrance"))
 			return nil
 		}
 		db, err := loadDBConn("core.db")
@@ -116,7 +116,7 @@ var resetBindIpsCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		i18n.UseI18nForCmd(language)
 		if !isRoot() {
-			fmt.Println(i18n.GetMsgWithMapForCmd("SudoHelper", map[string]interface{}{"cmd": "sudo 1pctl reset ips"}))
+			fmt.Println(adminHelperCmd("reset ips"))
 			return nil
 		}
 		db, err := loadDBConn("core.db")
@@ -135,7 +135,7 @@ var resetDomainCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		i18n.UseI18nForCmd(language)
 		if !isRoot() {
-			fmt.Println(i18n.GetMsgWithMapForCmd("SudoHelper", map[string]interface{}{"cmd": "sudo 1pctl reset domain"}))
+			fmt.Println(adminHelperCmd("reset domain"))
 			return nil
 		}
 		db, err := loadDBConn("core.db")
@@ -155,7 +155,7 @@ var resetPasskeyCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		i18n.UseI18nForCmd(language)
 		if !isRoot() {
-			fmt.Println(i18n.GetMsgWithMapForCmd("SudoHelper", map[string]interface{}{"cmd": "sudo 1pctl reset passkey"}))
+			fmt.Println(adminHelperCmd("reset passkey"))
 			return nil
 		}
 		db, err := loadDBConn("core.db")

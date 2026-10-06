@@ -21,7 +21,7 @@ var userinfoCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		i18n.UseI18nForCmd(language)
 		if !isRoot() {
-			fmt.Println(i18n.GetMsgWithMapForCmd("SudoHelper", map[string]interface{}{"cmd": "sudo 1pctl user-info"}))
+			fmt.Println(adminHelperCmd("user-info"))
 			return nil
 		}
 		db, err := loadDBConn("core.db")
@@ -83,7 +83,7 @@ var userinfoCmd = &cobra.Command{
 		fmt.Println(i18n.GetMsgByKeyForCmd("UserInfoAddr") + fmt.Sprintf("%s://%s:%s/%s ", protocol, address, port, entrance))
 		fmt.Println(i18n.GetMsgWithMapForCmd("UpdateUserResult", map[string]interface{}{"name": user}))
 		fmt.Println(i18n.GetMsgWithMapForCmd("UpdatePasswordResult", map[string]interface{}{"name": pass}))
-		updatePasswordCmd := "1pctl update password"
+		updatePasswordCmd := cliName() + " update password"
 		if isEnterpriseVersion && strings.TrimSpace(user) != "" {
 			updatePasswordCmd += " --username " + user
 		}

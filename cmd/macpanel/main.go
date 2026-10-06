@@ -9,6 +9,7 @@ import (
 	"time"
 
 	agentServer "github.com/1Panel-dev/1Panel/agent/server"
+	adminCmd "github.com/1Panel-dev/1Panel/core/cmd/server/cmd"
 	coreServer "github.com/1Panel-dev/1Panel/core/server"
 	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 	"github.com/spf13/cobra"
@@ -132,6 +133,8 @@ func main() {
 			agentServer.Start()
 		},
 	})
+
+	adminCmd.MountAdminCommands(root)
 
 	if err := root.Execute(); err != nil {
 		os.Exit(1)

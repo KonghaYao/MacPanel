@@ -14,7 +14,6 @@ import (
 	"github.com/1Panel-dev/1Panel/core/constant"
 	"github.com/1Panel-dev/1Panel/core/global"
 	"github.com/1Panel-dev/1Panel/core/i18n"
-	"github.com/1Panel-dev/1Panel/core/utils/cmd"
 	"github.com/1Panel-dev/1Panel/core/utils/common"
 	"github.com/1Panel-dev/1Panel/core/utils/encrypt"
 	"github.com/1Panel-dev/1Panel/core/utils/req_helper/proxy_local"
@@ -59,7 +58,7 @@ var updateUserName = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		i18n.UseI18nForCmd(language)
 		if !isRoot() {
-			fmt.Println(i18n.GetMsgWithMapForCmd("SudoHelper", map[string]interface{}{"cmd": "sudo 1pctl update username"}))
+			fmt.Println(adminHelperCmd("update username"))
 			return nil
 		}
 		if isEnterprise() && len(strings.TrimSpace(updateUserNameFlag)) == 0 {
@@ -76,7 +75,7 @@ var updatePassword = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		i18n.UseI18nForCmd(language)
 		if !isRoot() {
-			fmt.Println(i18n.GetMsgWithMapForCmd("SudoHelper", map[string]interface{}{"cmd": "sudo 1pctl update password"}))
+			fmt.Println(adminHelperCmd("update password"))
 			return nil
 		}
 		if isEnterprise() && len(strings.TrimSpace(updatePasswordUserName)) == 0 {
@@ -137,7 +136,7 @@ var updatePort = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		i18n.UseI18nForCmd(language)
 		if !isRoot() {
-			fmt.Println(i18n.GetMsgWithMapForCmd("SudoHelper", map[string]interface{}{"cmd": "sudo 1pctl update port"}))
+			fmt.Println(adminHelperCmd("update port"))
 			return nil
 		}
 		port()
@@ -150,7 +149,7 @@ var updateVersion = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		i18n.UseI18nForCmd(language)
 		if !isRoot() {
-			fmt.Println(i18n.GetMsgWithMapForCmd("SudoHelper", map[string]interface{}{"cmd": "sudo 1pctl update version"}))
+			fmt.Println(adminHelperCmd("update version"))
 			return nil
 		}
 		version := args[0]
@@ -372,7 +371,7 @@ func port() {
 	fmt.Println("\n" + i18n.GetMsgByKeyForCmd("UpdateSuccessful"))
 	fmt.Println(i18n.GetMsgWithMapForCmd("UpdatePortResult", map[string]interface{}{"name": newPortStr}))
 
-	std, err := cmd.NewCommandMgr().RunWithStdout("1pctl", "restart", "core")
+	std, err := restartPanel()
 	if err != nil {
 		fmt.Println(std)
 	}

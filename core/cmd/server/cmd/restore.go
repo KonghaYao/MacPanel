@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"runtime"
 	"sort"
 	"strings"
 
@@ -28,8 +27,8 @@ var restoreCmd = &cobra.Command{
 	Use: "restore",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		i18n.UseI18nForCmd(language)
-		if !isRoot() && runtime.GOOS != "darwin" {
-			fmt.Println(i18n.GetMsgWithMapForCmd("SudoHelper", map[string]interface{}{"cmd": "sudo 1pctl restore"}))
+		if !isRoot() {
+			fmt.Println(adminHelperCmd("restore"))
 			return nil
 		}
 		baseDir, err := ctl_conf.LoadFromFile(paths.ConfigFile(), "BASE_DIR")

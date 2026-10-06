@@ -111,7 +111,7 @@ ErrLicenseBindCount: "The new license free node count is less than the currently
 ErrNoSuchNode: "Node information not found, check and retry!"
 ErrNodeUnbind: "This node is not within the license binding range, check and retry!"
 ErrNodeBind: "This node is already bound to a license, check and retry!"
-ErrNodeLocalRollback: "The primary node does not support direct rollback. Run '1pctl restore' manually to roll back."
+ErrNodeLocalRollback: "The primary node does not support direct rollback. Run 'macpanel restore' manually to roll back."
 ErrIntlLicense: "The current version does not support importing international licenses yet. Stay tuned!"
 InvalidRequestBodyType: "Invalid request body format. Ensure content matches the required format and retry."
 InvalidLicenseCodeType: "Invalid license code format provided, check and try again!"

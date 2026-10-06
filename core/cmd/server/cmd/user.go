@@ -19,7 +19,7 @@ var userListCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		i18n.UseI18nForCmd(language)
 		if !isRoot() {
-			fmt.Println(i18n.GetMsgWithMapForCmd("SudoHelper", map[string]interface{}{"cmd": "sudo 1pctl user-list"}))
+			fmt.Println(adminHelperCmd("user-list"))
 			return nil
 		}
 		if isEnterprise() {
