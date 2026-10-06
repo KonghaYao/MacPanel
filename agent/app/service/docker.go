@@ -20,6 +20,7 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/utils/docker"
 
 	dockerfirewall "github.com/1Panel-dev/1Panel/agent/utils/firewall/docker_guard"
+	"github.com/docker/docker/api/types/swarm"
 )
 
 const dockerNftablesMinVersion = "29.0.0"
@@ -200,26 +201,43 @@ func (u *DockerService) LoadDockerConf() (*dto.DaemonJsonConf, error) {
 	var data dto.DaemonJsonConf
 	data.IPTables = true
 	data.Version = "-"
+	data.IsSwarm = false
+
+	type daemonFileResult struct {
+		content []byte
+		missing bool
+	}
+	fileCh := make(chan daemonFileResult, 1)
+	go func() {
+		if _, err := os.Stat(constant.DaemonJsonPath); err != nil {
+			fileCh <- daemonFileResult{missing: true}
+			return
+		}
+		content, err := os.ReadFile(constant.DaemonJsonPath)
+		if err != nil {
+			fileCh <- daemonFileResult{missing: true}
+			return
+		}
+		fileCh <- daemonFileResult{content: content}
+	}()
+
 	client, err := docker.NewDockerClient()
 	if err != nil {
 		return &data, err
 	}
-	itemVersion, err := client.ServerVersion(ctx)
-	if err == nil {
-		data.Version = itemVersion.Version
+	defer client.Close()
+	if info, err := client.Info(ctx); err == nil {
+		if info.ServerVersion != "" {
+			data.Version = info.ServerVersion
+		}
+		data.IsSwarm = info.Swarm.LocalNodeState == swarm.LocalNodeStateActive
 	}
-	data.IsSwarm = false
-	stdout2, _ := cmd.NewCommandMgr(cmd.WithTimeout(20*time.Second)).RunWithStdout("docker", "info")
-	if strings.Contains(stdout2, "Swarm: active") {
-		data.IsSwarm = true
-	}
-	if _, err := os.Stat(constant.DaemonJsonPath); err != nil {
+
+	fileResult := <-fileCh
+	if fileResult.missing {
 		return &data, nil
 	}
-	file, err := os.ReadFile(constant.DaemonJsonPath)
-	if err != nil {
-		return &data, nil
-	}
+	file := fileResult.content
 	var conf daemonJsonItem
 	daemonMap := make(map[string]interface{})
 	if err := json.Unmarshal(file, &daemonMap); err != nil {

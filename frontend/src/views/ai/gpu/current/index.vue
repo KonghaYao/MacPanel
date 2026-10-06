@@ -13,7 +13,7 @@
                             <span>{{ $t('aiTools.gpu.driverVersion') }}</span>
                             <strong>{{ gpuInfo.driverVersion }}</strong>
                         </div>
-                        <div v-if="gpuInfo.cudaVersion" class="overview-item">
+                        <div v-if="gpuInfo.cudaVersion && gpuInfo.type !== 'apple'" class="overview-item">
                             <span>{{ $t('aiTools.gpu.cudaVersion') }}</span>
                             <strong>{{ gpuInfo.cudaVersion }}</strong>
                         </div>
@@ -121,12 +121,18 @@
                                                 {{
                                                     item.type === 'ascend'
                                                         ? $t('aiTools.gpu.aiCPUUtil')
-                                                        : $t('aiTools.gpu.frequency')
+                                                        : item.type === 'apple'
+                                                          ? $t('aiTools.gpu.rendererUtil')
+                                                          : $t('aiTools.gpu.frequency')
                                                 }}
                                             </span>
                                             <strong>
                                                 {{
-                                                    (item.type === 'ascend' ? item.aiCPUUtil : item.frequency) || 'N/A'
+                                                    item.type === 'ascend'
+                                                        ? item.aiCPUUtil || 'N/A'
+                                                        : item.type === 'apple'
+                                                          ? item.encoderUtil || 'N/A'
+                                                          : item.frequency || 'N/A'
                                                 }}
                                             </strong>
                                         </div>
@@ -135,10 +141,13 @@
                                                 {{
                                                     item.type === 'ascend'
                                                         ? $t('commons.table.status')
-                                                        : $t('aiTools.gpu.fanSpeed')
+                                                        : item.type === 'apple'
+                                                          ? $t('aiTools.gpu.tilerUtil')
+                                                          : $t('aiTools.gpu.fanSpeed')
                                                 }}
                                             </span>
                                             <strong v-if="item.type === 'ascend'">{{ item.health || 'N/A' }}</strong>
+                                            <strong v-else-if="item.type === 'apple'">{{ item.decoderUtil || 'N/A' }}</strong>
                                             <strong v-else>
                                                 {{
                                                     [item.fanSpeed, item.fanRPM].filter(isAvailable).join(' / ') ||
@@ -373,7 +382,12 @@ const gpuGroups = computed<GPUGroup[]>(() => {
         if (!groups.has(key)) {
             groups.set(key, {
                 key,
-                title: item.type === 'ascend' ? `NPU ${item.npuIndex}` : item.type.toUpperCase(),
+                title:
+                    item.type === 'ascend'
+                        ? `NPU ${item.npuIndex}`
+                        : item.type === 'apple'
+                          ? i18n.global.t('aiTools.gpu.appleGPU')
+                          : item.type.toUpperCase(),
                 devices: [],
             });
         }
@@ -500,6 +514,38 @@ const visibleSections = (sections: DetailSection[]) => {
 
 const deviceDetailSections = (item: AcceleratorDevice): DetailSection[] => {
     const t = i18n.global.t;
+    if (item.type === 'apple') {
+        return visibleSections([
+            {
+                id: 'runtime',
+                title: t('aiTools.gpu.runtimeInfo'),
+                items: [
+                    { label: t('aiTools.gpu.gpuUtil'), value: item.gpuUtil },
+                    { label: t('aiTools.gpu.rendererUtil'), value: item.encoderUtil },
+                    { label: t('aiTools.gpu.tilerUtil'), value: item.decoderUtil },
+                ],
+            },
+            {
+                id: 'memory',
+                title: t('aiTools.gpu.unifiedMemory'),
+                items: [
+                    { label: t('aiTools.gpu.memoryUsed'), value: formatMemory(item.memUsed, item.memTotal) },
+                    { label: t('aiTools.gpu.memoryReserved'), value: item.memoryReserved },
+                    { label: t('aiTools.gpu.freeMemory'), value: item.memoryFree },
+                ],
+            },
+            {
+                id: 'device',
+                title: t('aiTools.gpu.deviceInfo'),
+                items: [
+                    { label: 'UUID', value: item.uuid, ellipsis: true },
+                    { label: t('aiTools.gpu.architecture'), value: item.architecture },
+                    { label: t('aiTools.gpu.driverVersion'), value: item.driverVersion },
+                    { label: t('aiTools.gpu.busID'), value: item.busID },
+                ],
+            },
+        ]);
+    }
     if (item.type === 'ascend') {
         return visibleSections([
             {

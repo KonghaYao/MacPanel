@@ -6,6 +6,7 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/i18n"
 	"github.com/1Panel-dev/1Panel/agent/middleware"
 	rou "github.com/1Panel-dev/1Panel/agent/router"
+	pkgmiddleware "github.com/1Panel-dev/1Panel/pkg/platform/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,6 +16,10 @@ var (
 
 func Routers() *gin.Engine {
 	Router = gin.Default()
+	Router.Use(pkgmiddleware.SlowRequest(pkgmiddleware.SlowRequestConfig{
+		Component: "agent",
+		Logf:      global.LOG.Warnf,
+	}))
 	Router.Use(i18n.UseI18n())
 
 	PrivateGroup := Router.Group("/api/v2")

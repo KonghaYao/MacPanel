@@ -20,6 +20,7 @@ import (
 	rou "github.com/1Panel-dev/1Panel/core/router"
 	"github.com/1Panel-dev/1Panel/core/utils/security"
 	"github.com/1Panel-dev/1Panel/core/utils/xpack"
+	pkgmiddleware "github.com/1Panel-dev/1Panel/pkg/platform/middleware"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
@@ -69,6 +70,10 @@ func setWebStatic(rootRouter *gin.RouterGroup) {
 
 func Routers() *gin.Engine {
 	Router = gin.New()
+	Router.Use(pkgmiddleware.SlowRequest(pkgmiddleware.SlowRequestConfig{
+		Component: "core",
+		Logf:      global.LOG.Warnf,
+	}))
 	Router.Use(i18n.UseI18n())
 	Router.Use(middleware.WhiteAllow())
 	Router.Use(middleware.BindDomain())

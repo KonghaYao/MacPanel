@@ -2,7 +2,10 @@ module github.com/1Panel-dev/1Panel/pkg/platform
 
 go 1.26.6
 
-require github.com/gin-gonic/gin v1.12.0
+require (
+	github.com/gin-gonic/gin v1.12.0
+	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
+)
 
 require (
 	github.com/bytedance/gopkg v0.1.4 // indirect

@@ -25,6 +25,7 @@ type providerResult struct {
 
 func New() (bool, Client) {
 	client := Client{}
+	client.providers = append(client.providers, platformProviders()...)
 	if cmd.Which(nvidiaSMICommand) {
 		client.providers = append(client.providers, nvidiaSMI{})
 	}

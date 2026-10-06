@@ -292,6 +292,8 @@ func (u *ContainerService) ContainerItemStats(ctx context.Context, req dto.Opera
 	}
 	return data, nil
 }
+const containerStatsConcurrency = 8
+
 func (u *ContainerService) ContainerListStats() ([]dto.ContainerListStats, error) {
 	client, err := docker.NewDockerClient()
 	if err != nil {
@@ -303,13 +305,20 @@ func (u *ContainerService) ContainerListStats() ([]dto.ContainerListStats, error
 		return nil, err
 	}
 	datas := make([]dto.ContainerListStats, len(list))
+	sem := make(chan struct{}, containerStatsConcurrency)
 	var wg sync.WaitGroup
-	wg.Add(len(list))
-	for i := 0; i < len(list); i++ {
-		go func(index int, item container.Summary) {
-			datas[index] = loadCpuAndMem(client, item.ID)
-			wg.Done()
-		}(i, list[i])
+	for i, item := range list {
+		datas[i].ContainerID = item.ID
+		if item.State != "running" {
+			continue
+		}
+		wg.Add(1)
+		go func(index int, containerID string) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			datas[index] = loadCpuAndMem(client, containerID)
+		}(i, item.ID)
 	}
 	wg.Wait()
 	return datas, nil

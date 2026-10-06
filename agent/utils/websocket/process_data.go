@@ -222,7 +222,7 @@ func getProcessData(processConfig PsProcessConfig) (res []byte, err error) {
 		return
 	}
 
-	connections, err := net.ConnectionsMaxWithContext(ctx, "all", 32768)
+	connections, err := agentPsutil.ConnectionsWithContext(ctx, "all")
 	if err != nil {
 		return
 	}
@@ -258,6 +258,11 @@ func getSSHSessions(config SSHSessionConfig) (res []byte, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
+	if sessions, ok := loadPlatformSSHSessions(ctx); ok {
+		res, err = json.Marshal(filterSSHSessions(sessions, config))
+		return
+	}
+
 	if sessions, ok := loadLoginctlSSHSessions(ctx); ok && len(sessions) > 0 {
 		res, err = json.Marshal(filterSSHSessions(sessions, config))
 		return
@@ -288,7 +293,7 @@ func getSSHSessions(config SSHSessionConfig) (res []byte, err error) {
 		return
 	}
 
-	connections, err := net.ConnectionsMaxWithContext(ctx, "all", 32768)
+	connections, err := agentPsutil.ConnectionsWithContext(ctx, "all")
 	if err != nil {
 		res, err = json.Marshal(result)
 		return
@@ -434,7 +439,7 @@ func getNetConnections(config NetConfig) (res []byte, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
-	connections, err := net.ConnectionsMaxWithContext(ctx, "all", 32768)
+	connections, err := agentPsutil.ConnectionsWithContext(ctx, "all")
 	if err != nil {
 		res, _ = json.Marshal(result)
 		return

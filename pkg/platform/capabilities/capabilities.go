@@ -90,7 +90,7 @@ func darwinFeatures() FeatureMap {
 		DockerInstall:     false,
 		DockerManage:      true,
 		OnlineUpgrade:     false,
-		ProcMonitoring:    false,
+		ProcMonitoring:    true,
 		OpenrestyDiagnose: false,
 	}
 }
