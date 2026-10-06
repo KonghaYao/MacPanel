@@ -79,6 +79,9 @@ class RequestHttp {
             (response: AxiosResponse) => {
                 const globalStore = GlobalStore();
                 const { data } = response;
+                if (response.config.responseType === 'blob' || data instanceof Blob) {
+                    return data;
+                }
                 const authResult = handleAuthResponseCode(data, { showRBACMessage: true });
                 if (authResult.handled) {
                     if (authResult.action === 'return') {

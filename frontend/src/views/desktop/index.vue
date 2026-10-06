@@ -268,9 +268,9 @@ onMounted(async () => {
         systemVersion.value = '';
     }
     try {
-        const res = await fetchDesktopWallpaper();
-        if (res.data instanceof Blob && res.data.size > 0) {
-            wallpaperUrl.value = URL.createObjectURL(res.data);
+        const data = await fetchDesktopWallpaper();
+        if (data instanceof Blob && data.type.startsWith('image/') && data.size > 0) {
+            wallpaperUrl.value = URL.createObjectURL(data);
         }
     } catch {
         wallpaperUrl.value = '';
@@ -302,6 +302,9 @@ onBeforeUnmount(() => {
 .wallpaper {
     position: absolute;
     inset: 0;
+}
+
+.wallpaper:not(.has-image) {
     background:
         radial-gradient(ellipse at 18% 18%, rgba(255, 186, 140, 0.95), transparent 42%),
         radial-gradient(ellipse at 78% 12%, rgba(126, 176, 255, 0.95), transparent 40%),
