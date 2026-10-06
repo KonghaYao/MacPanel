@@ -60,6 +60,11 @@ func runUnified() {
 }
 
 func main() {
+	if err := paths.Bootstrap(""); err != nil {
+		fmt.Fprintf(os.Stderr, "macpanel init: %v\n", err)
+		os.Exit(1)
+	}
+
 	var daemon bool
 
 	root := &cobra.Command{

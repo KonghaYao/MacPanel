@@ -7,7 +7,17 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync"
 )
+
+var bootstrapOnce sync.Once
+var bootstrapErr error
+
+// ResetBootstrapState clears one-time bootstrap state. For tests only.
+func ResetBootstrapState() {
+	bootstrapOnce = sync.Once{}
+	bootstrapErr = nil
+}
 
 const macPanelDirName = "MacPanel"
 
@@ -135,11 +145,18 @@ func RecycleBinDir(baseDir string) string {
 }
 
 // Bootstrap ensures macOS base directories and a default 1pctl config exist.
+// It is idempotent and safe to call from any startup path (CLI init, main, viper).
 func Bootstrap(version string) error {
 	if runtime.GOOS != "darwin" {
 		return nil
 	}
+	bootstrapOnce.Do(func() {
+		bootstrapErr = bootstrap(version)
+	})
+	return bootstrapErr
+}
 
+func bootstrap(version string) error {
 	dirs := []string{
 		ConfigDir(),
 		RunDir(),

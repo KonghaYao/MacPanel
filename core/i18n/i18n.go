@@ -212,13 +212,14 @@ func getLanguageFromDBInternal() string {
 	return lang
 }
 func getLanguageFrom1pctl() string {
-	configFile := paths.ConfigFile()
-	info, err := ctl_conf.LoadFromFile(configFile, "LANGUAGE")
-	if err != nil {
-		panic(err)
+	if paths.IsDarwin() {
+		if err := paths.Bootstrap(""); err != nil {
+			return ""
+		}
 	}
+	info := ctl_conf.LoadWithoutPanic("LANGUAGE")
 	if len(info) == 0 || info == `""` {
-		panic(fmt.Sprintf("error `LANGUAGE` find in %s", configFile))
+		return ""
 	}
 	return info
 }
