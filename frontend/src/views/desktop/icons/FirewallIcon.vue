@@ -1,11 +1,24 @@
 <template>
     <IconShell name="firewall" :colors="colors">
-        <path d="M32 11L49 18.5v14c0 11-8 18.5-17 21-9-2.5-17-10-17-21v-14L32 11Z" fill="#fff" />
-        <path d="M32 11L49 18.5v14c0 11-8 18.5-17 21-9-2.5-17-10-17-21v-14L32 11Z" fill="#fff" opacity="0.2" />
+        <defs>
+            <linearGradient id="shield-body" x1="0.5" y1="0" x2="0.5" y2="1">
+                <stop offset="0%" stop-color="#ffffff" />
+                <stop offset="100%" stop-color="#ffd0cc" />
+            </linearGradient>
+        </defs>
+        <path d="M32 10L50 18v14.5c0 11.5-8.5 19.5-18 22-9.5-2.5-18-10.5-18-22V18L32 10Z" fill="url(#shield-body)" />
+        <path d="M32 10L50 18v14.5c0 11.5-8.5 19.5-18 22-9.5-2.5-18-10.5-18-22V18L32 10Z" fill="#fff" opacity="0.25" />
         <path
-            d="M23 31l7 7 14-15"
-            stroke="#ff453a"
-            stroke-width="4.2"
+            d="M32 10L50 18v14.5c0 11.5-8.5 19.5-18 22-9.5-2.5-18-10.5-18-22V18L32 10Z"
+            fill="none"
+            stroke="#cc0000"
+            stroke-width="0.6"
+            opacity="0.3"
+        />
+        <path
+            d="M22 31l7.5 7.5 14-16"
+            stroke="#cc0000"
+            stroke-width="4"
             stroke-linecap="round"
             stroke-linejoin="round"
             fill="none"

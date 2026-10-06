@@ -1,14 +1,22 @@
 <template>
     <IconShell name="website" :colors="colors">
-        <circle cx="32" cy="32" r="17" fill="#f5f5f7" />
-        <circle cx="32" cy="32" r="14.5" fill="none" stroke="#aeaeb2" stroke-width="1.2" />
-        <path d="M32 15v34M15 32h34" stroke="#c7c7cc" stroke-width="1" />
-        <ellipse cx="32" cy="32" rx="14.5" ry="7" fill="none" stroke="#c7c7cc" stroke-width="1" />
-        <ellipse cx="32" cy="32" rx="7" ry="14.5" fill="none" stroke="#c7c7cc" stroke-width="1" />
-        <path d="M32 15c-4.5 5.5-4.5 18.5 0 24M32 15c4.5 5.5 4.5 18.5 0 24" stroke="#c7c7cc" stroke-width="1" fill="none" />
-        <path d="M32 32L32 15L43 32Z" fill="#ff3b30" />
-        <path d="M32 32L32 49L21 32Z" fill="#007aff" />
-        <circle cx="32" cy="32" r="2.8" fill="#fff" />
+        <defs>
+            <radialGradient id="compass-face" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0%" stop-color="#ffffff" />
+                <stop offset="100%" stop-color="#e8eef8" />
+            </radialGradient>
+        </defs>
+        <circle cx="32" cy="32" r="18" fill="url(#compass-face)" stroke="#b0b8c8" stroke-width="0.8" />
+        <circle cx="32" cy="32" r="15" fill="none" stroke="#c8c8cc" stroke-width="0.8" />
+        <path d="M32 14v36M14 32h36" stroke="#d0d0d4" stroke-width="0.8" />
+        <ellipse cx="32" cy="32" rx="15" ry="7.5" fill="none" stroke="#d0d0d4" stroke-width="0.7" />
+        <ellipse cx="32" cy="32" rx="7.5" ry="15" fill="none" stroke="#d0d0d4" stroke-width="0.7" />
+        <path d="M32 32L32 14L44 32Z" fill="#ff3333" />
+        <path d="M32 32L32 50L20 32Z" fill="#0066cc" />
+        <path d="M32 32L44 32L32 14Z" fill="#ff6666" opacity="0.6" />
+        <path d="M32 32L20 32L32 50Z" fill="#3388dd" opacity="0.6" />
+        <circle cx="32" cy="32" r="3" fill="#fff" stroke="#888" stroke-width="0.5" />
+        <circle cx="32" cy="32" r="1.2" fill="#666" />
     </IconShell>
 </template>
 

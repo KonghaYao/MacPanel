@@ -1,14 +1,19 @@
 <template>
     <IconShell name="files" :colors="colors">
-        <path
-            d="M32 13c-11 0-19 7.8-19 17.2v3.6C13 43.2 21 51 32 51s19-7.8 19-17.2v-3.6C51 20.8 43 13 32 13Z"
-            fill="#fff"
-        />
-        <path d="M32 13c-11 0-19 7.8-19 17.2v3.6C13 43.2 21 51 32 51s19-7.8 19-17.2v-3.6C51 20.8 43 13 32 13Z" fill="#fff" opacity="0.15" />
-        <ellipse cx="25.5" cy="28.5" rx="2.6" ry="3.2" fill="#2c2c2e" />
-        <ellipse cx="38.5" cy="28.5" rx="2.6" ry="3.2" fill="#2c2c2e" />
-        <path d="M24 38.5c3 4.2 11 4.2 16 0" stroke="#2c2c2e" stroke-width="2.6" stroke-linecap="round" fill="none" />
-        <path d="M24 22c2.5-1.5 5.5-2 8-2s5.5.5 8 2" stroke="#147ce5" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.35" />
+        <defs>
+            <linearGradient id="folder-back" x1="0.5" y1="0" x2="0.5" y2="1">
+                <stop offset="0%" stop-color="#a8d4ff" />
+                <stop offset="100%" stop-color="#2272c9" />
+            </linearGradient>
+            <linearGradient id="folder-front" x1="0.5" y1="0" x2="0.5" y2="1">
+                <stop offset="0%" stop-color="#d8ecff" />
+                <stop offset="100%" stop-color="#4a9ff5" />
+            </linearGradient>
+        </defs>
+        <path d="M14 22h14l3 4h19v22a3 3 0 0 1-3 3H14a3 3 0 0 1-3-3V25a3 3 0 0 1 3-3Z" fill="url(#folder-back)" />
+        <path d="M14 28h36v20a3 3 0 0 1-3 3H14a3 3 0 0 1-3-3V28Z" fill="url(#folder-front)" />
+        <path d="M14 28h36v6H14Z" fill="#fff" opacity="0.25" />
+        <path d="M14 22h14l3 4h19" fill="none" stroke="#fff" stroke-width="0.6" opacity="0.35" />
     </IconShell>
 </template>
 

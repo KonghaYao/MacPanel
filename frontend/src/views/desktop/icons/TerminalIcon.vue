@@ -1,15 +1,25 @@
 <template>
     <IconShell name="terminal" :colors="colors">
-        <rect x="13" y="17" width="38" height="30" rx="4" fill="#1a1a1a" opacity="0.45" />
+        <defs>
+            <linearGradient id="term-screen" x1="0.5" y1="0" x2="0.5" y2="1">
+                <stop offset="0%" stop-color="#2a2a2c" />
+                <stop offset="100%" stop-color="#0a0a0a" />
+            </linearGradient>
+        </defs>
+        <rect x="12" y="16" width="40" height="32" rx="4" fill="url(#term-screen)" stroke="#48484a" stroke-width="0.8" />
+        <rect x="12" y="16" width="40" height="6" rx="4" fill="#fff" opacity="0.06" />
         <path
-            d="M17 26l7.5 7.5L17 41"
-            stroke="#32d74b"
-            stroke-width="4.2"
+            d="M17 27l8 8-8 8"
+            stroke="#39ff14"
+            stroke-width="3.8"
             stroke-linecap="round"
             stroke-linejoin="round"
             fill="none"
         />
-        <rect x="29" y="37" width="17" height="4.2" rx="2" fill="#f5f5f7" />
+        <rect x="30" y="38" width="16" height="3.8" rx="1.5" fill="#39ff14" opacity="0.9" />
+        <circle cx="18" cy="19.5" r="1.2" fill="#ff5f57" opacity="0.7" />
+        <circle cx="22.5" cy="19.5" r="1.2" fill="#febc2e" opacity="0.7" />
+        <circle cx="27" cy="19.5" r="1.2" fill="#28c840" opacity="0.7" />
     </IconShell>
 </template>
 
