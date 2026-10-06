@@ -31,7 +31,7 @@ __debug*
 *.out
 
 # Dependency directories
-/pkg/
+# pkg/platform is a first-class Go module; do not ignore it.
 backend/__debug_bin
 core/cmd/server/__debug_bin
 core/cmd/server/web/assets

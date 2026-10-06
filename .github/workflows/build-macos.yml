@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - dev-v2
+    tags:
+      - "v*"
   pull_request:
   workflow_dispatch:
 
@@ -29,9 +31,11 @@ jobs:
         with:
           go-version: "1.26.6"
           cache-dependency-path: |
+            go.work.sum
             core/go.sum
             agent/go.sum
             cmd/macpanel/go.sum
+            pkg/platform/go.sum
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -50,6 +54,7 @@ jobs:
         env:
           GOARCH: ${{ matrix.goarch }}
         run: |
+          go work sync
           mkdir -p build
           cd cmd/macpanel && CGO_ENABLED=0 GOOS=darwin GOARCH=${GOARCH} go build -trimpath -ldflags '-s -w' -o ../../build/macpanel .
 
