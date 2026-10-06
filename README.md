@@ -4,18 +4,46 @@
 
 ## Prerequisites
 
-1. Install [mise](https://mise.jdx.dev/) and enable it in your shell (see [Getting Started](https://mise.jdx.dev/getting-started.html)).
+1. Install [mise](https://mise.jdx.dev/) and enable it in your shell:
+
+   ```bash
+   eval "$(mise activate zsh)"   # zsh
+   # eval "$(mise activate bash)"  # bash
+   ```
+
+   Add the `eval` line to `~/.zshrc` (or `~/.bashrc`) so `macpanel` is on PATH in new terminals. See [Getting Started](https://mise.jdx.dev/getting-started.html).
+
 2. **macOS** only (Apple Silicon or Intel).
 
 ## Install (mise + GitHub Release)
 
-When releases are available, install via mise from GitHub Releases:
+When releases are available, install the **latest** release via mise from GitHub Releases:
 
 ```bash
-mise use -g "github:KonghaYao/MacPanel[bin=macpanel]@0.2.0"
+mise use -g "github:KonghaYao/MacPanel[bin=macpanel]@latest"
 ```
 
+Releases are tagged `v*` (e.g. `v0.2.0`). `@latest` resolves to the newest stable [GitHub release](https://github.com/KonghaYao/MacPanel/releases/latest) (non-draft, non-prerelease).
+
 Downloads: [GitHub Releases](https://github.com/KonghaYao/MacPanel/releases)
+
+## Update
+
+To upgrade to the latest release:
+
+```bash
+mise use -g "github:KonghaYao/MacPanel[bin=macpanel]@latest"
+mise reshim
+```
+
+Or, if `macpanel` is already installed via mise:
+
+```bash
+mise upgrade macpanel
+mise reshim
+```
+
+To pin a specific version instead of latest, replace `@latest` with the version (without the `v` prefix), e.g. `@0.2.0`.
 
 ## Run
 
