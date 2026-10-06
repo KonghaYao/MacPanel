@@ -86,4 +86,5 @@ var (
 
 	diskService      = service.NewIDiskService()
 	homebrewService  = service.NewIHomebrewService()
+	desktopService   = service.NewIDesktopService()
 )

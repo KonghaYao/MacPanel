@@ -4,7 +4,12 @@
         :class="{ 'is-dark': isDarkTheme, 'is-interacting': interacting }"
         @pointerdown="closeMenus"
     >
-        <div class="wallpaper" aria-hidden="true" />
+        <div
+            class="wallpaper"
+            :class="{ 'has-image': !!wallpaperUrl }"
+            :style="wallpaperStyle"
+            aria-hidden="true"
+        />
         <MenuBar
             ref="menuRef"
             :active-title="activeTitle"
@@ -57,9 +62,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { fetchDesktopWallpaper } from '@/api/modules/desktop';
 import { getSettingBaseInfo } from '@/api/modules/setting';
 import { useGlobalStore } from '@/composables/useGlobalStore';
 import { syncPlatformCapabilities } from '@/utils/platform';
@@ -85,6 +91,7 @@ const activeWindowId = ref('');
 const interacting = ref(false);
 const selectedIcon = ref('');
 const systemVersion = ref('');
+const wallpaperUrl = ref('');
 const menuRef = ref<InstanceType<typeof MenuBar>>();
 let zTop = 10;
 let windowSeed = 1;
@@ -103,6 +110,9 @@ const menuWindows = computed(() =>
         id: item.id,
         title: t(item.titleKey),
     })),
+);
+const wallpaperStyle = computed(() =>
+    wallpaperUrl.value ? { backgroundImage: `url(${wallpaperUrl.value})` } : undefined,
 );
 
 const closeMenus = () => {
@@ -257,6 +267,20 @@ onMounted(async () => {
     } catch {
         systemVersion.value = '';
     }
+    try {
+        const res = await fetchDesktopWallpaper();
+        if (res.data instanceof Blob && res.data.size > 0) {
+            wallpaperUrl.value = URL.createObjectURL(res.data);
+        }
+    } catch {
+        wallpaperUrl.value = '';
+    }
+});
+
+onBeforeUnmount(() => {
+    if (wallpaperUrl.value) {
+        URL.revokeObjectURL(wallpaperUrl.value);
+    }
 });
 </script>
 
@@ -284,6 +308,12 @@ onMounted(async () => {
         radial-gradient(ellipse at 72% 78%, rgba(186, 140, 255, 0.8), transparent 46%),
         radial-gradient(ellipse at 12% 86%, rgba(94, 214, 224, 0.75), transparent 38%),
         linear-gradient(155deg, #6f97f8 0%, #c9b7ff 46%, #f2c7ae 100%);
+}
+
+.wallpaper.has-image {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .mac-desktop.is-dark .wallpaper {
