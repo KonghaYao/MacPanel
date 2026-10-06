@@ -71,7 +71,51 @@ func main() {
 			runUnified()
 		},
 	}
-	root.Flags().BoolVarP(&daemon, "daemon", "d", false, "Run in background (macOS only)")
+	root.Flags().BoolVarP(&daemon, "daemon", "d", false, "Run in background (alias for 'macpanel start', macOS only)")
+
+	root.AddCommand(&cobra.Command{
+		Use:   "start",
+		Short: "Start macpanel in background (macOS only)",
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := startDaemon(); err != nil {
+				fmt.Fprintf(os.Stderr, "start: %v\n", err)
+				os.Exit(1)
+			}
+		},
+	})
+
+	root.AddCommand(&cobra.Command{
+		Use:   "stop",
+		Short: "Stop background macpanel (macOS only)",
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := stopDaemon(); err != nil {
+				fmt.Fprintf(os.Stderr, "stop: %v\n", err)
+				os.Exit(1)
+			}
+		},
+	})
+
+	root.AddCommand(&cobra.Command{
+		Use:   "restart",
+		Short: "Restart background macpanel (macOS only)",
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := restartDaemon(); err != nil {
+				fmt.Fprintf(os.Stderr, "restart: %v\n", err)
+				os.Exit(1)
+			}
+		},
+	})
+
+	root.AddCommand(&cobra.Command{
+		Use:   "status",
+		Short: "Show background macpanel status (macOS only)",
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := printDaemonStatus(); err != nil {
+				fmt.Fprintf(os.Stderr, "status: %v\n", err)
+				os.Exit(1)
+			}
+		},
+	})
 
 	root.AddCommand(&cobra.Command{
 		Use:   "core",

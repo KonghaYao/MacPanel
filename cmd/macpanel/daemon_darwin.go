@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 )
@@ -70,13 +71,87 @@ func daemonChildArgs(args []string) []string {
 	filtered := make([]string, 0, len(args))
 	for _, arg := range args {
 		switch arg {
-		case "-d", "--daemon":
+		case "-d", "--daemon", "start", "stop", "restart", "status":
 			continue
 		default:
 			filtered = append(filtered, arg)
 		}
 	}
 	return filtered
+}
+
+func stopDaemon() error {
+	running, pid, err := existingDaemonPID()
+	if err != nil {
+		return err
+	}
+	if !running {
+		return fmt.Errorf("macpanel is not running")
+	}
+
+	proc, err := os.FindProcess(pid)
+	if err != nil {
+		_ = os.Remove(paths.PidFile())
+		fmt.Println("macpanel stopped")
+		return nil
+	}
+
+	if err := proc.Signal(syscall.SIGTERM); err != nil {
+		_ = os.Remove(paths.PidFile())
+		return fmt.Errorf("send SIGTERM to pid %d: %w", pid, err)
+	}
+
+	if !waitForProcessExit(pid, 30*time.Second) {
+		_ = proc.Signal(syscall.SIGKILL)
+		if !waitForProcessExit(pid, 5*time.Second) {
+			return fmt.Errorf("macpanel (pid %d) did not stop within timeout", pid)
+		}
+	}
+
+	_ = os.Remove(paths.PidFile())
+	fmt.Println("macpanel stopped")
+	return nil
+}
+
+func restartDaemon() error {
+	running, _, err := existingDaemonPID()
+	if err != nil {
+		return err
+	}
+	if running {
+		if err := stopDaemon(); err != nil {
+			return err
+		}
+	}
+	return startDaemon()
+}
+
+func printDaemonStatus() error {
+	running, pid, err := existingDaemonPID()
+	if err != nil {
+		return err
+	}
+	if running {
+		fmt.Printf("macpanel is running (pid %d)\n", pid)
+	} else {
+		fmt.Println("macpanel is stopped")
+	}
+	return nil
+}
+
+func waitForProcessExit(pid int, timeout time.Duration) bool {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		proc, err := os.FindProcess(pid)
+		if err != nil {
+			return true
+		}
+		if err := proc.Signal(syscall.Signal(0)); err != nil {
+			return true
+		}
+		time.Sleep(200 * time.Millisecond)
+	}
+	return false
 }
 
 func existingDaemonPID() (running bool, pid int, err error) {

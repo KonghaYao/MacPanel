@@ -56,26 +56,23 @@ macpanel
 **Background** (recommended) — survives closing the terminal:
 
 ```bash
-macpanel -d
+macpanel start
+# or: macpanel -d
 # or: macpanel --daemon
 ```
 
-Daemon mode writes:
+Service control:
+
+```bash
+macpanel status    # show running/stopped and pid
+macpanel stop      # stop background instance
+macpanel restart   # stop then start
+```
+
+Background mode writes:
 
 - PID: `~/Library/Application Support/MacPanel/run/macpanel.pid`
 - Log: `~/Library/Application Support/MacPanel/run/macpanel.log`
-
-Stop a background instance:
-
-```bash
-kill $(cat ~/Library/Application\ Support/MacPanel/run/macpanel.pid)
-```
-
-Alternative without built-in daemon mode:
-
-```bash
-nohup macpanel &
-```
 
 Open [http://127.0.0.1:9999](http://127.0.0.1:9999) in your browser after startup.
 

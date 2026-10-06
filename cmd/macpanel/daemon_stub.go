@@ -15,3 +15,15 @@ func startDaemon() error {
 func writeDaemonPID() {}
 
 func removeDaemonPID() {}
+
+func stopDaemon() error {
+	return fmt.Errorf("daemon control is only supported on macOS")
+}
+
+func restartDaemon() error {
+	return fmt.Errorf("daemon control is only supported on macOS")
+}
+
+func printDaemonStatus() error {
+	return fmt.Errorf("daemon control is only supported on macOS")
+}

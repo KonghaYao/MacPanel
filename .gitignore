@@ -79,3 +79,5 @@ opencode.json
 superpowers
 .worktrees/
 .codex/
+/macpanel
+build/macpanel
