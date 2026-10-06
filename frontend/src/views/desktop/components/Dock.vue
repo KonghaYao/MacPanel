@@ -137,10 +137,15 @@ const onBounceEnd = (id: string) => {
 .tile {
     width: 52px;
     height: 52px;
-    border-radius: 13px;
-    overflow: hidden;
+    overflow: visible;
     display: block;
     position: relative;
+    transition: filter 0.15s ease;
+}
+
+.dock-item:hover .tile,
+.dock-item:focus-visible .tile {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.28));
 }
 
 .tip {
