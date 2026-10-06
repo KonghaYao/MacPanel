@@ -10,6 +10,9 @@
                     <el-button v-permission type="primary" plain @click="openDomain">
                         {{ $t('aiTools.mcp.bindDomain') }}
                     </el-button>
+                    <el-button type="info" plain @click="openExternalAccess">
+                        {{ $t('aiTools.mcp.externalAccessGuide') }}
+                    </el-button>
                 </div>
             </template>
             <template #rightToolBar>
@@ -92,6 +95,7 @@
         <OpDialog ref="opRef" @search="search" />
         <ComposeLogs ref="composeLogRef" />
         <BindDomain ref="bindDomainRef" @close="searchWithTimeOut" />
+        <ExternalAccess ref="externalAccessRef" />
         <Config ref="configRef" />
         <TaskLog ref="taskLogRef" width="70%" @close="search" />
     </div>
@@ -116,6 +120,7 @@ import TaskLog from '@/components/log/task/index.vue';
 import i18n from '@/lang';
 import { MsgError, MsgSuccess } from '@/utils/message';
 import BindDomain from './bind/index.vue';
+import ExternalAccess from './external-access/index.vue';
 import Config from './config/index.vue';
 import { useGlobalStore } from '@/composables/useGlobalStore';
 
@@ -126,6 +131,7 @@ const opRef = ref();
 const composeLogRef = ref();
 const taskLogRef = ref();
 const bindDomainRef = ref();
+const externalAccessRef = ref();
 const configRef = ref();
 const items = ref<AI.McpServer[]>([]);
 const paginationConfig = reactive({
@@ -322,6 +328,10 @@ const testConnection = async (row: AI.McpServer) => {
 
 const openDomain = () => {
     bindDomainRef.value.acceptParams();
+};
+
+const openExternalAccess = () => {
+    externalAccessRef.value.acceptParams();
 };
 
 const openConfig = (row: AI.McpServer) => {

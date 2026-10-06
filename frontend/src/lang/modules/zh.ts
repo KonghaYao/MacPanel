@@ -47,6 +47,7 @@ const message = {
         sameKeyDevices:
             '多台设备可共用一个 Key，停用或撤销该 Key 会同时影响这些设备。如需单独管理，请为每台设备创建独立的 Key。',
         closePending: '密钥变更已保存，部分远端终端连接尚未关闭，系统将重试。',
+        copyMcpConfig: '复制 MCP 配置',
     },
     commons: {
         true: '是',
@@ -1647,6 +1648,19 @@ const message = {
             testConnection: '测试连接',
             connectionSuccess: '连接成功',
             connectionFailed: '连接失败',
+            externalAccessGuide: '接入说明',
+            externalAccessTitle: '外部 MCP 接入指南',
+            externalAccessIntro: '通过 Streamable HTTP，将 Cursor、Claude Desktop 等外部客户端接入 MacPanel 内置 MCP 服务。',
+            externalAccessStep1: '在「面板设置」中开启 API 接口。',
+            externalAccessStep2: '在「面板设置 → API Key」中创建 API Key。',
+            externalAccessStep3: '在 API Key 页面点击「复制 MCP 配置」，获取可直接使用的客户端配置。',
+            externalAccessStep4: '将配置粘贴到 MCP 客户端：',
+            externalAccessStep4Cursor: 'Cursor：~/.cursor/mcp.json',
+            externalAccessStep4Claude: 'Claude Desktop：claude_desktop_config.json（结构相同，使用 mcpServers）',
+            externalAccessStep5: '重启或重新加载客户端使配置生效。',
+            externalAccessStep6: 'MCP 端点为 {0}，使用 Panel API Key 作为 Bearer Token 进行鉴权。',
+            externalAccessExample: '配置示例',
+            externalAccessGoApiKeys: '前往 API Key',
         },
         tensorRT: {
             llm: 'TensorRT LLM',

@@ -53,6 +53,7 @@ const message = {
         sameKeyDevices:
             'Vários dispositivos podem compartilhar a chave e sua revogação. Use uma chave por dispositivo para controle independente.',
         closePending: 'A alteração foi salva. O fechamento de terminais remotos está pendente e será repetido.',
+        copyMcpConfig: 'Copiar configuração MCP',
     },
     commons: {
         true: 'Verdadeiro',
@@ -1726,6 +1727,21 @@ const message = {
             testConnection: 'Testar Conexão',
             connectionSuccess: 'Conexão bem-sucedida',
             connectionFailed: 'Falha na conexão',
+            externalAccessGuide: 'Guia de Acesso Externo',
+            externalAccessTitle: 'Guia de Acesso MCP Externo',
+            externalAccessIntro:
+                'Conecte clientes externos como Cursor e Claude Desktop ao servidor MCP integrado do MacPanel via Streamable HTTP.',
+            externalAccessStep1: 'Ative a interface API em Configurações.',
+            externalAccessStep2: 'Crie uma API Key em Configurações → API Key.',
+            externalAccessStep3:
+                'Na página API Key, clique em "Copiar configuração MCP" para copiar a configuração pronta do cliente.',
+            externalAccessStep4: 'Cole a configuração no seu cliente MCP:',
+            externalAccessStep4Cursor: 'Cursor: ~/.cursor/mcp.json',
+            externalAccessStep4Claude: 'Claude Desktop: claude_desktop_config.json (mesma estrutura mcpServers)',
+            externalAccessStep5: 'Reinicie ou recarregue o cliente para aplicar as alterações.',
+            externalAccessStep6: 'O endpoint MCP é {0}. A autenticação usa um token Bearer com sua Panel API Key.',
+            externalAccessExample: 'Configuração de Exemplo',
+            externalAccessGoApiKeys: 'Ir para API Keys',
         },
         tensorRT: {
             llm: 'TensorRT LLM',

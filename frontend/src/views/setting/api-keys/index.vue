@@ -186,6 +186,12 @@
                         <CopyButton :content="legacySecret" :is-icon="false" />
                     </template>
                 </el-input>
+                <CopyButton
+                    v-if="legacySecret"
+                    :content="buildMcpCursorConfig(legacySecret)"
+                    :is-icon="false"
+                    :label="$t('apiKeyManagement.copyMcpConfig')"
+                />
             </div>
         </DrawerPro>
     </div>
@@ -202,6 +208,7 @@ import APIKeySummary from '@/components/api-key-management/summary.vue';
 import DrawerPro from '@/components/drawer-pro/index.vue';
 import type { FuTableOperationButton } from '@/components/table/shared';
 import { isAnyAPIKeyIP, normalizeAPIKeyIPs } from '@/utils/api-key';
+import { buildMcpCursorConfig } from '@/utils/mcp-config';
 import { MsgSuccess, MsgWarning } from '@/utils/message';
 import i18n from '@/lang';
 import { useGlobalStore } from '@/composables/useGlobalStore';

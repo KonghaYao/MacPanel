@@ -54,6 +54,7 @@ const message = {
         sameKeyDevices:
             'Multiple devices may share this key and its revocation. Use a separate key for each device if you need independent control.',
         closePending: 'The key change was saved. Closing remote terminal connections is pending and will be retried.',
+        copyMcpConfig: 'Copy MCP Config',
     },
     commons: {
         true: 'True',
@@ -1719,6 +1720,21 @@ const message = {
             testConnection: 'Test Connection',
             connectionSuccess: 'Connection succeeded',
             connectionFailed: 'Connection failed',
+            externalAccessGuide: 'External Access Guide',
+            externalAccessTitle: 'External MCP Access Guide',
+            externalAccessIntro:
+                'Connect external clients such as Cursor and Claude Desktop to MacPanel\'s built-in MCP server via Streamable HTTP.',
+            externalAccessStep1: 'Enable the API interface in Settings.',
+            externalAccessStep2: 'Create an API Key in Settings → API Key.',
+            externalAccessStep3:
+                'On the API Key page, click "Copy MCP Config" to copy the ready-made client configuration.',
+            externalAccessStep4: 'Paste the configuration into your MCP client:',
+            externalAccessStep4Cursor: 'Cursor: ~/.cursor/mcp.json',
+            externalAccessStep4Claude: 'Claude Desktop: claude_desktop_config.json (same mcpServers structure)',
+            externalAccessStep5: 'Restart or reload the client to apply changes.',
+            externalAccessStep6: 'The MCP endpoint is {0}. Authentication uses a Bearer token with your Panel API Key.',
+            externalAccessExample: 'Example Configuration',
+            externalAccessGoApiKeys: 'Go to API Keys',
         },
         tensorRT: {
             llm: 'TensorRT LLM',

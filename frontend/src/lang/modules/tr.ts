@@ -55,6 +55,7 @@ const message = {
         sameKeyDevices:
             'Birden fazla cihaz aynı anahtarı ve iptal durumunu paylaşabilir. Bağımsız yönetim için her cihaza ayrı anahtar kullanın.',
         closePending: 'Anahtar değişikliği kaydedildi. Uzak terminallerin kapatılması bekleniyor ve yeniden denenecek.',
+        copyMcpConfig: 'MCP yapılandırmasını kopyala',
     },
     commons: {
         true: 'Doğru',
@@ -1724,6 +1725,21 @@ const message = {
             testConnection: 'Bağlantıyı Test Et',
             connectionSuccess: 'Bağlantı başarılı',
             connectionFailed: 'Bağlantı başarısız',
+            externalAccessGuide: 'Harici Erişim Kılavuzu',
+            externalAccessTitle: 'Harici MCP Erişim Kılavuzu',
+            externalAccessIntro:
+                'Cursor ve Claude Desktop gibi harici istemcileri Streamable HTTP ile MacPanel\'in yerleşik MCP sunucusuna bağlayın.',
+            externalAccessStep1: 'Ayarlar\'da API arayüzünü etkinleştirin.',
+            externalAccessStep2: 'Ayarlar → API Key bölümünde bir API Key oluşturun.',
+            externalAccessStep3:
+                'API Key sayfasında "MCP yapılandırmasını kopyala" düğmesine tıklayarak hazır istemci yapılandırmasını kopyalayın.',
+            externalAccessStep4: 'Yapılandırmayı MCP istemcinize yapıştırın:',
+            externalAccessStep4Cursor: 'Cursor: ~/.cursor/mcp.json',
+            externalAccessStep4Claude: 'Claude Desktop: claude_desktop_config.json (aynı mcpServers yapısı)',
+            externalAccessStep5: 'Değişiklikleri uygulamak için istemciyi yeniden başlatın veya yeniden yükleyin.',
+            externalAccessStep6: 'MCP endpoint: {0}. Kimlik doğrulama Panel API Key ile Bearer token kullanır.',
+            externalAccessExample: 'Örnek Yapılandırma',
+            externalAccessGoApiKeys: 'API Keys\'e Git',
         },
         tensorRT: {
             llm: 'TensorRT LLM',

@@ -49,6 +49,7 @@ const message = {
         bindingNotAllowed: 'ປິດການຜູກ QR',
         sameKeyDevices: 'ຫຼາຍອຸປະກອນສາມາດໃຊ້ກະແຈດຽວ ແລະ ຖືກຖອນພ້ອມກັນ. ໃຊ້ກະແຈຕ່າງກັນເພື່ອຄວບຄຸມແຍກ.',
         closePending: 'ບັນທຶກການປ່ຽນກະແຈແລ້ວ. ການປິດເທີມິນອນທາງໄກຍັງລໍຖ້າ ແລະ ຈະລອງໃໝ່.',
+        copyMcpConfig: 'Copy MCP Config',
     },
     commons: {
         true: 'ແມ່ນ',
@@ -1674,6 +1675,20 @@ const message = {
             testConnection: 'ທົດສອບການເຊື່ອມຕໍ່',
             connectionSuccess: 'ເຊື່ອມຕໍ່ສຳເລັດ',
             connectionFailed: 'ເຊື່ອມຕໍ່ລົ້ມເຫຼວ',
+            externalAccessGuide: 'ຄູ່ມືການເຊື່ອມຕໍ່ພາຍນອກ',
+            externalAccessTitle: 'ຄູ່ມືການເຊື່ອມຕໍ່ MCP ພາຍນອກ',
+            externalAccessIntro:
+                'ເຊື່ອມຕໍ່ໄຄລient ພາຍນອກ ເຊັ່ນ Cursor ແລະ Claude Desktop ໄປຍັງ MCP server ທີ່ມີໃນ MacPanel ຜ່ານ Streamable HTTP.',
+            externalAccessStep1: 'ເປີດໃຊ້ງານ API interface ໃນການຕັ້ງຄ່າ.',
+            externalAccessStep2: 'ສ້າງ API Key ໃນ ການຕັ້ງຄ່າ → API Key.',
+            externalAccessStep3: 'ໃນໜ້າ API Key, ກົດ "Copy MCP Config" ເພື່ອຄັດລອກການຕັ້ງຄ່າໄຄລient ທີ່ພ້ອມໃຊ້.',
+            externalAccessStep4: 'ວາງການຕັ້ງຄ່າໃສ່ MCP client ຂອງທ່ານ:',
+            externalAccessStep4Cursor: 'Cursor: ~/.cursor/mcp.json',
+            externalAccessStep4Claude: 'Claude Desktop: claude_desktop_config.json (ໂຄງສ້າງ mcpServers ດຽວກັນ)',
+            externalAccessStep5: 'ເລີ່ມໃໝ່ ຫຼື ໂຫຼດ client ໃໝ່ເພື່ອໃຊ້ການປ່ຽນແປງ.',
+            externalAccessStep6: 'MCP endpoint ແມ່ນ {0}. ການພິສູດຕົວຕົນໃຊ້ Bearer token ກັບ Panel API Key ຂອງທ່ານ.',
+            externalAccessExample: 'ຕົວຢ່າງການຕັ້ງຄ່າ',
+            externalAccessGoApiKeys: 'ໄປທີ່ API Keys',
         },
         tensorRT: {
             llm: 'TensorRT LLM',

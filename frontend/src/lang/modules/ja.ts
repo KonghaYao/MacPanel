@@ -52,6 +52,7 @@ const message = {
         sameKeyDevices:
             '複数端末で同じキーを共有すると同時に失効します。個別に管理する場合は端末ごとにキーを作成してください。',
         closePending: 'キーの変更を保存しました。一部のリモートターミナルの終了は保留中で、再試行されます。',
+        copyMcpConfig: 'MCP 設定をコピー',
     },
     commons: {
         true: 'はい',
@@ -1698,6 +1699,20 @@ const message = {
             testConnection: '接続テスト',
             connectionSuccess: '接続に成功しました',
             connectionFailed: '接続に失敗しました',
+            externalAccessGuide: '外部接続ガイド',
+            externalAccessTitle: '外部 MCP 接続ガイド',
+            externalAccessIntro:
+                'Streamable HTTP を使用して、Cursor や Claude Desktop などの外部クライアントを MacPanel 組み込み MCP サーバーに接続します。',
+            externalAccessStep1: '設定で API インターフェースを有効にします。',
+            externalAccessStep2: '設定 → API Key で API Key を作成します。',
+            externalAccessStep3: 'API Key ページで「MCP 設定をコピー」をクリックし、クライアント設定をコピーします。',
+            externalAccessStep4: '設定を MCP クライアントに貼り付けます：',
+            externalAccessStep4Cursor: 'Cursor: ~/.cursor/mcp.json',
+            externalAccessStep4Claude: 'Claude Desktop: claude_desktop_config.json（同じ mcpServers 構造）',
+            externalAccessStep5: 'クライアントを再起動または再読み込みして変更を反映します。',
+            externalAccessStep6: 'MCP エンドポイントは {0} です。Panel API Key を Bearer トークンとして使用して認証します。',
+            externalAccessExample: '設定例',
+            externalAccessGoApiKeys: 'API Key へ移動',
         },
         tensorRT: {
             llm: 'TensorRT LLM',

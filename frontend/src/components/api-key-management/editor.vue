@@ -23,6 +23,13 @@
                         </template>
                     </el-input>
                 </el-form-item>
+                <el-form-item v-if="secret">
+                    <CopyButton
+                        :content="buildMcpCursorConfig(secret)"
+                        :is-icon="false"
+                        :label="$t('apiKeyManagement.copyMcpConfig')"
+                    />
+                </el-form-item>
             </el-form>
             <el-checkbox v-if="secret" v-model="saved">{{ $t('apiKeyManagement.saved') }}</el-checkbox>
         </template>
@@ -162,6 +169,7 @@ import DrawerPro from '@/components/drawer-pro/index.vue';
 import type { APIKey } from '@/api/interface/api-key';
 import { createAPIKey, updateAPIKey } from '@/api/modules/api-key';
 import { ANY_API_KEY_IP, defaultAPIKeyExpiry, isAnyAPIKeyIP, normalizeAPIKeyIPs } from '@/utils/api-key';
+import { buildMcpCursorConfig } from '@/utils/mcp-config';
 import { checkCidr, checkCidrV6, checkIpV4V6 } from '@/utils/validate';
 import { Rules } from '@/global/form-rules';
 import { MsgSuccess, MsgWarning } from '@/utils/message';

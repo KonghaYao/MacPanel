@@ -53,6 +53,7 @@ const message = {
         sameKeyDevices:
             'چند دستگاه می‌توانند کلید و لغو مشترک داشته باشند. برای کنترل مستقل، برای هر دستگاه کلید جداگانه بسازید.',
         closePending: 'تغییر کلید ذخیره شد. بستن پایانه‌های راه دور در انتظار است و دوباره تلاش خواهد شد.',
+        copyMcpConfig: 'کپی پیکربندی MCP',
     },
     commons: {
         true: 'درست',
@@ -1698,6 +1699,21 @@ const message = {
             testConnection: 'تست اتصال',
             connectionSuccess: 'اتصال با موفقیت برقرار شد',
             connectionFailed: 'اتصال ناموفق بود',
+            externalAccessGuide: 'راهنمای دسترسی خارجی',
+            externalAccessTitle: 'راهنمای دسترسی MCP خارجی',
+            externalAccessIntro:
+                'کلاینت‌های خارجی مانند Cursor و Claude Desktop را از طریق Streamable HTTP به سرور MCP داخلی MacPanel متصل کنید.',
+            externalAccessStep1: 'رابط API را در تنظیمات فعال کنید.',
+            externalAccessStep2: 'یک API Key در تنظیمات → API Key ایجاد کنید.',
+            externalAccessStep3:
+                'در صفحه API Key، روی «کپی پیکربندی MCP» کلیک کنید تا پیکربندی آماده کلاینت کپی شود.',
+            externalAccessStep4: 'پیکربندی را در کلاینت MCP خود جای‌گذاری کنید:',
+            externalAccessStep4Cursor: 'Cursor: ~/.cursor/mcp.json',
+            externalAccessStep4Claude: 'Claude Desktop: claude_desktop_config.json (ساختار mcpServers یکسان)',
+            externalAccessStep5: 'برای اعمال تغییرات، کلاینت را مجدداً راه‌اندازی یا بارگذاری کنید.',
+            externalAccessStep6: 'endpoint MCP برابر {0} است. احراز هویت با Bearer token و Panel API Key انجام می‌شود.',
+            externalAccessExample: 'نمونه پیکربندی',
+            externalAccessGoApiKeys: 'رفتن به API Keys',
         },
         tensorRT: {
             llm: 'TensorRT LLM',

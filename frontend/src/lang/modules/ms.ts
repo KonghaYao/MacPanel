@@ -54,6 +54,7 @@ const message = {
         sameKeyDevices:
             'Beberapa peranti boleh berkongsi kunci dan pembatalannya. Gunakan kunci berasingan bagi setiap peranti untuk kawalan bebas.',
         closePending: 'Perubahan kunci disimpan. Penutupan terminal jauh masih menunggu dan akan dicuba semula.',
+        copyMcpConfig: 'Salin konfigurasi MCP',
     },
     commons: {
         true: 'Benar',
@@ -1728,6 +1729,21 @@ const message = {
             testConnection: 'Uji Sambungan',
             connectionSuccess: 'Sambungan berjaya',
             connectionFailed: 'Sambungan gagal',
+            externalAccessGuide: 'Panduan Akses Luaran',
+            externalAccessTitle: 'Panduan Akses MCP Luaran',
+            externalAccessIntro:
+                'Sambungkan klien luaran seperti Cursor dan Claude Desktop ke pelayan MCP terbina dalam MacPanel melalui Streamable HTTP.',
+            externalAccessStep1: 'Dayakan antara muka API dalam Tetapan.',
+            externalAccessStep2: 'Cipta API Key dalam Tetapan → API Key.',
+            externalAccessStep3:
+                'Pada halaman API Key, klik "Salin konfigurasi MCP" untuk menyalin konfigurasi klien yang sedia ada.',
+            externalAccessStep4: 'Tampal konfigurasi ke klien MCP anda:',
+            externalAccessStep4Cursor: 'Cursor: ~/.cursor/mcp.json',
+            externalAccessStep4Claude: 'Claude Desktop: claude_desktop_config.json (struktur mcpServers yang sama)',
+            externalAccessStep5: 'Mulakan semula atau muat semula klien untuk menggunakan perubahan.',
+            externalAccessStep6: 'Endpoint MCP ialah {0}. Pengesahan menggunakan token Bearer dengan Panel API Key anda.',
+            externalAccessExample: 'Contoh Konfigurasi',
+            externalAccessGoApiKeys: 'Pergi ke API Keys',
         },
         tensorRT: {
             llm: 'TensorRT LLM',

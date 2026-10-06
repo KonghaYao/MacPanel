@@ -54,6 +54,7 @@ const message = {
         sameKeyDevices:
             'Несколько устройств могут использовать общий ключ и отзыв. Для независимого управления создайте отдельный ключ для каждого устройства.',
         closePending: 'Изменение ключа сохранено. Закрытие удалённых терминалов ожидается и будет повторено.',
+        copyMcpConfig: 'Копировать конфигурацию MCP',
     },
     commons: {
         true: 'Да',
@@ -1717,6 +1718,21 @@ const message = {
             testConnection: 'Проверить подключение',
             connectionSuccess: 'Подключение успешно',
             connectionFailed: 'Ошибка подключения',
+            externalAccessGuide: 'Руководство по внешнему доступу',
+            externalAccessTitle: 'Руководство по внешнему доступу MCP',
+            externalAccessIntro:
+                'Подключайте внешние клиенты, такие как Cursor и Claude Desktop, к встроенному MCP-серверу MacPanel через Streamable HTTP.',
+            externalAccessStep1: 'Включите API-интерфейс в настройках.',
+            externalAccessStep2: 'Создайте API Key в Настройки → API Key.',
+            externalAccessStep3:
+                'На странице API Key нажмите «Копировать конфигурацию MCP», чтобы скопировать готовую конфигурацию клиента.',
+            externalAccessStep4: 'Вставьте конфигурацию в MCP-клиент:',
+            externalAccessStep4Cursor: 'Cursor: ~/.cursor/mcp.json',
+            externalAccessStep4Claude: 'Claude Desktop: claude_desktop_config.json (та же структура mcpServers)',
+            externalAccessStep5: 'Перезапустите или перезагрузите клиент, чтобы применить изменения.',
+            externalAccessStep6: 'MCP endpoint: {0}. Аутентификация выполняется Bearer-токеном с Panel API Key.',
+            externalAccessExample: 'Пример конфигурации',
+            externalAccessGoApiKeys: 'Перейти к API Keys',
         },
         tensorRT: {
             llm: 'TensorRT LLM',

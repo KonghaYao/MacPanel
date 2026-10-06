@@ -52,6 +52,7 @@ const message = {
         bindingNotAllowed: 'QR 연결 꺼짐',
         sameKeyDevices: '여러 기기가 같은 키를 공유하면 함께 폐기됩니다. 개별 제어가 필요하면 기기별 키를 만드세요.',
         closePending: '키 변경을 저장했습니다. 일부 원격 터미널 종료가 대기 중이며 재시도됩니다.',
+        copyMcpConfig: 'MCP 구성 복사',
     },
     commons: {
         true: '참',
@@ -1684,6 +1685,20 @@ const message = {
             testConnection: '연결 테스트',
             connectionSuccess: '연결 성공',
             connectionFailed: '연결 실패',
+            externalAccessGuide: '외부 접속 가이드',
+            externalAccessTitle: '외부 MCP 접속 가이드',
+            externalAccessIntro:
+                'Streamable HTTP를 통해 Cursor, Claude Desktop 등 외부 클라이언트를 MacPanel 내장 MCP 서버에 연결합니다.',
+            externalAccessStep1: '설정에서 API 인터페이스를 활성화합니다.',
+            externalAccessStep2: '설정 → API Key에서 API Key를 생성합니다.',
+            externalAccessStep3: 'API Key 페이지에서 "MCP 구성 복사"를 클릭하여 클라이언트 구성을 복사합니다.',
+            externalAccessStep4: '구성을 MCP 클라이언트에 붙여넣습니다:',
+            externalAccessStep4Cursor: 'Cursor: ~/.cursor/mcp.json',
+            externalAccessStep4Claude: 'Claude Desktop: claude_desktop_config.json (동일한 mcpServers 구조)',
+            externalAccessStep5: '클라이언트를 재시작하거나 다시 로드하여 변경 사항을 적용합니다.',
+            externalAccessStep6: 'MCP 엔드포인트는 {0}입니다. Panel API Key를 Bearer 토큰으로 사용하여 인증합니다.',
+            externalAccessExample: '구성 예시',
+            externalAccessGoApiKeys: 'API Key로 이동',
         },
         tensorRT: {
             llm: 'TensorRT LLM',
