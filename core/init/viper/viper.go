@@ -39,7 +39,8 @@ func Init() {
 		devConfFile = path.Join(paths.ConfDir(), "app.yaml")
 	}
 	_, err := os.Stat(devConfFile)
-	if mode == "dev" && err == nil {
+	useDevConfig := mode == "dev" && err == nil
+	if useDevConfig {
 		v.SetConfigName("app")
 		v.AddConfigPath(paths.ConfDir())
 		if err := v.ReadInConfig(); err != nil {
@@ -70,7 +71,7 @@ func Init() {
 		panic(err)
 	}
 	_, err = os.Stat(devConfFile)
-	if mode == "dev" && err == nil {
+	if useDevConfig {
 		if serverConfig.Base.InstallDir != "" {
 			baseDir = serverConfig.Base.InstallDir
 		}
@@ -108,6 +109,12 @@ func Init() {
 	global.CONF.Base.ChangeUserInfo = loadChangeInfo()
 	global.CONF.Conn.Entrance = entrance
 	global.CONF.Conn.Port = port
+	if paths.IsDarwin() && !useDevConfig {
+		global.CONF.Base.Mode = "stable"
+		if global.CONF.LogConfig.Level == "" || global.CONF.LogConfig.Level == "debug" {
+			global.CONF.LogConfig.Level = "info"
+		}
+	}
 	global.Viper = v
 }
 

@@ -36,7 +36,8 @@ func Init() {
 	if paths.IsDarwin() {
 		devConfFile = path.Join(paths.ConfDir(), "app.yaml")
 	}
-	if mode == "dev" && fileOp.Stat(devConfFile) {
+	useDevConfig := mode == "dev" && fileOp.Stat(devConfFile)
+	if useDevConfig {
 		v.SetConfigName("app")
 		v.AddConfigPath(paths.ConfDir())
 		if err := v.ReadInConfig(); err != nil {
@@ -59,6 +60,12 @@ func Init() {
 	}
 
 	global.CONF = serverConfig
+	if paths.IsDarwin() && !useDevConfig {
+		global.CONF.Base.Mode = "stable"
+		if global.CONF.Log.Level == "" || global.CONF.Log.Level == "debug" {
+			global.CONF.Log.Level = "info"
+		}
+	}
 
 	initBaseInfo()
 	global.Viper = v

@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	adminCmd "github.com/1Panel-dev/1Panel/core/cmd/server/cmd"
 	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 )
 
@@ -64,6 +65,7 @@ func startDaemon() error {
 	fmt.Printf("macpanel started in background (pid %d)\n", cmd.Process.Pid)
 	fmt.Printf("log: %s\n", logPath)
 	fmt.Printf("pid: %s\n", pidPath)
+	adminCmd.PrintInstallInfo(os.Stdout)
 	return nil
 }
 
@@ -133,6 +135,7 @@ func printDaemonStatus() error {
 	}
 	if running {
 		fmt.Printf("macpanel is running (pid %d)\n", pid)
+		adminCmd.PrintInstallInfo(os.Stdout)
 	} else {
 		fmt.Println("macpanel is stopped")
 	}

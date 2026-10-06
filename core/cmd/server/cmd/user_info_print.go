@@ -9,6 +9,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/global"
 	"github.com/1Panel-dev/1Panel/core/i18n"
 	"github.com/1Panel-dev/1Panel/core/utils/encrypt"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 	"gorm.io/gorm"
 )
 
@@ -17,6 +18,9 @@ func PrintUserInfo(out io.Writer, language string) error {
 
 	db, err := loadDBConn("core.db")
 	if err != nil {
+		if paths.IsDarwin() {
+			return PrintUserInfoFromCtl(out)
+		}
 		return fmt.Errorf("init my db conn failed, err: %v", err)
 	}
 	agentDB, err := loadDBConn("agent.db")
