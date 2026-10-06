@@ -1,12 +1,13 @@
 <template>
     <IconShell name="settings" :colors="colors">
-        <circle cx="32" cy="32" r="8" fill="#fff" />
+        <circle cx="32" cy="32" r="7.5" fill="#fff" />
         <path
-            d="M32 12v6M32 46v6M12 32h6M46 32h6M18.8 18.8l4.2 4.2M41 41l4.2 4.2M45.2 18.8 41 23M23 41l-4.2 4.2"
+            d="M32 11v7M32 46v7M11 32h7M46 32h7M17.5 17.5l5 5M41.5 41.5l5 5M46.5 17.5l-5 5M22.5 41.5l-5 5"
             stroke="#fff"
-            stroke-width="5"
+            stroke-width="5.2"
             stroke-linecap="round"
         />
+        <circle cx="32" cy="32" r="7.5" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.35" />
     </IconShell>
 </template>
 

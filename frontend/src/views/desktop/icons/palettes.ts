@@ -9,63 +9,63 @@ export interface IconPalette {
 
 export const ICON_PALETTES: Record<DockGlyph, IconPalette> = {
     containers: {
-        colors: ['#3d9ae8', '#2496ed', '#1565b8'],
-        tint: 'linear-gradient(180deg, #3d9ae8 0%, #2496ed 45%, #1565b8 100%)',
+        colors: ['#4db8ff', '#2496ed', '#1260b0'],
+        tint: 'linear-gradient(180deg, #4db8ff 0%, #2496ed 52%, #1260b0 100%)',
     },
     images: {
-        colors: ['#ff6b9d', '#c850c0', '#4158d0'],
-        tint: 'linear-gradient(180deg, #ff6b9d 0%, #c850c0 45%, #4158d0 100%)',
+        colors: ['#ff7eb3', '#d946ef', '#6366f1'],
+        tint: 'linear-gradient(180deg, #ff7eb3 0%, #d946ef 52%, #6366f1 100%)',
     },
     appStore: {
-        colors: ['#5eb3ff', '#1a9cff', '#0070e0'],
-        tint: 'linear-gradient(180deg, #5eb3ff 0%, #1a9cff 45%, #0070e0 100%)',
+        colors: ['#66b8ff', '#0a84ff', '#0066d6'],
+        tint: 'linear-gradient(180deg, #66b8ff 0%, #0a84ff 52%, #0066d6 100%)',
     },
     monitor: {
-        colors: ['#48484a', '#2c2c2e', '#1c1c1e'],
-        tint: 'linear-gradient(180deg, #48484a 0%, #2c2c2e 45%, #1c1c1e 100%)',
+        colors: ['#636366', '#3a3a3c', '#1c1c1e'],
+        tint: 'linear-gradient(180deg, #636366 0%, #3a3a3c 52%, #1c1c1e 100%)',
     },
     terminal: {
-        colors: ['#3a3a3c', '#1c1c1e', '#000000'],
-        tint: 'linear-gradient(180deg, #3a3a3c 0%, #1c1c1e 45%, #000000 100%)',
+        colors: ['#48484a', '#2c2c2e', '#0d0d0d'],
+        tint: 'linear-gradient(180deg, #48484a 0%, #2c2c2e 52%, #0d0d0d 100%)',
     },
     files: {
-        colors: ['#6eb4ff', '#3d9cf0', '#1a7ad9'],
-        tint: 'linear-gradient(180deg, #6eb4ff 0%, #3d9cf0 45%, #1a7ad9 100%)',
+        colors: ['#7ec4ff', '#3d9cf0', '#147ce5'],
+        tint: 'linear-gradient(180deg, #7ec4ff 0%, #3d9cf0 52%, #147ce5 100%)',
     },
     database: {
-        colors: ['#4db6ac', '#26a69a', '#00796b'],
-        tint: 'linear-gradient(180deg, #4db6ac 0%, #26a69a 45%, #00796b 100%)',
+        colors: ['#5cd6b8', '#34c759', '#248a3d'],
+        tint: 'linear-gradient(180deg, #5cd6b8 0%, #34c759 52%, #248a3d 100%)',
     },
     website: {
-        colors: ['#ffffff', '#e8e8ed', '#c7c7cc'],
-        tint: 'linear-gradient(180deg, #ffffff 0%, #e8e8ed 45%, #c7c7cc 100%)',
+        colors: ['#ffffff', '#f0f0f5', '#d8d8de'],
+        tint: 'linear-gradient(180deg, #ffffff 0%, #f0f0f5 52%, #d8d8de 100%)',
     },
     firewall: {
-        colors: ['#ff6961', '#ff453a', '#d70015'],
-        tint: 'linear-gradient(180deg, #ff6961 0%, #ff453a 45%, #d70015 100%)',
+        colors: ['#ff8a80', '#ff453a', '#c41e1e'],
+        tint: 'linear-gradient(180deg, #ff8a80 0%, #ff453a 52%, #c41e1e 100%)',
     },
     cronjob: {
-        colors: ['#ffffff', '#f2f2f7', '#d1d1d6'],
-        tint: 'linear-gradient(180deg, #ffffff 0%, #f2f2f7 45%, #d1d1d6 100%)',
+        colors: ['#ffb340', '#ff9500', '#cc7700'],
+        tint: 'linear-gradient(180deg, #ffb340 0%, #ff9500 52%, #cc7700 100%)',
     },
     logs: {
-        colors: ['#636366', '#48484a', '#2c2c2e'],
-        tint: 'linear-gradient(180deg, #636366 0%, #48484a 45%, #2c2c2e 100%)',
+        colors: ['#8e8e93', '#636366', '#48484a'],
+        tint: 'linear-gradient(180deg, #8e8e93 0%, #636366 52%, #48484a 100%)',
     },
     toolbox: {
-        colors: ['#ffb340', '#ff9500', '#e68600'],
-        tint: 'linear-gradient(180deg, #ffb340 0%, #ff9500 45%, #e68600 100%)',
+        colors: ['#ffd060', '#ff9f0a', '#e68600'],
+        tint: 'linear-gradient(180deg, #ffd060 0%, #ff9f0a 52%, #e68600 100%)',
     },
     gpu: {
-        colors: ['#9d7aff', '#7c4dff', '#5e35b1'],
-        tint: 'linear-gradient(180deg, #9d7aff 0%, #7c4dff 45%, #5e35b1 100%)',
+        colors: ['#b388ff', '#8b5cf6', '#6d28d9'],
+        tint: 'linear-gradient(180deg, #b388ff 0%, #8b5cf6 52%, #6d28d9 100%)',
     },
     homebrew: {
-        colors: ['#e8b86d', '#c8956c', '#8b6914'],
-        tint: 'linear-gradient(180deg, #e8b86d 0%, #c8956c 45%, #8b6914 100%)',
+        colors: ['#f0c878', '#d4a056', '#a67c2a'],
+        tint: 'linear-gradient(180deg, #f0c878 0%, #d4a056 52%, #a67c2a 100%)',
     },
     settings: {
-        colors: ['#aeaeb2', '#8e8e93', '#636366'],
-        tint: 'linear-gradient(180deg, #aeaeb2 0%, #8e8e93 45%, #636366 100%)',
+        colors: ['#c7c7cc', '#98989d', '#636366'],
+        tint: 'linear-gradient(180deg, #c7c7cc 0%, #98989d 52%, #636366 100%)',
     },
 };

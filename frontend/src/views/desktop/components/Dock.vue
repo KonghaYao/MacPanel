@@ -60,10 +60,10 @@ const onMove = (event: MouseEvent) => {
     row.querySelectorAll<HTMLElement>('.dock-item').forEach((item) => {
         const center = rowRect.left + item.offsetLeft + item.offsetWidth / 2;
         const distance = Math.abs(event.clientX - center);
-        const influence = 128;
+        const influence = 140;
         const linear = Math.max(0, 1 - distance / influence);
         const eased = linear * linear * (3 - 2 * linear);
-        next.push(1 + eased * 0.7);
+        next.push(1 + eased * 0.75);
     });
     scales.value = next;
 };
@@ -103,22 +103,24 @@ const onBounceEnd = (id: string) => {
     pointer-events: auto;
     display: flex;
     align-items: flex-end;
-    gap: 6px;
+    gap: 4px;
     max-width: calc(100vw - 24px);
-    padding: 8px 10px 6px;
-    border-radius: 22px;
-    background: rgba(255, 255, 255, 0.32);
-    border: 1px solid rgba(255, 255, 255, 0.42);
+    padding: 6px 12px 4px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.22);
+    border: 0.5px solid rgba(255, 255, 255, 0.38);
     box-shadow:
-        0 16px 40px rgba(0, 0, 0, 0.28),
-        inset 0 1px 0 rgba(255, 255, 255, 0.45);
-    backdrop-filter: blur(22px) saturate(1.8);
+        0 0 0 0.5px rgba(0, 0, 0, 0.06),
+        0 12px 36px rgba(0, 0, 0, 0.22),
+        inset 0 0.5px 0 rgba(255, 255, 255, 0.5);
+    -webkit-backdrop-filter: blur(36px) saturate(1.15);
+    backdrop-filter: blur(36px) saturate(1.15);
 }
 
 .dock-item {
     position: relative;
-    width: 58px;
-    height: 68px;
+    width: 60px;
+    height: 72px;
     padding: 0 0 8px;
     border: 0;
     background: transparent;
@@ -127,6 +129,7 @@ const onBounceEnd = (id: string) => {
     align-items: center;
     justify-content: flex-end;
     transform-origin: center bottom;
+    transition: transform 0.12s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     cursor: pointer;
 }
 
@@ -135,17 +138,11 @@ const onBounceEnd = (id: string) => {
 }
 
 .tile {
-    width: 52px;
-    height: 52px;
+    width: 56px;
+    height: 56px;
     overflow: visible;
     display: block;
     position: relative;
-    transition: filter 0.15s ease;
-}
-
-.dock-item:hover .tile,
-.dock-item:focus-visible .tile {
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.28));
 }
 
 .tip {
@@ -193,8 +190,12 @@ const onBounceEnd = (id: string) => {
 }
 
 :global(.mac-desktop.is-dark) .dock {
-    background: rgba(40, 40, 42, 0.46);
-    border-color: rgba(255, 255, 255, 0.14);
+    background: rgba(30, 30, 32, 0.42);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 0 0 0.5px rgba(0, 0, 0, 0.24),
+        0 12px 36px rgba(0, 0, 0, 0.38),
+        inset 0 0.5px 0 rgba(255, 255, 255, 0.08);
 }
 
 :global(.mac-desktop.is-dark) .tip {

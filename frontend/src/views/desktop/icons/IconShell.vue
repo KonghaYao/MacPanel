@@ -6,27 +6,37 @@
             </clipPath>
             <linearGradient :id="bgId" x1="0.5" y1="0" x2="0.5" y2="1">
                 <stop offset="0%" :stop-color="colors[0]" />
-                <stop offset="48%" :stop-color="colors[1]" />
+                <stop offset="52%" :stop-color="colors[1]" />
                 <stop offset="100%" :stop-color="colors[2]" />
             </linearGradient>
-            <linearGradient :id="shineId" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#fff" stop-opacity="0.5" />
-                <stop offset="38%" stop-color="#fff" stop-opacity="0.1" />
+            <radialGradient :id="specId" cx="0.5" cy="0.08" r="0.62" fx="0.5" fy="0">
+                <stop offset="0%" stop-color="#fff" stop-opacity="0.62" />
+                <stop offset="42%" stop-color="#fff" stop-opacity="0.14" />
                 <stop offset="100%" stop-color="#fff" stop-opacity="0" />
-            </linearGradient>
-            <radialGradient :id="vignetteId" cx="0.5" cy="0.58" r="0.72">
-                <stop offset="55%" stop-color="#000" stop-opacity="0" />
-                <stop offset="100%" stop-color="#000" stop-opacity="0.2" />
             </radialGradient>
-            <filter :id="shadowId" x="-15%" y="-8%" width="130%" height="125%">
-                <feDropShadow dx="0" dy="1.5" stdDeviation="1.4" flood-color="#000" flood-opacity="0.32" />
+            <linearGradient :id="shadeId" x1="0.5" y1="0.55" x2="0.5" y2="1">
+                <stop offset="0%" stop-color="#000" stop-opacity="0" />
+                <stop offset="55%" stop-color="#000" stop-opacity="0.06" />
+                <stop offset="100%" stop-color="#000" stop-opacity="0.28" />
+            </linearGradient>
+            <linearGradient :id="rimId" x1="0.5" y1="0" x2="0.5" y2="1">
+                <stop offset="0%" stop-color="#fff" stop-opacity="0.42" />
+                <stop offset="12%" stop-color="#fff" stop-opacity="0.06" />
+                <stop offset="88%" stop-color="#000" stop-opacity="0.04" />
+                <stop offset="100%" stop-color="#000" stop-opacity="0.2" />
+            </linearGradient>
+            <filter :id="shadowId" x="-22%" y="-12%" width="144%" height="138%" color-interpolation-filters="sRGB">
+                <feDropShadow dx="0" dy="2.2" stdDeviation="2.1" flood-color="#000" flood-opacity="0.38" />
             </filter>
         </defs>
-        <g :clip-path="`url(#${clipId})`" :filter="`url(#${shadowId})`">
-            <rect width="64" height="64" :fill="`url(#${bgId})`" />
-            <slot />
-            <rect width="64" height="64" :fill="`url(#${vignetteId})`" />
-            <rect width="64" height="64" :fill="`url(#${shineId})`" />
+        <g :filter="`url(#${shadowId})`">
+            <g :clip-path="`url(#${clipId})`">
+                <path :d="SQUIRCLE_PATH" :fill="`url(#${bgId})`" />
+                <slot />
+                <path :d="SQUIRCLE_PATH" :fill="`url(#${shadeId})`" />
+                <path :d="SQUIRCLE_PATH" :fill="`url(#${specId})`" />
+            </g>
+            <path :d="SQUIRCLE_PATH" fill="none" :stroke="`url(#${rimId})`" stroke-width="0.65" />
         </g>
     </svg>
 </template>
@@ -42,7 +52,17 @@ const props = defineProps<{
 
 const clipId = computed(() => `${props.name}-clip`);
 const bgId = computed(() => `${props.name}-bg`);
-const shineId = computed(() => `${props.name}-shine`);
-const vignetteId = computed(() => `${props.name}-vig`);
-const shadowId = computed(() => `${props.name}-sh`);
+const specId = computed(() => `${props.name}-spec`);
+const shadeId = computed(() => `${props.name}-shade`);
+const rimId = computed(() => `${props.name}-rim`);
+const shadowId = computed(() => `${props.name}-shadow`);
 </script>
+
+<style scoped>
+.mac-icon {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+}
+</style>
