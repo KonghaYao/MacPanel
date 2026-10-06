@@ -8,6 +8,33 @@
             </template>
             <template #rightToolBar><TableRefresh @search="search" /></template>
             <template #main>
+                <el-form label-position="top" class="mb-4">
+                    <el-form-item>
+                        <template #label>{{ $t('setting.apiInterface') }}</template>
+                        <el-switch
+                            v-model="apiInterfaceStatus"
+                            active-value="Enable"
+                            inactive-value="Disable"
+                            :loading="apiConfigSaving"
+                            @change="onApiInterfaceChange"
+                        />
+                        <span class="input-help">{{ $t('setting.apiInterfaceHelper') }}</span>
+                    </el-form-item>
+                </el-form>
+                <el-alert type="warning" :closable="false" class="!mb-4">
+                    <ul class="m-0 list-disc space-y-1 pl-4 break-words leading-6">
+                        <li>
+                            <span class="text-[var(--panel-alert-error-text-color,var(--el-color-danger))]">
+                                {{ $t('setting.apiInterfaceAlert1') }}
+                            </span>
+                        </li>
+                        <li>
+                            <span class="text-[var(--panel-alert-error-text-color,var(--el-color-danger))]">
+                                {{ $t('setting.apiInterfaceAlert2') }}
+                            </span>
+                        </li>
+                    </ul>
+                </el-alert>
                 <ComplexTable
                     :data="items"
                     :pagination-config="pagination"
@@ -169,7 +196,7 @@ import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, react
 import { ElMessageBox } from 'element-plus';
 import type { APIKey } from '@/api/interface/api-key';
 import { revokeAPIKey, searchAPIKeys, setAPIKeyStatus } from '@/api/modules/api-key';
-import { generateApiKey, getUserInfo } from '@/api/modules/auth';
+import { generateApiKey, getUserInfo, updateApiConfig } from '@/api/modules/auth';
 import APIKeyEditor from '@/components/api-key-management/editor.vue';
 import APIKeySummary from '@/components/api-key-management/summary.vue';
 import DrawerPro from '@/components/drawer-pro/index.vue';
@@ -183,6 +210,14 @@ const { isMobile } = useGlobalStore();
 
 const items = ref<APIKey.Item[]>([]);
 const loading = ref(false);
+const apiInterfaceStatus = ref('Disable');
+const apiConfigSaving = ref(false);
+const apiConfig = reactive({
+    apiKey: '',
+    ipWhiteList: '',
+    apiTrustedProxies: '',
+    apiKeyValidityTime: 0,
+});
 const editor = ref<InstanceType<typeof APIKeyEditor>>();
 const detail = ref<APIKey.Item>();
 const detailVisible = ref(false);
@@ -202,6 +237,56 @@ const clearLegacySecret = () => {
     secretRequestVersion++;
     legacySecret.value = '';
     legacyBusy.value = false;
+};
+
+const loadApiConfig = async () => {
+    if (!active) return;
+    try {
+        const response = await getUserInfo();
+        if (!active) return;
+        apiInterfaceStatus.value = response.data.apiInterfaceStatus || 'Disable';
+        apiConfig.apiKey = response.data.apiKey || '';
+        apiConfig.ipWhiteList = response.data.ipWhiteList || '';
+        apiConfig.apiTrustedProxies = response.data.apiTrustedProxies || '';
+        apiConfig.apiKeyValidityTime = response.data.apiKeyValidityTime || 0;
+    } catch {
+        // Keep the last known config when refresh fails.
+    }
+};
+
+const onApiInterfaceChange = async (value: string) => {
+    const previous = value === 'Enable' ? 'Disable' : 'Enable';
+    if (value === 'Disable') {
+        try {
+            await ElMessageBox.confirm(
+                i18n.global.t('setting.apiInterfaceClose'),
+                i18n.global.t('setting.apiInterface'),
+                {
+                    type: 'warning',
+                    confirmButtonText: i18n.global.t('commons.button.confirm'),
+                    cancelButtonText: i18n.global.t('commons.button.cancel'),
+                },
+            );
+        } catch {
+            apiInterfaceStatus.value = previous;
+            return;
+        }
+    }
+    apiConfigSaving.value = true;
+    try {
+        await updateApiConfig({
+            apiInterfaceStatus: value,
+            apiKey: apiConfig.apiKey,
+            ipWhiteList: apiConfig.ipWhiteList,
+            apiTrustedProxies: apiConfig.apiTrustedProxies,
+            apiKeyValidityTime: apiConfig.apiKeyValidityTime,
+        });
+        MsgSuccess(i18n.global.t('commons.msg.operationSuccess'));
+    } catch {
+        apiInterfaceStatus.value = previous;
+    } finally {
+        apiConfigSaving.value = false;
+    }
 };
 
 const search = async (preserveLegacyRequest?: number) => {
@@ -339,6 +424,7 @@ const activate = () => {
     if (active) return;
     active = true;
     void search();
+    void loadApiConfig();
 };
 const deactivate = () => {
     active = false;
