@@ -138,25 +138,11 @@ const onBounceEnd = (id: string) => {
 }
 
 .tile {
-    width: 56px;
-    height: 56px;
+    width: 60px;
+    height: 60px;
     overflow: visible;
     display: block;
     position: relative;
-    -webkit-box-reflect: below 1px linear-gradient(transparent 55%, rgba(255, 255, 255, 0.18));
-}
-
-.tile::after {
-    content: '';
-    position: absolute;
-    left: 4px;
-    right: 4px;
-    bottom: -6px;
-    height: 6px;
-    border-radius: 50%;
-    background: radial-gradient(ellipse, rgba(0, 0, 0, 0.32), transparent 72%);
-    filter: blur(1.5px);
-    pointer-events: none;
 }
 
 .tip {

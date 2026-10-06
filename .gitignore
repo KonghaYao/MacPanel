@@ -81,4 +81,6 @@ superpowers
 .codex/
 /macpanel
 build/macpanel
+cmd/macpanel/macpanel
+cmd/macpanel/build/
 .dev/
