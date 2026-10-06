@@ -26,5 +26,6 @@ func commonGroups() []CommonRouter {
 		&GroupRouter{},
 		&AlertRouter{},
 		&RuntimeDiagnosticsRouter{},
+		&HomebrewRouter{},
 	}
 }

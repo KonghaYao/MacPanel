@@ -152,6 +152,9 @@ var WebUrlMap = map[string]struct{}{
 	"/toolbox/fail2ban":     {},
 	"/toolbox/clean":        {},
 
+	"/homebrew":       {},
+	"/homebrew/index": {},
+
 	"/websites":                 {},
 	"/websites/templates":       {},
 	"/websites/ssl":             {},

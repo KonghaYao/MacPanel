@@ -17,6 +17,7 @@ type FeatureMap struct {
 	OnlineUpgrade     bool `json:"online_upgrade"`
 	ProcMonitoring    bool `json:"proc_monitoring"`
 	OpenrestyDiagnose bool `json:"openresty_diagnose"`
+	Homebrew          bool `json:"homebrew"`
 }
 
 type PlatformCapabilities struct {
@@ -75,6 +76,7 @@ func linuxFeatures() FeatureMap {
 		OnlineUpgrade:     true,
 		ProcMonitoring:    true,
 		OpenrestyDiagnose: true,
+		Homebrew:          false,
 	}
 }
 
@@ -92,6 +94,7 @@ func darwinFeatures() FeatureMap {
 		OnlineUpgrade:     false,
 		ProcMonitoring:    true,
 		OpenrestyDiagnose: false,
+		Homebrew:          true,
 	}
 }
 
@@ -122,6 +125,8 @@ func isFeatureEnabled(feature string) bool {
 		return features.ProcMonitoring
 	case "openresty_diagnose":
 		return features.OpenrestyDiagnose
+	case "homebrew":
+		return features.Homebrew
 	default:
 		return false
 	}
