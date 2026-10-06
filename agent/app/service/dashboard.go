@@ -574,6 +574,46 @@ func loadDiskInfo() []dto.DiskInfo {
 	return datas
 }
 
+func shouldIncludeDarwinMount(mountpoint string, hasDataVolume bool) bool {
+	switch {
+	case mountpoint == "/System/Volumes/Data":
+		return true
+	case mountpoint == "/":
+		return !hasDataVolume
+	case strings.HasPrefix(mountpoint, "/Volumes/"):
+		return true
+	case strings.HasPrefix(mountpoint, "/System/Volumes/"):
+		return false
+	default:
+		return false
+	}
+}
+
+func darwinMountPriority(mountpoint string) int {
+	switch mountpoint {
+	case "/System/Volumes/Data":
+		return 3
+	case "/":
+		return 2
+	default:
+		return 1
+	}
+}
+
+func apfsContainerID(device string) string {
+	device = strings.TrimPrefix(device, "/dev/")
+	if !strings.HasPrefix(device, "disk") {
+		return device
+	}
+	if i := strings.IndexByte(device, 's'); i > len("disk") {
+		suffix := device[i+1:]
+		if len(suffix) > 0 && suffix[0] >= '0' && suffix[0] <= '9' {
+			return device[:i]
+		}
+	}
+	return device
+}
+
 func loadDiskInfoDarwin() []dto.DiskInfo {
 	partitions, err := psutil.DISK.GetPartitions(false, false)
 	if err != nil {
@@ -584,23 +624,30 @@ func loadDiskInfoDarwin() []dto.DiskInfo {
 	skipFstype := map[string]struct{}{
 		"devfs": {}, "autofs": {}, "tmpfs": {}, "overlay": {},
 	}
-	excludes := map[string]struct{}{
-		"/dev": {}, "/private/var/vm": {}, "/System/Volumes/VM": {},
+
+	hasDataVolume := false
+	for _, part := range partitions {
+		if part.Mountpoint == "/System/Volumes/Data" {
+			hasDataVolume = true
+			break
+		}
 	}
 
-	var datas []dto.DiskInfo
-	seen := make(map[string]struct{})
+	containerBest := make(map[string]dto.DiskInfo)
+	containerPriority := make(map[string]int)
+	seenMount := make(map[string]struct{})
+
 	for _, part := range partitions {
 		if _, skip := skipFstype[part.Fstype]; skip {
 			continue
 		}
-		if _, skip := excludes[part.Mountpoint]; skip {
+		if !shouldIncludeDarwinMount(part.Mountpoint, hasDataVolume) {
 			continue
 		}
-		if _, ok := seen[part.Mountpoint]; ok {
+		if _, ok := seenMount[part.Mountpoint]; ok {
 			continue
 		}
-		seen[part.Mountpoint] = struct{}{}
+		seenMount[part.Mountpoint] = struct{}{}
 
 		state, err := psutil.DISK.GetUsage(part.Mountpoint, false)
 		if err != nil {
@@ -608,7 +655,7 @@ func loadDiskInfoDarwin() []dto.DiskInfo {
 			continue
 		}
 
-		datas = append(datas, dto.DiskInfo{
+		info := dto.DiskInfo{
 			Path:              part.Mountpoint,
 			Type:              part.Fstype,
 			Device:            part.Device,
@@ -620,7 +667,20 @@ func loadDiskInfoDarwin() []dto.DiskInfo {
 			InodesUsed:        state.InodesUsed,
 			InodesFree:        state.InodesFree,
 			InodesUsedPercent: state.InodesUsedPercent,
-		})
+		}
+
+		containerID := apfsContainerID(part.Device)
+		priority := darwinMountPriority(part.Mountpoint)
+		if existing, ok := containerPriority[containerID]; ok && priority <= existing {
+			continue
+		}
+		containerBest[containerID] = info
+		containerPriority[containerID] = priority
+	}
+
+	datas := make([]dto.DiskInfo, 0, len(containerBest))
+	for _, info := range containerBest {
+		datas = append(datas, info)
 	}
 
 	sort.Slice(datas, func(i, j int) bool {
