@@ -24,6 +24,7 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/utils/controller"
 	"github.com/1Panel-dev/1Panel/agent/utils/copier"
 	"github.com/1Panel-dev/1Panel/agent/utils/psutil"
+	"github.com/1Panel-dev/1Panel/pkg/platform/capabilities"
 	"github.com/gin-gonic/gin"
 	"github.com/shirou/gopsutil/v4/disk"
 	"github.com/shirou/gopsutil/v4/load"
@@ -171,11 +172,11 @@ func (u *DashboardService) LoadBaseInfo(ioOption string, netOption string) (*dto
 	cpuInfo, err := psutil.CPUInfo.GetCPUInfo(false)
 	if err == nil && len(cpuInfo) > 0 {
 		baseInfo.CPUModelName = cpuInfo[0].ModelName
+		baseInfo.CPUMhz = cpuInfo[0].Mhz
 	}
 
 	baseInfo.CPUCores, _ = psutil.CPUInfo.GetPhysicalCores(false)
 	baseInfo.CPULogicalCores, _ = psutil.CPUInfo.GetLogicalCores(false)
-	baseInfo.CPUMhz = cpuInfo[0].Mhz
 
 	baseInfo.CurrentInfo = *u.LoadCurrentInfo(ioOption, netOption)
 	return &baseInfo, nil
@@ -456,6 +457,10 @@ type diskInfo struct {
 }
 
 func loadDiskInfo() []dto.DiskInfo {
+	if capabilities.IsDarwin() {
+		return loadDiskInfoDarwin()
+	}
+
 	var datas []dto.DiskInfo
 	cmdMgr := cmd.NewCommandMgr(cmd.WithTimeout(2 * time.Second))
 	format := `NR>1 && !/tmpfs|snap\/core|udev/ {printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n", $1, $2, $3, $4, $5, $6, $7}`
@@ -562,6 +567,61 @@ func loadDiskInfo() []dto.DiskInfo {
 		}(mounts[i])
 	}
 	wg.Wait()
+
+	sort.Slice(datas, func(i, j int) bool {
+		return datas[i].Path < datas[j].Path
+	})
+	return datas
+}
+
+func loadDiskInfoDarwin() []dto.DiskInfo {
+	partitions, err := psutil.DISK.GetPartitions(false, false)
+	if err != nil {
+		global.LOG.Errorf("load disk info from partitions failed, err: %v", err)
+		return nil
+	}
+
+	skipFstype := map[string]struct{}{
+		"devfs": {}, "autofs": {}, "tmpfs": {}, "overlay": {},
+	}
+	excludes := map[string]struct{}{
+		"/dev": {}, "/private/var/vm": {}, "/System/Volumes/VM": {},
+	}
+
+	var datas []dto.DiskInfo
+	seen := make(map[string]struct{})
+	for _, part := range partitions {
+		if _, skip := skipFstype[part.Fstype]; skip {
+			continue
+		}
+		if _, skip := excludes[part.Mountpoint]; skip {
+			continue
+		}
+		if _, ok := seen[part.Mountpoint]; ok {
+			continue
+		}
+		seen[part.Mountpoint] = struct{}{}
+
+		state, err := psutil.DISK.GetUsage(part.Mountpoint, false)
+		if err != nil {
+			global.LOG.Errorf("load disk info from %s failed, err: %v", part.Mountpoint, err)
+			continue
+		}
+
+		datas = append(datas, dto.DiskInfo{
+			Path:              part.Mountpoint,
+			Type:              part.Fstype,
+			Device:            part.Device,
+			Total:             state.Total,
+			Free:              state.Free,
+			Used:              state.Used,
+			UsedPercent:       state.UsedPercent,
+			InodesTotal:       state.InodesTotal,
+			InodesUsed:        state.InodesUsed,
+			InodesFree:        state.InodesFree,
+			InodesUsedPercent: state.InodesUsedPercent,
+		})
+	}
 
 	sort.Slice(datas, func(i, j int) bool {
 		return datas[i].Path < datas[j].Path

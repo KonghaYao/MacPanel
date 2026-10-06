@@ -1940,3 +1940,13 @@ var AddMonitorSettings = &gormigrate.Migration{
 		return nil
 	},
 }
+
+var FixDarwinLocalSSHConn = &gormigrate.Migration{
+	ID: "20251006-fix-darwin-local-ssh-conn",
+	Migrate: func(tx *gorm.DB) error {
+		if err := service.EnsureLocalSSHConn(); err != nil {
+			global.LOG.Warnf("fix darwin local ssh conn failed: %v", err)
+		}
+		return nil
+	},
+}

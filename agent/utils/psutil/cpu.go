@@ -71,6 +71,10 @@ type CPUInfoState struct {
 }
 
 func (c *CPUUsageState) GetCPUUsage() (float64, []float64, []float64) {
+	if capabilities.IsDarwin() {
+		return c.getCPUUsageGopsutil()
+	}
+
 	c.mu.Lock()
 
 	now := time.Now()
@@ -135,6 +139,80 @@ func (c *CPUUsageState) GetCPUUsage() (float64, []float64, []float64) {
 	c.lastSampleTime = time.Now()
 
 	return totalUsage, c.cachedPerCore, detailedPercent.GetCPUDetailedPercent()
+}
+
+func (c *CPUUsageState) getCPUUsageGopsutil() (float64, []float64, []float64) {
+	c.mu.Lock()
+	now := time.Now()
+	if !c.lastSampleTime.IsZero() && now.Sub(c.lastSampleTime) < fastInterval {
+		result := c.cachedTotalUsage
+		perCore := c.cachedPerCore
+		detailed := c.cachedDetailedPercent
+		c.mu.Unlock()
+		return result, perCore, detailed.GetCPUDetailedPercent()
+	}
+	c.mu.Unlock()
+
+	times1, err := cpu.Times(false)
+	if err != nil || len(times1) == 0 {
+		return 0, nil, nil
+	}
+	perTimes1, _ := cpu.Times(true)
+	time.Sleep(100 * time.Millisecond)
+	times2, err := cpu.Times(false)
+	if err != nil || len(times2) == 0 {
+		return 0, nil, nil
+	}
+	perTimes2, _ := cpu.Times(true)
+
+	totalUsage := calcCPUPercentTimes(times1[0], times2[0])
+	detailedPercent := calcCPUDetailedPercentTimes(times1[0], times2[0])
+
+	perCore := make([]float64, 0, len(perTimes2))
+	for i := range perTimes2 {
+		if i < len(perTimes1) {
+			perCore = append(perCore, calcCPUPercentTimes(perTimes1[i], perTimes2[i]))
+		}
+	}
+
+	c.mu.Lock()
+	c.cachedTotalUsage = totalUsage
+	c.cachedPerCore = perCore
+	c.cachedDetailedPercent = detailedPercent
+	c.lastSampleTime = time.Now()
+	c.mu.Unlock()
+
+	return totalUsage, perCore, detailedPercent.GetCPUDetailedPercent()
+}
+
+func calcCPUPercentTimes(prev, cur cpu.TimesStat) float64 {
+	deltaIdle := (cur.Idle + cur.Iowait) - (prev.Idle + prev.Iowait)
+	deltaTotal := cpuTimesTotal(cur) - cpuTimesTotal(prev)
+	if deltaTotal <= 0 {
+		return 0
+	}
+	return (1 - deltaIdle/deltaTotal) * 100
+}
+
+func calcCPUDetailedPercentTimes(prev, cur cpu.TimesStat) CPUDetailedPercent {
+	deltaTotal := cpuTimesTotal(cur) - cpuTimesTotal(prev)
+	if deltaTotal <= 0 {
+		return CPUDetailedPercent{Idle: 100}
+	}
+	return CPUDetailedPercent{
+		User:    (cur.User - prev.User) / deltaTotal * 100,
+		System:  (cur.System - prev.System) / deltaTotal * 100,
+		Nice:    (cur.Nice - prev.Nice) / deltaTotal * 100,
+		Idle:    (cur.Idle - prev.Idle) / deltaTotal * 100,
+		Iowait:  (cur.Iowait - prev.Iowait) / deltaTotal * 100,
+		Irq:     (cur.Irq - prev.Irq) / deltaTotal * 100,
+		Softirq: (cur.Softirq - prev.Softirq) / deltaTotal * 100,
+		Steal:   (cur.Steal - prev.Steal) / deltaTotal * 100,
+	}
+}
+
+func cpuTimesTotal(t cpu.TimesStat) float64 {
+	return t.User + t.Nice + t.System + t.Idle + t.Iowait + t.Irq + t.Softirq + t.Steal + t.Guest + t.GuestNice
 }
 
 func (c *CPUUsageState) NumCPU() int {

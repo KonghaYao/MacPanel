@@ -17,6 +17,7 @@ func Init() {
 	go syncTask()
 	go initAcmeAccount()
 	go checkDockerCompose()
+	go service.EnsureLocalSSHConnOnDarwin()
 }
 
 func syncApp() {
