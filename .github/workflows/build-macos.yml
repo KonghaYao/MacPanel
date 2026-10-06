@@ -79,9 +79,14 @@ jobs:
           name: macpanel-darwin-amd64
           path: artifacts/amd64
 
+      - name: Prepare release assets
+        run: |
+          mv artifacts/arm64/macpanel artifacts/arm64/macpanel-darwin-arm64
+          mv artifacts/amd64/macpanel artifacts/amd64/macpanel-darwin-amd64
+
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/arm64/macpanel
-            artifacts/amd64/macpanel
+            artifacts/arm64/macpanel-darwin-arm64
+            artifacts/amd64/macpanel-darwin-amd64
