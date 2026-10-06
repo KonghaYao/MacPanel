@@ -16,6 +16,16 @@
                     </span>
                 </div>
             </el-alert>
+            <el-alert v-if="type === 'compose' && fullBackupDir" :closable="false" type="info">
+                <div class="mt-2 text-xs">
+                    <span>{{ $t('setting.backupDir') }}：</span>
+                    <span>{{ fullBackupDir }}</span>
+                    <span class="jump" @click="goFile()">
+                        <el-icon class="ml-2"><Position /></el-icon>
+                        {{ $t('firewall.quickJump') }}
+                    </span>
+                </div>
+            </el-alert>
 
             <ComplexTable
                 class="mt-5"
@@ -177,7 +187,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { computeSize } from '@/utils/size';
 import { dateFormat } from '@/utils/date';
 import { downloadFile } from '@/utils/file';
@@ -244,11 +254,26 @@ interface DialogProps {
     appInstallID?: number;
     node?: string;
 }
+const fullBackupDir = computed(() => {
+    if (!backupPath.value) {
+        return '';
+    }
+    if (type.value === 'compose') {
+        return `${backupPath.value}/compose/${name.value}`;
+    }
+    if (type.value === 'app') {
+        return `${backupPath.value}/app/${name.value}/${detailName.value}`;
+    }
+    return '';
+});
+
 const acceptParams = (params: DialogProps): void => {
     type.value = params.type;
     node.value = params.node || currentNode.value;
-    if (type.value === 'app') {
-        appInstallID.value = params.appInstallID || 0;
+    if (type.value === 'app' || type.value === 'compose') {
+        if (type.value === 'app') {
+            appInstallID.value = params.appInstallID || 0;
+        }
         loadBackupDir();
     }
     name.value = params.name;
@@ -273,7 +298,7 @@ const loadBackupDir = async () => {
 };
 
 const goFile = async () => {
-    routerToFileWithPath(`${backupPath.value}/app/${name.value}/${detailName.value}`);
+    routerToFileWithPath(fullBackupDir.value);
 };
 
 const onChange = async (info: any) => {
