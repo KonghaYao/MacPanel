@@ -81,7 +81,17 @@
                         fix
                     >
                         <template #default="{ row }">
-                            <span :title="getPrimaryImageName(row.tags)">{{ getPrimaryImageName(row.tags) }}</span>
+                            <el-text
+                                v-if="getPrimaryImageName(row.tags) !== '-'"
+                                type="primary"
+                                class="cursor-pointer image-name-link"
+                                :class="{ 'is-active': isImageNameFilterActive(getPrimaryImageName(row.tags)) }"
+                                :title="getPrimaryImageName(row.tags)"
+                                @click="onFilterByImageName(getPrimaryImageName(row.tags))"
+                            >
+                                {{ getPrimaryImageName(row.tags) }}
+                            </el-text>
+                            <span v-else>-</span>
                         </template>
                     </el-table-column>
                     <el-table-column
@@ -242,6 +252,24 @@ const updateIndeterminate = computed(
 const onSearchByName = () => {
     paginationConfig.currentPage = 1;
     search();
+};
+
+const isImageNameFilterActive = (imageName: string) => {
+    const filter = paginationConfig.name.trim().toLowerCase();
+    if (!filter || imageName === '-') {
+        return false;
+    }
+    const nameLower = imageName.toLowerCase();
+    const shortName = nameLower.includes('/') ? nameLower.slice(nameLower.lastIndexOf('/') + 1) : nameLower;
+    return nameLower.includes(filter) || shortName.includes(filter);
+};
+
+const onFilterByImageName = (imageName: string) => {
+    if (imageName === '-') {
+        return;
+    }
+    paginationConfig.name = paginationConfig.name === imageName ? '' : imageName;
+    onSearchByName();
 };
 
 const search = async (column?: any) => {
@@ -511,6 +539,11 @@ const buttons = [
 </script>
 
 <style scoped lang="scss">
+.image-name-link.is-active {
+    font-weight: 600;
+    text-decoration: underline;
+}
+
 .image-pin-button {
     opacity: 0.72;
     transition: opacity 0.2s;
