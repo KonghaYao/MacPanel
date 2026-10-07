@@ -23,8 +23,16 @@
 
                         <div class="mb-3 flex flex-wrap items-center gap-1 text-sm text-gray-500">
                             <span>{{ $t('mirrors.configPath') }}</span>
-                            <span class="break-all">{{ eco.configPath }}</span>
-                            <CopyButton :content="eco.configPath" />
+                            <el-link
+                                v-if="eco.configPath"
+                                type="primary"
+                                :underline="false"
+                                class="break-all"
+                                @click="openConfigPreview(eco.configPath)"
+                            >
+                                {{ eco.configPath }}
+                            </el-link>
+                            <CopyButton v-if="eco.configPath" :content="eco.configPath" />
                         </div>
 
                         <el-alert v-if="noteOf(eco.id)" class="mb-3" type="info" :closable="false">
@@ -82,6 +90,7 @@
                 </el-tabs>
             </template>
         </LayoutContent>
+        <TextPreview ref="textPreviewRef" />
     </div>
 </template>
 
@@ -91,6 +100,7 @@ import { useI18n } from 'vue-i18n';
 import { applyMirror, listMirrors } from '@/api/modules/mirror';
 import { Mirror } from '@/api/interface/mirror';
 import { MsgSuccess } from '@/utils/message';
+import TextPreview from '@/views/host/file-management/text-preview/index.vue';
 
 const { t, te } = useI18n();
 const loading = ref(false);
@@ -98,6 +108,16 @@ const applyingKey = ref('');
 const activeTab = ref('');
 const ecosystems = ref<Mirror.Ecosystem[]>([]);
 const drafts = reactive<Record<string, Record<string, string>>>({});
+const textPreviewRef = ref<InstanceType<typeof TextPreview>>();
+
+const configFileName = (configPath: string) => {
+    const parts = configPath.split(/[/\\]/);
+    return parts[parts.length - 1] || configPath;
+};
+
+const openConfigPreview = (configPath: string) => {
+    textPreviewRef.value?.acceptParams({ path: configPath, name: configFileName(configPath) });
+};
 
 const keyOf = (ecosystem: string, action: string) => `${ecosystem}:${action}`;
 
