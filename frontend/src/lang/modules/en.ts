@@ -1928,6 +1928,7 @@ const message = {
         imageDelete: 'Image delete',
         repoName: 'Container registry',
         imageName: 'Image name',
+        imageNameSearchPlaceholder: 'Search by image name',
         pull: 'Pull',
         path: 'Path',
         importImage: 'Import',

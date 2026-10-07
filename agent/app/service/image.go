@@ -68,14 +68,7 @@ func (u *ImageService) Page(req dto.PageImage) (int64, interface{}, error) {
 	if len(req.Name) != 0 {
 		length, count := len(list), 0
 		for count < length {
-			hasTag := false
-			for _, tag := range list[count].RepoTags {
-				if strings.Contains(tag, req.Name) {
-					hasTag = true
-					break
-				}
-			}
-			if !hasTag {
+			if !docker.ImageRepositoryMatchesFilter(list[count].RepoTags, req.Name) {
 				list = append(list[:count], list[(count+1):]...)
 				length--
 			} else {
@@ -93,42 +86,9 @@ func (u *ImageService) Page(req dto.PageImage) (int64, interface{}, error) {
 			Size:      image.Size,
 		})
 	}
-	switch req.OrderBy {
-	case "size":
-		sort.Slice(records, func(i, j int) bool {
-			if req.Order == constant.OrderAsc {
-				return records[i].Size < records[j].Size
-			}
-			return records[i].Size > records[j].Size
-		})
-	case "isUsed":
-		sort.Slice(records, func(i, j int) bool {
-			if req.Order == constant.OrderAsc {
-				return !records[i].IsUsed
-			}
-			return records[i].IsUsed
-		})
-	case "tags":
-		sort.Slice(records, func(i, j int) bool {
-			if len(records[i].Tags) == 0 || len(records[j].Tags) == 0 {
-				return true
-			}
-			if req.Order == constant.OrderAsc {
-				return records[i].Tags[0] < records[j].Tags[0]
-			}
-			return records[i].Tags[0] > records[j].Tags[0]
-		})
-	default:
-		sort.Slice(records, func(i, j int) bool {
-			if req.Order == constant.OrderAsc {
-				return records[i].CreatedAt.Before(records[j].CreatedAt)
-			}
-			return records[i].CreatedAt.After(records[j].CreatedAt)
-		})
-	}
 
 	imageDescriptions, _ := settingRepo.GetDescriptionList(repo.WithByType("image"))
-	for i := 0; i < len(list); i++ {
+	for i := 0; i < len(records); i++ {
 		for _, desc := range imageDescriptions {
 			if "sha256:"+desc.ID == records[i].ID {
 				records[i].Description = desc.Description
@@ -137,7 +97,10 @@ func (u *ImageService) Page(req dto.PageImage) (int64, interface{}, error) {
 		}
 	}
 	sort.Slice(records, func(i, j int) bool {
-		return records[i].IsPinned && !records[j].IsPinned
+		if records[i].IsPinned != records[j].IsPinned {
+			return records[i].IsPinned
+		}
+		return imageRecordLess(records, i, j, req.OrderBy, req.Order)
 	})
 	total, start, end := len(records), (req.Page-1)*req.PageSize, req.Page*req.PageSize
 	if start > total {
@@ -545,6 +508,43 @@ func (u *ImageService) ImageRemove(req dto.BatchDelete) error {
 		_ = taskItem.Execute()
 	}()
 	return nil
+}
+
+func imageRecordLess(records []dto.ImageInfo, i, j int, orderBy, order string) bool {
+	asc := order == constant.OrderAsc
+	switch orderBy {
+	case "size":
+		if records[i].Size != records[j].Size {
+			if asc {
+				return records[i].Size < records[j].Size
+			}
+			return records[i].Size > records[j].Size
+		}
+	case "isUsed":
+		if records[i].IsUsed != records[j].IsUsed {
+			if asc {
+				return !records[i].IsUsed
+			}
+			return records[i].IsUsed
+		}
+	case "tags":
+		tagI := docker.PrimaryImageTag(records[i].Tags)
+		tagJ := docker.PrimaryImageTag(records[j].Tags)
+		if tagI != tagJ {
+			if asc {
+				return tagI < tagJ
+			}
+			return tagI > tagJ
+		}
+	default:
+		if !records[i].CreatedAt.Equal(records[j].CreatedAt) {
+			if asc {
+				return records[i].CreatedAt.Before(records[j].CreatedAt)
+			}
+			return records[i].CreatedAt.After(records[j].CreatedAt)
+		}
+	}
+	return records[i].ID < records[j].ID
 }
 
 func checkUsed(imageID string, containers []container.Summary) bool {

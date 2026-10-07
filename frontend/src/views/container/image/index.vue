@@ -27,7 +27,11 @@
                 </el-button>
             </template>
             <template #rightToolBar>
-                <TableSearch @search="search()" v-model:searchName="paginationConfig.name" />
+                <TableSearch
+                    @search="onSearchByName"
+                    v-model:searchName="paginationConfig.name"
+                    :placeholder="$t('container.imageNameSearchPlaceholder')"
+                />
                 <TableRefresh @search="search()" />
                 <TableSetting title="image-refresh" @search="search()" />
             </template>
@@ -70,22 +74,33 @@
                         </template>
                     </el-table-column>
                     <el-table-column
+                        :label="$t('container.imageName')"
+                        prop="imageName"
+                        min-width="160"
+                        :width="isMobile ? 200 : 'auto'"
+                        fix
+                    >
+                        <template #default="{ row }">
+                            <span :title="getPrimaryImageName(row.tags)">{{ getPrimaryImageName(row.tags) }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
                         :label="$t('container.tag')"
                         prop="tags"
                         sortable="custom"
-                        min-width="160"
-                        :width="isMobile ? 400 : 'auto'"
+                        min-width="120"
+                        :width="isMobile ? 200 : 'auto'"
                         fix
                     >
                         <template #default="{ row }">
                             <el-tag
                                 class="ml-2.5"
-                                v-for="(item, index) of row.tags"
+                                v-for="(item, index) of row.tags.filter((tag) => tag && !tag.includes('<none>'))"
                                 :key="index"
                                 :title="item"
                                 type="info"
                             >
-                                {{ item }}
+                                {{ getImageTagLabel(item) }}
                             </el-tag>
                         </template>
                     </el-table-column>
@@ -179,6 +194,7 @@ import { ElMessageBox } from 'element-plus';
 import { updateCommonDescription } from '@/api/modules/setting';
 import { MsgError, MsgSuccess } from '@/utils/message';
 import { useGlobalStore } from '@/composables/useGlobalStore';
+import { getImageTagLabel, getPrimaryImageName } from '@/utils/docker';
 
 const { isMobile } = useGlobalStore();
 const taskLogRef = ref();
@@ -223,12 +239,20 @@ const updateIndeterminate = computed(
     () => updateSelectedTags.value.length > 0 && updateSelectedTags.value.length < updateTagOptions.value.length,
 );
 
+const onSearchByName = () => {
+    paginationConfig.currentPage = 1;
+    search();
+};
+
 const search = async (column?: any) => {
     if (!isActive.value || !isExist.value) {
         return;
     }
-    paginationConfig.orderBy = column?.order ? column.prop : paginationConfig.orderBy;
-    paginationConfig.order = column?.order ? column.order : paginationConfig.order;
+    if (column?.order) {
+        paginationConfig.orderBy = column.prop;
+        paginationConfig.order = column.order;
+        paginationConfig.currentPage = 1;
+    }
     const params = {
         name: paginationConfig.name,
         page: paginationConfig.currentPage,

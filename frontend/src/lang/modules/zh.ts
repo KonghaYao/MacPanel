@@ -1847,6 +1847,7 @@ const message = {
         imageDelete: '删除镜像',
         repoName: '仓库名',
         imageName: '镜像名',
+        imageNameSearchPlaceholder: '按镜像名搜索',
         httpRepo: 'http 仓库添加授信需要重启 docker 服务',
         delInsecure: '删除授信',
         delInsecureHelper: '删除授信需要重启 docker 服务，是否删除？',

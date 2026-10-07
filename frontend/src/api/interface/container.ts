@@ -221,10 +221,11 @@ export namespace Container {
     export interface ImageInfo {
         id: string;
         createdAt: Date;
-        name: string;
         tags: Array<string>;
-        size: string;
+        size: number;
         isUsed: boolean;
+        isPinned?: boolean;
+        description?: string;
     }
     export interface ImageBuild {
         taskID: string;
