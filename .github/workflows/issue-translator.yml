@@ -1,14 +1,16 @@
 name: Issue Translator
-on: 
-  issue_comment: 
+on:
+  issue_comment:
     types: [created]
-  issues: 
+  issues:
     types: [opened]
 jobs:
   build:
+    # Upstream-only automation; forks like KonghaYao/MacPanel lack ISSUE_TRANSLATOR_TOKEN.
+    if: github.repository == '1Panel-dev/1Panel'
     runs-on: ubuntu-latest
     steps:
       - uses: usthe/issues-translate-action@v2.7
         with:
           IS_MODIFY_TITLE: true
-          BOT_GITHUB_TOKEN: ${{ secrets.ISSUE_TRANSLATOR_TOKEN }} 
+          BOT_GITHUB_TOKEN: ${{ secrets.ISSUE_TRANSLATOR_TOKEN }}
