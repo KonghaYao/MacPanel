@@ -42,7 +42,7 @@
                     <el-descriptions-item
                         v-for="(config, index) in networkData?.IPAM?.Config"
                         :key="index"
-                        :label="$t('container.subnet') + (index > 0 ? ' ' + (index + 1) : '')"
+                        :label="$t('container.subnet') + (Number(index) > 0 ? ' ' + (Number(index) + 1) : '')"
                     >
                         <div v-if="config">
                             <el-tag v-if="config.Subnet" type="info" :label="$t('container.subnet')">

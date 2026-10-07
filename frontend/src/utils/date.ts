@@ -156,6 +156,20 @@ export function dateFormatWithoutYear(dataStr: any) {
     return `${String(m)}-${String(d)}\n${String(h)}:${String(minute)}:${String(s)}`;
 }
 
+export function dateFormatWithoutSeconds(dataStr: any) {
+    const date = new Date(dataStr);
+    const y = date.getFullYear();
+    let m: string | number = date.getMonth() + 1;
+    m = m < 10 ? `0${String(m)}` : m;
+    let d: string | number = date.getDate();
+    d = d < 10 ? `0${String(d)}` : d;
+    let h: string | number = date.getHours();
+    h = h < 10 ? `0${String(h)}` : h;
+    let minute: string | number = date.getMinutes();
+    minute = minute < 10 ? `0${String(minute)}` : minute;
+    return `${String(y)}-${String(m)}-${String(d)}   ${String(h)}:${String(minute)}`;
+}
+
 export function dateFormatForSecond(dataStr: any) {
     const date = new Date(dataStr);
     let h: string | number = date.getHours();

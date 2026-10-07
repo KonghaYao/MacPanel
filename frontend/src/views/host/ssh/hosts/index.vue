@@ -56,7 +56,7 @@ import { deleteSSHHosts, searchSSHHosts, testSSHHost } from '@/api/modules/host'
 import { Host } from '@/api/interface/host';
 import i18n from '@/lang';
 import { MsgError, MsgSuccess } from '@/utils/message';
-import { dateFormatWithoutSeconds } from '@/utils/util';
+import { dateFormatWithoutSeconds } from '@/utils/date';
 import { reactive, ref } from 'vue';
 
 const loading = ref(false);

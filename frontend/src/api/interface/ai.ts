@@ -61,7 +61,7 @@ export namespace AI {
         pcieMaxWidth?: string;
         clockEvents?: string[];
         processStatus?: string;
-        type: 'nvidia' | 'amd';
+        type: 'nvidia' | 'amd' | 'apple';
         index: number;
         productName: string;
         persistenceMode: string;

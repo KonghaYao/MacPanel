@@ -88,11 +88,12 @@
 </template>
 
 <script lang="ts" setup>
+import { Process } from '@/api/interface/process';
 import { getProcessByID } from '@/api/modules/process';
 import { ref } from 'vue';
 
 const open = ref(false);
-const data = ref({
+const data = ref<Process.PsProcessData>({
     name: '',
     envs: [] as string[],
     status: '',
@@ -106,12 +107,20 @@ const data = ref({
     startTime: '',
     cmdLine: '',
     rss: '',
+    pss: '',
+    uss: '',
+    shared: '',
+    text: '',
+    dirty: '',
     swap: '',
     vms: '',
     hwm: '',
     data: '',
     stack: '',
     locked: '',
+    cpuPercent: '',
+    cpuValue: 0,
+    rssValue: 0,
     openFiles: [],
     connects: [],
 });

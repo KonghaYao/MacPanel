@@ -44,6 +44,8 @@ import { listDisks } from '@/api/modules/host';
 import DiskRouter from '@/views/host/disk-management/index.vue';
 import DiskCard from '@/views/host/disk-management/components/disk-card.vue';
 import Partition from '@/views/host/disk-management/partition/index.vue';
+import { useGlobalStore } from '@/composables/useGlobalStore';
+import { computed, onMounted, ref } from 'vue';
 
 const { platformOS } = useGlobalStore();
 const isDarwin = computed(() => platformOS.value === 'darwin');

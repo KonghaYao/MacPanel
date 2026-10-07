@@ -209,7 +209,7 @@
                                 </el-col>
                                 <el-col :span="2">
                                     <el-button
-                                        @click="removeReplace(index)"
+                                        @click="removeReplace(Number(index))"
                                         type="danger"
                                         link
                                         size="small"
