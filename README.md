@@ -23,7 +23,7 @@ When releases are available, install the **latest** release via mise from GitHub
 mise use -g "github:KonghaYao/MacPanel[bin=macpanel]@latest"
 ```
 
-Releases are tagged `v*` (e.g. `v0.4.0`). `@latest` resolves to the newest stable [GitHub release](https://github.com/KonghaYao/MacPanel/releases/latest) (non-draft, non-prerelease).
+Releases are tagged `v*` (e.g. `v0.4.1`). `@latest` resolves to the newest stable [GitHub release](https://github.com/KonghaYao/MacPanel/releases/latest) (non-draft, non-prerelease).
 
 Downloads: [GitHub Releases](https://github.com/KonghaYao/MacPanel/releases)
 
@@ -43,7 +43,7 @@ mise upgrade macpanel
 mise reshim
 ```
 
-To pin a specific version instead of latest, replace `@latest` with the version (without the `v` prefix), e.g. `@0.4.0`.
+To pin a specific version instead of latest, replace `@latest` with the version (without the `v` prefix), e.g. `@0.4.1`.
 
 ## Run
 
