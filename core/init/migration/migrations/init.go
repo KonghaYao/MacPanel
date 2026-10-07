@@ -18,8 +18,8 @@ import (
 	"github.com/1Panel-dev/1Panel/core/utils/common"
 	"github.com/1Panel-dev/1Panel/core/utils/ctl_conf"
 	"github.com/1Panel-dev/1Panel/core/utils/encrypt"
-	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 	"github.com/1Panel-dev/1Panel/core/utils/menutree"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 	"github.com/go-gormigrate/gormigrate/v2"
 	"gorm.io/gorm"
 )
@@ -1316,6 +1316,21 @@ var AddAllowIPTrustedProxiesSetting = &gormigrate.Migration{
 			return err
 		}
 		return nil
+	},
+}
+
+var AddMirrorMenu = &gormigrate.Migration{
+	ID: "20261007-add-mirror-menu",
+	Migrate: func(tx *gorm.DB) error {
+		return helper.UpsertChildMenuByLabel(tx, "System-Menu", dto.ShowMenu{
+			ID:       "78",
+			Disabled: false,
+			Title:    "menu.mirrors",
+			IsShow:   true,
+			Label:    "Mirrors",
+			Path:     "/hosts/mirrors",
+			Sort:     650,
+		}, "Disk")
 	},
 }
 

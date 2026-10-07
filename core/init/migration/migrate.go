@@ -63,6 +63,7 @@ func coreMigrations() []*gormigrate.Migration {
 		migrations.AddAPITrustedProxiesSetting,
 		migrations.AddAllowIPTrustedProxiesSetting,
 		migrations.AddWebsiteTemplateMenu,
+		migrations.AddMirrorMenu,
 		migrations.RepairXpackAppMenus,
 		migrations.UpdateFirewallMenuPath,
 		migrations.RemoveUpageHideMenu,

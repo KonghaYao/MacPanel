@@ -115,6 +115,16 @@ const hostRouter = {
             },
         },
         {
+            path: '/hosts/mirrors',
+            name: 'Mirrors',
+            component: () => import('@/views/host/mirrors/index.vue'),
+            meta: {
+                icon: 'p-exchange-menu',
+                title: 'menu.mirrors',
+                adminOnly: true,
+            },
+        },
+        {
             path: '/hosts/process/process',
             name: 'Process',
             component: () => import('@/views/host/process/process/index.vue'),

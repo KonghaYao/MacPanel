@@ -85,7 +85,8 @@ var (
 	groupService     = service.NewIGroupService()
 	alertService     = service.NewIAlertService()
 
-	diskService      = service.NewIDiskService()
-	homebrewService  = service.NewIHomebrewService()
-	desktopService   = service.NewIDesktopService()
+	diskService     = service.NewIDiskService()
+	homebrewService = service.NewIHomebrewService()
+	desktopService  = service.NewIDesktopService()
+	mirrorService   = service.NewIMirrorService()
 )
