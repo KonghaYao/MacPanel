@@ -77,6 +77,11 @@ func (s *HostRouter) InitRouter(Router *gin.RouterGroup) {
 		hostRouter.POST("/ssh/cert/search", baseApi.SearchRootCert)
 		hostRouter.POST("/ssh/cert/delete", baseApi.DeleteRootCert)
 
+		hostRouter.POST("/ssh/hosts/search", baseApi.SearchSSHHosts)
+		hostRouter.POST("/ssh/hosts", baseApi.CreateSSHHost)
+		hostRouter.POST("/ssh/hosts/delete", baseApi.DeleteSSHHosts)
+		hostRouter.POST("/ssh/hosts/test", baseApi.TestSSHHost)
+
 		hostRouter.POST("/tool/status", baseApi.GetToolStatus)
 		hostRouter.POST("/tool/init", baseApi.InitToolConfig)
 		hostRouter.POST("/tool/operate", baseApi.OperateTool)

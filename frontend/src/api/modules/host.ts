@@ -158,6 +158,21 @@ export const cleanSSHLogs = () => {
     return http.post(`/hosts/ssh/log/clean`, {});
 };
 
+export const searchSSHHosts = (params: ReqPage & { info?: string }) => {
+    return http.post<ResPage<Host.SSHHostInfo>>(`/hosts/ssh/hosts/search`, params);
+};
+export const createSSHHost = (params: Host.SSHHostOperate) => {
+    const request = deepCopy(params) as Host.SSHHostOperate;
+    encodeBase64Fields(request, ['password']);
+    return http.post<Host.SSHHostInfo>(`/hosts/ssh/hosts`, request, TimeoutEnum.T_60S);
+};
+export const deleteSSHHosts = (ids: number[]) => {
+    return http.post(`/hosts/ssh/hosts/delete`, { ids });
+};
+export const testSSHHost = (params: Host.SSHHostTest) => {
+    return http.post<Host.SSHHostTestResult>(`/hosts/ssh/hosts/test`, params, TimeoutEnum.T_40S);
+};
+
 export const listDisks = () => {
     return http.get<Host.CompleteDiskInfo>(`/hosts/disks`);
 };

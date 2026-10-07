@@ -63,5 +63,6 @@ var (
 	taskRepo = repo.NewITaskRepo()
 
 	groupRepo = repo.NewIGroupRepo()
-	alertRepo = repo.NewIAlertRepo()
+	alertRepo  = repo.NewIAlertRepo()
+	sshHostRepo = repo.NewISSHHostRepo()
 )

@@ -16,6 +16,10 @@ const buttons = [
         path: '/hosts/ssh/ssh',
     },
     {
+        label: i18n.global.t('ssh.hostManage', 2),
+        path: '/hosts/ssh/hosts',
+    },
+    {
         label: i18n.global.t('ssh.session', 2),
         path: '/hosts/ssh/session',
     },

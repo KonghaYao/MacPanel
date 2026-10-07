@@ -74,3 +74,33 @@ type SSHHistory struct {
 	Status   string    `json:"status"`
 	Message  string    `json:"message"`
 }
+
+type SSHHostOperate struct {
+	Alias    string `json:"alias" validate:"required"`
+	HostName string `json:"hostName" validate:"required"`
+	User     string `json:"user" validate:"required"`
+	Port     int    `json:"port"`
+	Password string `json:"password"`
+}
+
+type SSHHostInfo struct {
+	ID         uint      `json:"id"`
+	CreatedAt  time.Time `json:"createdAt"`
+	Alias      string    `json:"alias"`
+	HostName   string    `json:"hostName"`
+	User       string    `json:"user"`
+	Port       int       `json:"port"`
+	AuthStatus string    `json:"authStatus"`
+}
+
+type SSHHostTest struct {
+	ID       uint   `json:"id"`
+	Alias    string `json:"alias"`
+	HostName string `json:"hostName"`
+	User     string `json:"user"`
+	Port     int    `json:"port"`
+}
+
+type SSHHostTestResult struct {
+	Status bool `json:"status"`
+}

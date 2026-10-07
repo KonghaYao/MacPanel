@@ -161,6 +161,18 @@ const hostRouter = {
             },
         },
         {
+            path: '/hosts/ssh/hosts',
+            name: 'SSHHosts',
+            component: () => import('@/views/host/ssh/hosts/index.vue'),
+            hidden: true,
+            meta: {
+                parent: 'menu.ssh',
+                title: 'ssh.hostManage',
+                activeMenu: '/hosts/ssh/ssh',
+                permission: 'host_ssh_view',
+            },
+        },
+        {
             path: '/hosts/ssh/log',
             name: 'SSHLog',
             component: () => import('@/views/host/ssh/log/index.vue'),

@@ -171,6 +171,34 @@ export namespace Host {
         message: string;
     }
 
+    export interface SSHHostInfo extends CommonModel {
+        alias: string;
+        hostName: string;
+        user: string;
+        port: number;
+        authStatus: string;
+    }
+
+    export interface SSHHostOperate {
+        alias: string;
+        hostName: string;
+        user: string;
+        port: number;
+        password: string;
+    }
+
+    export interface SSHHostTest {
+        id?: number;
+        alias?: string;
+        hostName?: string;
+        user?: string;
+        port?: number;
+    }
+
+    export interface SSHHostTestResult {
+        status: boolean;
+    }
+
     export interface DiskBasicInfo {
         device: string;
         size: string;

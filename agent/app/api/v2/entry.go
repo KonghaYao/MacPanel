@@ -42,6 +42,7 @@ var (
 	fileHistoryService        = service.NewIFileHistoryService()
 	fileShareService          = service.NewIFileShareService()
 	sshService                = service.NewISSHService()
+	sshHostService            = service.NewISSHHostService()
 	firewallService           = service.NewIFirewallService()
 	firewallSettingService    = service.NewIFirewallSettingService()
 	forwardingService         = service.NewIForwardingService()
