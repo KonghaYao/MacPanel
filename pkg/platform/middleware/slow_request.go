@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -20,6 +21,8 @@ type SlowRequestConfig struct {
 	Component string
 	Threshold time.Duration
 	Logf      func(format string, args ...any)
+	// SkipRequest optionally skips logging for requests handled elsewhere (e.g. core proxy to agent).
+	SkipRequest func(*gin.Context) bool
 }
 
 // SlowRequest logs requests whose total handler time exceeds the threshold.
@@ -36,7 +39,7 @@ func SlowRequest(cfg SlowRequestConfig) gin.HandlerFunc {
 	}
 
 	return func(c *gin.Context) {
-		if threshold <= 0 || shouldSkipSlowRequest(c.Request.URL.Path) || websocket.IsWebSocketUpgrade(c.Request) {
+		if threshold <= 0 || shouldSkipSlowRequest(c) || websocket.IsWebSocketUpgrade(c.Request) || (cfg.SkipRequest != nil && cfg.SkipRequest(c)) {
 			c.Next()
 			return
 		}
@@ -84,7 +87,8 @@ func slowRequestThresholdFromEnv() time.Duration {
 	return time.Duration(ms) * time.Millisecond
 }
 
-func shouldSkipSlowRequest(path string) bool {
+func shouldSkipSlowRequest(c *gin.Context) bool {
+	path := c.Request.URL.Path
 	switch {
 	case path == "/favicon.ico", path == "/":
 		return true
@@ -100,7 +104,19 @@ func shouldSkipSlowRequest(path string) bool {
 		return true
 	case strings.HasPrefix(path, "/1panel/swagger"):
 		return true
-	default:
-		return false
 	}
+
+	if isEventStreamRequest(c.Request) {
+		return true
+	}
+
+	if c.Query("follow") == "true" && strings.HasSuffix(path, "/search/log") {
+		return true
+	}
+
+	return false
+}
+
+func isEventStreamRequest(req *http.Request) bool {
+	return strings.Contains(strings.ToLower(req.Header.Get("Accept")), "text/event-stream")
 }

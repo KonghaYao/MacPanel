@@ -74,6 +74,9 @@ func Routers() *gin.Engine {
 	Router.Use(pkgmiddleware.SlowRequest(pkgmiddleware.SlowRequestConfig{
 		Component: "core",
 		Logf:      global.LOG.Warnf,
+		SkipRequest: func(c *gin.Context) bool {
+			return middleware.ShouldProxyToAgent(c.Request.URL.Path)
+		},
 	}))
 	Router.Use(i18n.UseI18n())
 	Router.Use(middleware.WhiteAllow())
