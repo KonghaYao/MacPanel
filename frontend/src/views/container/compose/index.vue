@@ -621,6 +621,10 @@ import { Rules } from '@/global/form-rules';
 import { loadBaseDir } from '@/api/modules/setting';
 import { ElCheckbox, ElForm } from 'element-plus';
 import { useGlobalStore } from '@/composables/useGlobalStore';
+import {
+    DEFAULT_COMPOSE_TEMPLATE,
+    DEFAULT_COMPOSE_TEMPLATE_ID,
+} from '@/views/container/compose/default-template';
 
 const { currentNode, isAdminOrNodeAdmin } = useGlobalStore();
 
@@ -876,17 +880,17 @@ const loadContainerStats = async () => {
 
 const onOpenDialog = async () => {
     isOnCreate.value = true;
-    loadTemplates();
     form.name = '';
     form.dirName = '';
     form.from = 'edit';
     form.path = '';
-    form.file = '';
+    form.file = DEFAULT_COMPOSE_TEMPLATE;
     form.template = null;
     form.env = '';
     form.forcePull = false;
+    oldFrom.value = 'edit';
+    await loadTemplates();
     loadPath();
-    loadTemplates();
 };
 const onEdit = (item: string) => {
     if (item === 'template') {
@@ -904,6 +908,11 @@ const changeTemplate = () => {
         }
     }
 };
+const applyDefaultComposeTemplate = () => {
+    form.template = DEFAULT_COMPOSE_TEMPLATE_ID;
+    form.file = DEFAULT_COMPOSE_TEMPLATE;
+};
+
 const changeFrom = () => {
     if ((oldFrom.value === 'edit' || oldFrom.value === 'template') && form.file) {
         ElMessageBox.confirm(i18n.global.t('container.fromChangeHelper'), i18n.global.t('app.source'), {
@@ -920,17 +929,38 @@ const changeFrom = () => {
                     form.file = '';
                 }
                 oldFrom.value = form.from;
+                if (form.from === 'template') {
+                    applyDefaultComposeTemplate();
+                }
+                if (form.from === 'edit') {
+                    form.file = DEFAULT_COMPOSE_TEMPLATE;
+                }
             })
             .catch(() => {
                 form.from = oldFrom.value;
             });
     } else {
         oldFrom.value = form.from;
+        if (form.from === 'template') {
+            applyDefaultComposeTemplate();
+        }
+        if (form.from === 'edit' && !form.file) {
+            form.file = DEFAULT_COMPOSE_TEMPLATE;
+        }
     }
 };
 const loadTemplates = async () => {
     const res = await listComposeTemplate();
-    templateOptions.value = res.data;
+    const templates = Array.isArray(res.data) ? res.data : [];
+    templateOptions.value = [
+        {
+            id: DEFAULT_COMPOSE_TEMPLATE_ID,
+            name: i18n.global.t('container.defaultComposeTemplate'),
+            description: i18n.global.t('container.defaultComposeTemplateDesc'),
+            content: DEFAULT_COMPOSE_TEMPLATE,
+        },
+        ...templates,
+    ];
 };
 const loadPath = async () => {
     const pathRes = await loadBaseDir();

@@ -1927,6 +1927,8 @@ const message = {
         composeDownHelper: '将停止并删除 {0} 编排下所有容器及网络，是否继续？',
         composeEnvHelper2: '该编排为 1Panel 应用商店创建，请在已安装应用中修改环境变量。',
         composeContentPlaceholder: '在此写入或粘贴 docker-compose 文件内容',
+        defaultComposeTemplate: '默认模版',
+        defaultComposeTemplateDesc: '包含 nginx 示例服务的常用 docker-compose 模版',
 
         setting: '配置',
         goSetting: '去修改',

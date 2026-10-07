@@ -2009,6 +2009,8 @@ const message = {
         composeEnvHelper2:
             'This orchestration was created by the 1Panel App Store. Please modify environment variables in the installed applications.',
         composeContentPlaceholder: 'Write or paste the content of your docker-compose file here',
+        defaultComposeTemplate: 'Default template',
+        defaultComposeTemplateDesc: 'A common docker-compose template with an nginx example service',
 
         setting: 'Setting | Settings',
         goSetting: 'Go to Settings',

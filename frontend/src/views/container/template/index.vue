@@ -89,6 +89,7 @@ import OperatorDialog from '@/views/container/template/operator/index.vue';
 import { deleteComposeTemplate, searchComposeTemplate } from '@/api/modules/container';
 import DockerStatus from '@/views/container/docker-status/index.vue';
 import i18n from '@/lang';
+import { DEFAULT_COMPOSE_TEMPLATE } from '@/views/container/compose/default-template';
 
 const loading = ref();
 const data = ref();
@@ -162,7 +163,7 @@ const onOpenDialog = async (
     title: string,
     rowData: Partial<Container.TemplateInfo> = {
         name: '',
-        content: '',
+        content: title === 'create' ? DEFAULT_COMPOSE_TEMPLATE : '',
         description: '',
     },
 ) => {
