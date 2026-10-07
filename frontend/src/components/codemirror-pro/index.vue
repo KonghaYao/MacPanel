@@ -11,6 +11,7 @@ import { EditorState, Extension } from '@codemirror/state';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { StreamLanguage } from '@codemirror/language';
 import { nginx } from './nginx';
+import { dotenv } from './dotenv';
 import { yaml } from '@codemirror/legacy-modes/mode/yaml';
 import { shell } from '@codemirror/legacy-modes/mode/shell';
 import { dockerFile } from '@codemirror/legacy-modes/mode/dockerfile';
@@ -75,7 +76,9 @@ const customStyle = computed<CSSProperties>(() => ({
 const toggleLineComment = (mode: string) => {
     return (view: EditorView) => {
         const commentChar =
-            mode === 'yaml' || mode === 'shell' || mode === 'nginx' || mode === 'dockerfile' ? '#' : '//';
+            mode === 'yaml' || mode === 'shell' || mode === 'nginx' || mode === 'dockerfile' || mode === 'dotenv'
+                ? '#'
+                : '//';
 
         const { state } = view;
 
@@ -160,6 +163,9 @@ const initCodeMirror = () => {
             break;
         case 'shell':
             extensions.push(StreamLanguage.define(shell));
+            break;
+        case 'dotenv':
+            extensions.push(StreamLanguage.define(dotenv));
             break;
     }
 

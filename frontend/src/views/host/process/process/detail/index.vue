@@ -61,6 +61,7 @@
                     <CodemirrorPro
                         :placeholder="$t('commons.msg.noneData')"
                         v-model="envStr"
+                        mode="dotenv"
                         :heightDiff="300"
                         :disabled="true"
                     ></CodemirrorPro>

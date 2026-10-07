@@ -37,13 +37,12 @@
         :close-on-click-modal="false"
         @closed="importText = ''"
     >
-        <el-input
+        <CodemirrorPro
             v-model="importText"
-            type="textarea"
-            :rows="8"
-            :aria-label="$t('runtime.environment')"
+            mode="dotenv"
+            :minHeight="180"
+            :height="220"
             placeholder="KEY=value"
-            spellcheck="false"
         />
         <el-alert
             v-if="parsed.error"
@@ -76,6 +75,7 @@ import { FormRules } from 'element-plus';
 import { Rules } from '@/global/form-rules';
 import { Runtime } from '@/api/interface/runtime';
 import { mergeEnvironments, parseEnvironment } from '@/utils/runtime-environment';
+import CodemirrorPro from '@/components/codemirror-pro/index.vue';
 
 const props = defineProps({
     environments: {

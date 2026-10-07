@@ -442,12 +442,12 @@
                             </div>
 
                             <div v-show="showType === 'env'">
-                                <el-input
-                                    placeholder="key=value"
-                                    type="textarea"
-                                    :rows="18"
-                                    :readonly="isAppStoreCompose"
+                                <CodemirrorPro
                                     v-model="env"
+                                    mode="dotenv"
+                                    :heightDiff="475"
+                                    :readonly="isAppStoreCompose"
+                                    placeholder="KEY=value"
                                 />
                                 <span v-if="isAppStoreCompose" class="input-help">
                                     {{ $t('container.composeEnvHelper2') }}
@@ -523,7 +523,13 @@
                                     </div>
                                 </el-form-item>
                                 <span class="envTitle">{{ $t('container.env') }}</span>
-                                <el-input placeholder="key=value" type="textarea" :rows="3" v-model="form.env" />
+                                <CodemirrorPro
+                                    v-model="form.env"
+                                    mode="dotenv"
+                                    :minHeight="120"
+                                    :height="150"
+                                    placeholder="KEY=value"
+                                />
                                 <span class="envTitle">{{ $t('commons.button.set') }}</span>
                                 <el-form-item>
                                     <el-checkbox v-model="form.forcePull" :label="$t('container.forcePull')" />
