@@ -32,12 +32,16 @@ func pipDefinition() definition {
 				"trustedHost": "mirrors.aliyun.com",
 			}},
 			{id: "ustc", name: "USTC", values: map[string]string{
-				"indexUrl":    "https://pypi.mirrors.ustc.edu.cn/simple",
-				"trustedHost": "pypi.mirrors.ustc.edu.cn",
+				"indexUrl":    "https://mirrors.ustc.edu.cn/pypi/simple",
+				"trustedHost": "mirrors.ustc.edu.cn",
 			}},
 			{id: "tencent", name: "Tencent Cloud", values: map[string]string{
 				"indexUrl":    "https://mirrors.cloud.tencent.com/pypi/simple",
 				"trustedHost": "mirrors.cloud.tencent.com",
+			}},
+			{id: "huawei", name: "Huawei Cloud", values: map[string]string{
+				"indexUrl":    "https://repo.huaweicloud.com/repository/pypi/simple",
+				"trustedHost": "repo.huaweicloud.com",
 			}},
 		},
 		configPath: pipConfigPath,
@@ -54,7 +58,7 @@ func npmDefinition() definition {
 		presets: []presetDef{
 			{id: "official", name: "Official", values: map[string]string{}},
 			{id: "npmmirror", name: "npmmirror", values: map[string]string{"registry": "https://registry.npmmirror.com"}},
-			{id: "huawei", name: "Huawei Cloud", values: map[string]string{"registry": "https://repo.huaweicloud.com/repository/npm/"}},
+			{id: "huawei", name: "Huawei Cloud", values: map[string]string{"registry": "https://mirrors.huaweicloud.com/npm/"}},
 			{id: "tencent", name: "Tencent Cloud", values: map[string]string{"registry": "https://mirrors.cloud.tencent.com/npm/"}},
 		},
 		configPath: npmrcPath,
@@ -93,7 +97,7 @@ func mavenPresets() []presetDef {
 		{id: "official", name: "Official", values: map[string]string{}},
 		{id: "aliyun", name: "Aliyun", values: map[string]string{"repository": "https://maven.aliyun.com/repository/public"}},
 		{id: "huawei", name: "Huawei Cloud", values: map[string]string{"repository": "https://repo.huaweicloud.com/repository/maven/"}},
-		{id: "tencent", name: "Tencent Cloud", values: map[string]string{"repository": "https://mirrors.cloud.tencent.com/nexus/repository/maven-public/"}},
+		{id: "tencent", name: "Tencent Cloud", values: map[string]string{"repository": "https://mirrors.tencent.com/nexus/repository/maven-public/"}},
 	}
 }
 
@@ -117,6 +121,10 @@ func goDefinition() definition {
 			{id: "goproxy-io", name: "goproxy.io", values: map[string]string{
 				"goproxy": "https://goproxy.io,direct",
 				"gosumdb": "sum.golang.google.cn",
+			}},
+			{id: "baidu", name: "Baidu", values: map[string]string{
+				"goproxy": "https://goproxy.bj.bcebos.com,direct",
+				"gosumdb": "off",
 			}},
 		},
 		configPath: goEnvPath,
@@ -151,6 +159,8 @@ func dockerDefinition() definition {
 			{id: "official", name: "Official", values: map[string]string{}},
 			{id: "daocloud", name: "DaoCloud", values: map[string]string{"mirrors": "https://docker.m.daocloud.io"}},
 			{id: "panel", name: "1Panel", values: map[string]string{"mirrors": "https://docker.1panel.live"}},
+			{id: "panel-dev", name: "1Panel Dev", values: map[string]string{"mirrors": "https://docker.1panel.dev"}},
+			{id: "1ms", name: "1ms.run", values: map[string]string{"mirrors": "https://docker.1ms.run"}},
 		},
 		configPath: dockerDaemonPath,
 		read:       readDocker,

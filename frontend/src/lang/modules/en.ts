@@ -2427,6 +2427,9 @@ const message = {
             'goproxy-io': 'goproxy.io',
             daocloud: 'DaoCloud',
             panel: '1Panel',
+            'panel-dev': '1Panel Dev',
+            '1ms': '1ms.run',
+            baidu: 'Baidu',
             rsproxy: 'rsproxy',
         },
         notes: {

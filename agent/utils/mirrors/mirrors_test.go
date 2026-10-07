@@ -18,7 +18,8 @@ func testOpts(t *testing.T) Options {
 }
 
 func TestCatalogPresets(t *testing.T) {
-	for _, def := range definitions() {
+	defs := append(definitions(), homebrewDefinition())
+	for _, def := range defs {
 		seen := map[string]bool{}
 		hasOfficial := false
 		for _, preset := range def.presets {
