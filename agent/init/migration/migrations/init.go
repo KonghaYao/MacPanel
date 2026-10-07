@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/user"
 	"path"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -809,6 +810,9 @@ var UpdateMcpServerGatewayConfig = &gormigrate.Migration{
 var InitLocalSSHConn = &gormigrate.Migration{
 	ID: "20250905-init-local-ssh",
 	Migrate: func(tx *gorm.DB) error {
+		if runtime.GOOS == "darwin" {
+			return nil
+		}
 		itemPath := ""
 		currentInfo, _ := user.Current()
 		if len(currentInfo.HomeDir) == 0 {
@@ -1944,8 +1948,8 @@ var AddMonitorSettings = &gormigrate.Migration{
 var FixDarwinLocalSSHConn = &gormigrate.Migration{
 	ID: "20251006-fix-darwin-local-ssh-conn",
 	Migrate: func(tx *gorm.DB) error {
-		if err := service.EnsureLocalSSHConn(); err != nil {
-			global.LOG.Warnf("fix darwin local ssh conn failed: %v", err)
+		if runtime.GOOS == "darwin" {
+			service.EnsureSSHDisabledOnDarwin()
 		}
 		return nil
 	},

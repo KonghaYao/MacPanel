@@ -158,6 +158,7 @@ const hostRouter = {
                 detail: 'menu.config',
                 activeMenu: '/hosts/ssh/ssh',
                 permission: 'host_ssh_view',
+                platformFeature: 'sshd_config',
             },
         },
         {
@@ -170,6 +171,7 @@ const hostRouter = {
                 title: 'ssh.loginLogs',
                 activeMenu: '/hosts/ssh/ssh',
                 permission: 'host_ssh_view',
+                platformFeature: 'sshd_config',
             },
         },
         {
@@ -182,6 +184,7 @@ const hostRouter = {
                 title: 'ssh.session',
                 activeMenu: '/hosts/ssh/ssh',
                 permission: 'host_ssh_view',
+                platformFeature: 'sshd_config',
             },
         },
     ],

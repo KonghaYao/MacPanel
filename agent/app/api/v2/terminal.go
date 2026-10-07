@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -19,6 +20,7 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/utils/cmd"
 	"github.com/1Panel-dev/1Panel/agent/utils/ssh"
 	"github.com/1Panel-dev/1Panel/agent/utils/terminal"
+	"github.com/1Panel-dev/1Panel/pkg/platform/capabilities"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
@@ -35,7 +37,12 @@ import (
 // @Security Timestamp
 // @Router /hosts/terminal/local [get]
 func (b *BaseApi) WsLocalTerminal(c *gin.Context) {
-	b.runSSHSession(c, "local", loadLocalConn, c.DefaultQuery("command", ""))
+	command := c.DefaultQuery("command", "")
+	if capabilities.IsDarwin() {
+		b.runLocalShellSession(c, command)
+		return
+	}
+	b.runSSHSession(c, "local", loadLocalConn, command)
 }
 
 // @Tags Terminal
@@ -129,6 +136,34 @@ func prepareTerminalSession(c *gin.Context) (*websocket.Conn, int, int, bool) {
 		return nil, 0, 0, false
 	}
 	return wsConn, cols, rows, true
+}
+
+func (b *BaseApi) runLocalShellSession(c *gin.Context, initCmd string) {
+	wsConn, cols, rows, ok := prepareTerminalSession(c)
+	if !ok {
+		return
+	}
+	defer wsConn.Close()
+	identity, ok := loadTerminalIdentity(c)
+	if !ok {
+		_ = wshandleError(wsConn, errors.New("missing terminal identity"))
+		return
+	}
+	opts := terminal.SessionOptions{
+		Identity:   identity,
+		Kind:       "local",
+		Title:      sanitizeTerminalTitle(c.Query("title")),
+		Persistent: c.Query("terminalPersistent") == "true",
+		Cols:       cols,
+		Rows:       rows,
+		InitCmd:    initCmd,
+	}
+	err := terminal.ServeCommand(wsConn, strings.TrimSpace(c.Query("session")), opts, func() (*terminal.LocalCommand, error) {
+		return newLocalShellCommand(initCmd)
+	})
+	if err != nil {
+		_ = wshandleError(wsConn, err)
+	}
 }
 
 func (b *BaseApi) runSSHSession(c *gin.Context, kind string, connect func() (*ssh.SSHClient, error), command string) {
@@ -402,6 +437,17 @@ func loadDatabaseInitCmd(c *gin.Context) ([]string, error) {
 	}
 
 	return commands, nil
+}
+
+func newLocalShellCommand(initCmd string) (*terminal.LocalCommand, error) {
+	shell := os.Getenv("SHELL")
+	if shell == "" {
+		shell = "/bin/zsh"
+	}
+	if initCmd != "" {
+		return terminal.NewCommand(shell, "-l", "-c", initCmd)
+	}
+	return terminal.NewCommand(shell, "-l")
 }
 
 func wshandleError(ws *websocket.Conn, err error) bool {
