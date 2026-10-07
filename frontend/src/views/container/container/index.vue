@@ -44,7 +44,7 @@
                         :icon="includeAppStore ? 'View' : 'Hide'"
                     />
                 </el-tooltip>
-                <TableRefresh @search="search()" />
+                <TableRefresh @search="refresh()" />
                 <TableSetting title="container-refresh" @search="refresh()" />
                 <fu-table-column-select
                     :columns="columns"
@@ -515,6 +515,7 @@ const isExist = ref(false);
 const loading = ref(false);
 const viewMode = ref<'table' | 'card'>('table');
 const data = ref<any[]>([]);
+const statsCache = ref<Record<string, any>[]>([]);
 const networkItemsByRow = computed(
     () => new Map(data.value.map((row) => [row, (row.network || []).filter((item: string) => item?.trim())])),
 );
@@ -604,6 +605,19 @@ const applyStatsToRows = (stats: Record<string, any>[]) => {
                 container[field] = stat[field];
             }
         }
+    }
+};
+
+const loadStats = async () => {
+    if (!isActive.value || !isExist.value) {
+        return;
+    }
+    try {
+        const res = await containerListStats();
+        statsCache.value = res.data || [];
+        applyStatsToRows(statsCache.value);
+    } catch {
+        statsCache.value = [];
     }
 };
 
@@ -715,9 +729,8 @@ const search = async (column?: any) => {
         excludeAppStore: !includeAppStore.value,
     };
     loading.value = true;
-    const [containerResult, statsResult, statusResult] = await Promise.allSettled([
+    const [containerResult, statusResult] = await Promise.allSettled([
         searchContainer(params),
-        containerListStats(),
         loadContainerStatus(),
     ]);
     loading.value = false;
@@ -728,8 +741,10 @@ const search = async (column?: any) => {
         paginationConfig.total = containerResult.value.data.total;
     }
 
-    if (statsResult.status === 'fulfilled') {
-        applyStatsToRows(statsResult.value.data || []);
+    if (statsCache.value.length === 0) {
+        loadStats();
+    } else {
+        applyStatsToRows(statsCache.value);
     }
 
     if (statusResult.status === 'fulfilled') {
@@ -778,7 +793,8 @@ const refresh = async () => {
     };
     const [containerResult, statsResult] = await Promise.all([searchContainer(params), containerListStats()]);
     syncContainerRows(containerResult.data.items || []);
-    applyStatsToRows(statsResult.data || []);
+    statsCache.value = statsResult.data || [];
+    applyStatsToRows(statsCache.value);
 };
 
 const loadSize = async (row: any) => {

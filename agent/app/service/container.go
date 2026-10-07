@@ -51,6 +51,7 @@ import (
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/mem"
+	"golang.org/x/sync/singleflight"
 )
 
 type ContainerService struct{}
@@ -292,26 +293,88 @@ func (u *ContainerService) ContainerItemStats(ctx context.Context, req dto.Opera
 	}
 	return data, nil
 }
-const containerStatsConcurrency = 8
+const (
+	containerStatsConcurrency   = 8
+	containerListStatsCacheTTL  = 3 * time.Second
+)
+
+type containerListStatsCacheStore struct {
+	mu        sync.RWMutex
+	data      []dto.ContainerListStats
+	fetchedAt time.Time
+}
+
+var (
+	containerListStatsCache containerListStatsCacheStore
+	containerListStatsFetch singleflight.Group
+)
+
+func (c *containerListStatsCacheStore) get() ([]dto.ContainerListStats, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	if c.data == nil || time.Since(c.fetchedAt) >= containerListStatsCacheTTL {
+		return nil, false
+	}
+	return cloneContainerListStats(c.data), true
+}
+
+func (c *containerListStatsCacheStore) set(data []dto.ContainerListStats) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.data = cloneContainerListStats(data)
+	c.fetchedAt = time.Now()
+}
+
+func cloneContainerListStats(data []dto.ContainerListStats) []dto.ContainerListStats {
+	if len(data) == 0 {
+		return nil
+	}
+	out := make([]dto.ContainerListStats, len(data))
+	copy(out, data)
+	return out
+}
 
 func (u *ContainerService) ContainerListStats() ([]dto.ContainerListStats, error) {
+	if cached, ok := containerListStatsCache.get(); ok {
+		return cached, nil
+	}
+
+	result, err, _ := containerListStatsFetch.Do("all", func() (interface{}, error) {
+		if cached, ok := containerListStatsCache.get(); ok {
+			return cached, nil
+		}
+		data, err := fetchContainerListStats()
+		if err != nil {
+			return nil, err
+		}
+		containerListStatsCache.set(data)
+		return cloneContainerListStats(data), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.([]dto.ContainerListStats), nil
+}
+
+func fetchContainerListStats() ([]dto.ContainerListStats, error) {
 	client, err := docker.NewDockerClient()
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
-	list, err := client.ContainerList(context.Background(), container.ListOptions{All: true})
+
+	listOptions := container.ListOptions{}
+	listOptions.Filters = filters.NewArgs(filters.Arg("status", "running"))
+	list, err := client.ContainerList(context.Background(), listOptions)
 	if err != nil {
 		return nil, err
 	}
+
 	datas := make([]dto.ContainerListStats, len(list))
 	sem := make(chan struct{}, containerStatsConcurrency)
 	var wg sync.WaitGroup
 	for i, item := range list {
 		datas[i].ContainerID = item.ID
-		if item.State != "running" {
-			continue
-		}
 		wg.Add(1)
 		go func(index int, containerID string) {
 			defer wg.Done()
