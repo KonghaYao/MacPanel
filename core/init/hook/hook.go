@@ -104,7 +104,5 @@ func initDockerConf() {
 	if err != nil {
 		return
 	}
-	if strings.Contains(dockerPath, "snap") {
-		constant.DaemonJsonPath = "/var/snap/docker/current/config/daemon.json"
-	}
+	constant.DaemonJsonPath = paths.ResolveDockerDaemonJsonPath(dockerPath)
 }

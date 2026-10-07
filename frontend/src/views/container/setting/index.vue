@@ -201,7 +201,7 @@
             <div class="mt-2.5">
                 <span class="text-rose-500">{{ $t('container.iptablesHelper2') }}</span>
                 <div class="mt-2.5">
-                    <span class="text-xs">{{ $t('container.restartHelper') }}</span>
+                    <span class="text-xs">{{ restartHelperText }}</span>
                 </div>
                 <div class="mt-2.5">
                     <span class="text-xs">{{ $t('commons.msg.operateConfirm') }}</span>
@@ -248,7 +248,7 @@
 
 <script lang="ts" setup>
 import { ElMessageBox, FormInstance } from 'element-plus';
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import CodemirrorPro from '@/components/codemirror-pro/index.vue';
 import Mirror from '@/views/container/setting/mirror/index.vue';
 import Registry from '@/views/container/setting/registry/index.vue';
@@ -269,8 +269,9 @@ import { getAgentSettingInfo } from '@/api/modules/setting';
 import { MsgSuccess } from '@/utils/message';
 import { checkNumberRange } from '@/global/form-rules';
 import { useGlobalStore } from '@/composables/useGlobalStore';
+import { getDockerRestartHelper } from '@/utils/docker';
 
-const { docsUrl, isFxplay, isMobile, openMenuTabs } = useGlobalStore();
+const { docsUrl, isFxplay, isMobile, openMenuTabs, platformOS } = useGlobalStore();
 
 const unset = ref(i18n.global.t('setting.unSetting'));
 const submitInput = ref();
@@ -279,6 +280,8 @@ const isActive = ref(false);
 const isExist = ref(false);
 
 const loading = ref(false);
+const dockerRuntime = ref('');
+const restartHelperText = computed(() => getDockerRestartHelper(dockerRuntime.value, platformOS.value));
 const showDaemonJsonAlert = ref(false);
 const confShowType = ref('base');
 
@@ -329,7 +332,7 @@ const open = ref();
 const onSaveFile = async () => {
     let params = {
         header: i18n.global.t('database.confChange'),
-        operationInfo: i18n.global.t('container.restartHelper'),
+        operationInfo: restartHelperText.value,
         submitInputInfo: i18n.global.t('database.restartNow'),
     };
     confirmDialogRefFile.value!.acceptParams(params);
@@ -340,7 +343,7 @@ const loadHeight = () => {
 };
 
 const onChangeMirrors = () => {
-    mirrorRef.value.acceptParams({ mirrors: form.mirrors });
+    mirrorRef.value.acceptParams({ mirrors: form.mirrors, dockerRuntime: dockerRuntime.value });
 };
 const onChangeRegistries = () => {
     registriesRef.value.acceptParams({ registries: form.registries });
@@ -361,7 +364,7 @@ const handleIPv6 = async () => {
     }
     let params = {
         header: i18n.global.t('database.confChange'),
-        operationInfo: i18n.global.t('container.restartHelper'),
+        operationInfo: restartHelperText.value,
         submitInputInfo: i18n.global.t('database.restartNow'),
     };
     confirmDialogRefIpv6.value!.acceptParams(params);
@@ -377,7 +380,7 @@ const handleLogOption = async () => {
     }
     let params = {
         header: i18n.global.t('database.confChange'),
-        operationInfo: i18n.global.t('container.restartHelper'),
+        operationInfo: restartHelperText.value,
         submitInputInfo: i18n.global.t('database.restartNow'),
     };
     confirmDialogRefLog.value!.acceptParams(params);
@@ -390,7 +393,7 @@ const handleIptables = () => {
     if (form.iptables) {
         let params = {
             header: i18n.global.t('database.confChange'),
-            operationInfo: i18n.global.t('container.restartHelper'),
+            operationInfo: restartHelperText.value,
             submitInputInfo: i18n.global.t('database.restartNow'),
         };
         confirmDialogRefIptable.value!.acceptParams(params);
@@ -410,7 +413,7 @@ const onSubmitOpenIPtable = () => {
 const handleLive = async () => {
     let params = {
         header: i18n.global.t('database.confChange'),
-        operationInfo: i18n.global.t('container.restartHelper'),
+        operationInfo: restartHelperText.value,
         submitInputInfo: i18n.global.t('database.restartNow'),
     };
     confirmDialogRefLive.value!.acceptParams(params);
@@ -421,7 +424,7 @@ const onSubmitSaveLive = () => {
 const handleCgroup = async () => {
     let params = {
         header: i18n.global.t('database.confChange'),
-        operationInfo: i18n.global.t('container.restartHelper'),
+        operationInfo: restartHelperText.value,
         submitInputInfo: i18n.global.t('database.restartNow'),
     };
     confirmDialogRefCgroup.value!.acceptParams(params);
@@ -507,6 +510,7 @@ const search = async () => {
     const res = await loadDaemonJson();
     form.isSwarm = res.data.isSwarm;
     form.version = res.data.version;
+    dockerRuntime.value = res.data.dockerRuntime || '';
     form.cgroupDriver = res.data.cgroupDriver || 'cgroupfs';
     form.liveRestore = res.data.liveRestore;
     form.iptables = res.data.iptables;

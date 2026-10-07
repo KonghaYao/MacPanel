@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 	"time"
@@ -18,6 +19,8 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/utils/common"
 	"github.com/1Panel-dev/1Panel/agent/utils/controller"
 	"github.com/1Panel-dev/1Panel/agent/utils/docker"
+	"github.com/1Panel-dev/1Panel/pkg/platform/capabilities"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 
 	dockerfirewall "github.com/1Panel-dev/1Panel/agent/utils/firewall/docker_guard"
 	"github.com/docker/docker/api/types/swarm"
@@ -202,6 +205,9 @@ func (u *DockerService) LoadDockerConf() (*dto.DaemonJsonConf, error) {
 	data.IPTables = true
 	data.Version = "-"
 	data.IsSwarm = false
+	if dockerPath, err := exec.LookPath("docker"); err == nil {
+		data.DockerRuntime = string(paths.DetectDockerRuntime(dockerPath))
+	}
 
 	type daemonFileResult struct {
 		content []byte
@@ -274,10 +280,8 @@ func (u *DockerService) LoadDockerConf() (*dto.DaemonJsonConf, error) {
 }
 
 func (u *DockerService) UpdateConf(req dto.SettingUpdate, withRestart bool) error {
-	if withRestart {
-		if err := rejectDarwinDockerServiceControl(); err != nil {
-			return err
-		}
+	if withRestart && capabilities.IsDarwin() {
+		withRestart = false
 	}
 	err := createIfNotExistDaemonJsonFile()
 	if err != nil {

@@ -1930,6 +1930,8 @@ const message = {
         setting: '配置',
         goSetting: '去修改',
         restartHelper: '修改配置后需要重启 Docker 服务生效',
+        restartHelperOrbStack: '修改配置后请在终端执行 orb restart docker 使其生效',
+        restartHelperDockerDesktop: '修改配置后请重启 Docker Desktop 使其生效',
         operatorStatusHelper: '此操作将{0}Docker 服务，是否继续？',
         dockerStatus: 'Docker 服务',
         daemonJsonPathHelper: '请保证配置路径与 docker.service 中指定的配置路径保持一致。',

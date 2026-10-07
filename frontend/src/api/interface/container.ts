@@ -418,6 +418,7 @@ export namespace Container {
         isExist: boolean;
         isActive: boolean;
         version: string;
+        dockerRuntime?: string;
         registryMirrors: Array<string>;
         insecureRegistries: Array<string>;
         liveRestore: boolean;

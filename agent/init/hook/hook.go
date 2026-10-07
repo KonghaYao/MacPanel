@@ -3,7 +3,6 @@ package hook
 import (
 	"os"
 	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/1Panel-dev/1Panel/agent/app/dto"
@@ -166,9 +165,7 @@ func initDockerConf() {
 	if err != nil {
 		return
 	}
-	if strings.Contains(dockerPath, "snap") {
-		constant.DaemonJsonPath = "/var/snap/docker/current/config/daemon.json"
-	}
+	constant.InitDaemonJsonPath(dockerPath)
 }
 
 func initAlertTask() {

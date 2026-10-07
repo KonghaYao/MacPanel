@@ -10,13 +10,14 @@ type DockerStatus struct {
 }
 
 type DaemonJsonConf struct {
-	IsSwarm      bool     `json:"isSwarm"`
-	Version      string   `json:"version"`
-	Mirrors      []string `json:"registryMirrors"`
-	Registries   []string `json:"insecureRegistries"`
-	LiveRestore  bool     `json:"liveRestore"`
-	IPTables     bool     `json:"iptables"`
-	CgroupDriver string   `json:"cgroupDriver"`
+	IsSwarm       bool     `json:"isSwarm"`
+	Version       string   `json:"version"`
+	DockerRuntime string   `json:"dockerRuntime,omitempty"`
+	Mirrors       []string `json:"registryMirrors"`
+	Registries    []string `json:"insecureRegistries"`
+	LiveRestore   bool     `json:"liveRestore"`
+	IPTables      bool     `json:"iptables"`
+	CgroupDriver  string   `json:"cgroupDriver"`
 
 	Ipv6         bool   `json:"ipv6"`
 	FixedCidrV6  string `json:"fixedCidrV6"`

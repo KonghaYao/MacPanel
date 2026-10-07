@@ -3,10 +3,12 @@ package paths
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 )
 
@@ -20,6 +22,97 @@ func ResetBootstrapState() {
 }
 
 const macPanelDirName = "MacPanel"
+
+const (
+	defaultDockerDaemonJSONPath = "/etc/docker/daemon.json"
+	snapDockerDaemonJSONPath    = "/var/snap/docker/current/config/daemon.json"
+)
+
+type DockerRuntime string
+
+const (
+	DockerRuntimeLinux         DockerRuntime = "linux"
+	DockerRuntimeDockerDesktop DockerRuntime = "docker-desktop"
+	DockerRuntimeOrbStack      DockerRuntime = "orbstack"
+)
+
+func ResolveDockerDaemonJsonPath(dockerBinaryPath string) string {
+	if strings.Contains(dockerBinaryPath, "snap") {
+		return snapDockerDaemonJSONPath
+	}
+	if runtime.GOOS == "darwin" {
+		if home, err := os.UserHomeDir(); err == nil {
+			return resolveDarwinDockerDaemonJSONPath(dockerBinaryPath, home)
+		}
+	}
+	return defaultDockerDaemonJSONPath
+}
+
+func DetectDockerRuntime(dockerBinaryPath string) DockerRuntime {
+	if runtime.GOOS != "darwin" {
+		return DockerRuntimeLinux
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return DockerRuntimeDockerDesktop
+	}
+	return detectDarwinDockerRuntime(dockerBinaryPath, home)
+}
+
+func resolveDarwinDockerDaemonJSONPath(dockerBinaryPath, home string) string {
+	if detectDarwinDockerRuntime(dockerBinaryPath, home) == DockerRuntimeOrbStack {
+		return filepath.Join(home, ".orbstack", "config", "docker.json")
+	}
+	return filepath.Join(home, ".docker", "daemon.json")
+}
+
+func detectDarwinDockerRuntime(dockerBinaryPath, home string) DockerRuntime {
+	if isOrbStackDockerBinary(dockerBinaryPath) {
+		return DockerRuntimeOrbStack
+	}
+	if readDockerCurrentContext(home) == "orbstack" {
+		return DockerRuntimeOrbStack
+	}
+	orbConfig := filepath.Join(home, ".orbstack", "config", "docker.json")
+	orbDocker := filepath.Join(home, ".orbstack", "bin", "docker")
+	if fileExists(orbConfig) && fileExists(orbDocker) && !isDockerDesktopBinary(dockerBinaryPath) {
+		return DockerRuntimeOrbStack
+	}
+	return DockerRuntimeDockerDesktop
+}
+
+func isOrbStackDockerBinary(dockerBinaryPath string) bool {
+	normalized := filepath.ToSlash(dockerBinaryPath)
+	return strings.Contains(normalized, "/.orbstack/") || strings.Contains(normalized, "orbstack")
+}
+
+func isDockerDesktopBinary(dockerBinaryPath string) bool {
+	normalized := filepath.ToSlash(dockerBinaryPath)
+	return strings.Contains(normalized, "Docker.app")
+}
+
+func readDockerCurrentContext(home string) string {
+	if ctx := strings.TrimSpace(os.Getenv("DOCKER_CONTEXT")); ctx != "" {
+		return ctx
+	}
+	configPath := filepath.Join(home, ".docker", "config.json")
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return ""
+	}
+	var cfg struct {
+		CurrentContext string `json:"currentContext"`
+	}
+	if err := json.Unmarshal(data, &cfg); err != nil {
+		return ""
+	}
+	return strings.TrimSpace(cfg.CurrentContext)
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
 
 func BaseDir() string {
 	if runtime.GOOS == "darwin" {

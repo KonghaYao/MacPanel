@@ -37,14 +37,20 @@ import ConfirmDialog from '@/components/confirm-dialog/index.vue';
 import { updateDaemonJson } from '@/api/modules/container';
 import { FormInstance } from 'element-plus';
 import { emptyLineFilter } from '@/utils/validate';
+import { getDockerRestartHelper } from '@/utils/docker';
+import { useGlobalStore } from '@/composables/useGlobalStore';
+
 const emit = defineEmits<{ (e: 'search'): void }>();
+const { platformOS } = useGlobalStore();
 
 const confirmDialogRef = ref();
 
 interface DialogProps {
     mirrors: string;
+    dockerRuntime?: string;
 }
 const drawerVisible = ref();
+const dockerRuntime = ref('');
 const loading = ref();
 
 const form = reactive({
@@ -73,6 +79,7 @@ function checkMirrors(rule: any, value: any, callback: any) {
 
 const acceptParams = (params: DialogProps): void => {
     form.mirrors = params.mirrors || params.mirrors.replaceAll(',', '\n');
+    dockerRuntime.value = params.dockerRuntime || '';
     drawerVisible.value = true;
 };
 
@@ -82,7 +89,7 @@ const onSave = async (formEl: FormInstance | undefined) => {
         if (!valid) return;
         let params = {
             header: i18n.global.t('database.confChange'),
-            operationInfo: i18n.global.t('container.restartHelper'),
+            operationInfo: getDockerRestartHelper(dockerRuntime.value, platformOS.value),
             submitInputInfo: i18n.global.t('database.restartNow'),
         };
         confirmDialogRef.value!.acceptParams(params);

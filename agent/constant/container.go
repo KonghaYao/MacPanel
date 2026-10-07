@@ -1,5 +1,7 @@
 package constant
 
+import "github.com/1Panel-dev/1Panel/pkg/platform/paths"
+
 const (
 	ContainerOpStart   = "start"
 	ContainerOpStop    = "stop"
@@ -16,3 +18,7 @@ const (
 )
 
 var DaemonJsonPath = "/etc/docker/daemon.json"
+
+func InitDaemonJsonPath(dockerBinaryPath string) {
+	DaemonJsonPath = paths.ResolveDockerDaemonJsonPath(dockerBinaryPath)
+}

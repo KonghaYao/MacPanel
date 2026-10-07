@@ -2012,6 +2012,8 @@ const message = {
         setting: 'Setting | Settings',
         goSetting: 'Go to Settings',
         restartHelper: 'Configuration changes require restarting the Docker service to take effect',
+        restartHelperOrbStack: 'After changing the configuration, run orb restart docker in Terminal to apply it',
+        restartHelperDockerDesktop: 'After changing the configuration, restart Docker Desktop to apply it',
         operatorStatusHelper: 'This will "{0}" the Docker service. Continue?',
         dockerStatus: 'Docker Service',
         daemonJsonPathHelper: 'Ensure that the configuration path is the same as that specified in docker.service.',
