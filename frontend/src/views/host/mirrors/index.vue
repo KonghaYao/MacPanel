@@ -8,74 +8,78 @@
                 </el-alert>
             </template>
             <template #main>
-                <el-card v-for="eco in ecosystems" :key="eco.id" class="mb-4">
-                    <div class="mb-3 flex flex-wrap items-center gap-2">
-                        <span class="text-base font-medium">{{ ecosystemTitle(eco.id) }}</span>
-                        <el-tag v-if="eco.readError" type="danger">{{ $t('mirrors.readFailed') }}</el-tag>
-                        <el-tag v-else-if="eco.activePreset" :type="eco.activePreset === 'official' ? 'info' : 'success'">
-                            {{ activeLabel(eco) }}
-                        </el-tag>
-                        <el-tag v-else type="warning">{{ $t('mirrors.custom') }}</el-tag>
-                    </div>
-
-                    <div class="mb-3 flex flex-wrap items-center gap-1 text-sm text-gray-500">
-                        <span>{{ $t('mirrors.configPath') }}</span>
-                        <span class="break-all">{{ eco.configPath }}</span>
-                        <CopyButton :content="eco.configPath" />
-                    </div>
-
-                    <el-alert v-if="noteOf(eco.id)" class="mb-3" type="info" :closable="false">
-                        {{ noteOf(eco.id) }}
-                    </el-alert>
-                    <el-alert v-if="eco.readError" class="mb-3" type="warning" :closable="false">
-                        {{ eco.readError }}
-                    </el-alert>
-
-                    <div class="mb-4 flex flex-wrap items-center gap-2">
-                        <div v-for="preset in eco.presets" :key="preset.id" class="flex items-center">
-                            <el-button
-                                :type="eco.activePreset === preset.id ? 'primary' : 'default'"
-                                :disabled="applyingKey !== ''"
-                                :loading="applyingKey === keyOf(eco.id, preset.id)"
-                                @click="onPreset(eco.id, preset.id)"
+                <el-tabs v-if="ecosystems.length" v-model="activeTab">
+                    <el-tab-pane v-for="eco in ecosystems" :key="eco.id" :label="ecosystemTitle(eco.id)" :name="eco.id">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <el-tag v-if="eco.readError" type="danger">{{ $t('mirrors.readFailed') }}</el-tag>
+                            <el-tag
+                                v-else-if="eco.activePreset"
+                                :type="eco.activePreset === 'official' ? 'info' : 'success'"
                             >
-                                {{ presetLabel(preset) }}
-                            </el-button>
-                            <CopyButton :content="preset.snippet" />
+                                {{ activeLabel(eco) }}
+                            </el-tag>
+                            <el-tag v-else type="warning">{{ $t('mirrors.custom') }}</el-tag>
                         </div>
-                    </div>
 
-                    <el-form v-if="drafts[eco.id]" label-position="top" class="max-w-3xl">
-                        <el-form-item v-for="field in eco.fields" :key="field.key" :label="fieldLabel(field.key)">
-                            <el-input
-                                v-if="field.kind === 'urls'"
-                                v-model="drafts[eco.id][field.key]"
-                                type="textarea"
-                                :rows="4"
-                            />
-                            <el-input v-else v-model="drafts[eco.id][field.key]" />
-                        </el-form-item>
-                        <el-form-item>
-                            <el-button
-                                type="primary"
-                                plain
-                                :disabled="applyingKey !== ''"
-                                :loading="applyingKey === keyOf(eco.id, 'custom')"
-                                @click="onCustom(eco.id)"
-                            >
-                                {{ $t('mirrors.saveCustom') }}
-                            </el-button>
-                        </el-form-item>
-                    </el-form>
-
-                    <div class="mt-2 rounded bg-[var(--el-fill-color-light)] p-3">
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="text-sm">{{ $t('mirrors.snippet') }}</span>
-                            <CopyButton :content="eco.snippet" :is-icon="false" />
+                        <div class="mb-3 flex flex-wrap items-center gap-1 text-sm text-gray-500">
+                            <span>{{ $t('mirrors.configPath') }}</span>
+                            <span class="break-all">{{ eco.configPath }}</span>
+                            <CopyButton :content="eco.configPath" />
                         </div>
-                        <pre class="mt-2 whitespace-pre-wrap break-all text-xs leading-5">{{ eco.snippet }}</pre>
-                    </div>
-                </el-card>
+
+                        <el-alert v-if="noteOf(eco.id)" class="mb-3" type="info" :closable="false">
+                            {{ noteOf(eco.id) }}
+                        </el-alert>
+                        <el-alert v-if="eco.readError" class="mb-3" type="warning" :closable="false">
+                            {{ eco.readError }}
+                        </el-alert>
+
+                        <div class="mb-4 flex flex-wrap items-center gap-2">
+                            <div v-for="preset in eco.presets" :key="preset.id" class="flex items-center">
+                                <el-button
+                                    :type="eco.activePreset === preset.id ? 'primary' : 'default'"
+                                    :disabled="applyingKey !== ''"
+                                    :loading="applyingKey === keyOf(eco.id, preset.id)"
+                                    @click="onPreset(eco.id, preset.id)"
+                                >
+                                    {{ presetLabel(preset) }}
+                                </el-button>
+                                <CopyButton :content="preset.snippet" />
+                            </div>
+                        </div>
+
+                        <el-form v-if="drafts[eco.id]" label-position="top" class="max-w-3xl">
+                            <el-form-item v-for="field in eco.fields" :key="field.key" :label="fieldLabel(field.key)">
+                                <el-input
+                                    v-if="field.kind === 'urls'"
+                                    v-model="drafts[eco.id][field.key]"
+                                    type="textarea"
+                                    :rows="4"
+                                />
+                                <el-input v-else v-model="drafts[eco.id][field.key]" />
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button
+                                    type="primary"
+                                    plain
+                                    :disabled="applyingKey !== ''"
+                                    :loading="applyingKey === keyOf(eco.id, 'custom')"
+                                    @click="onCustom(eco.id)"
+                                >
+                                    {{ $t('mirrors.saveCustom') }}
+                                </el-button>
+                            </el-form-item>
+                        </el-form>
+
+                        <div class="mt-2 rounded bg-[var(--el-fill-color-light)] p-3">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-sm">{{ $t('mirrors.snippet') }}</span>
+                                <CopyButton :content="eco.snippet" :is-icon="false" />
+                            </div>
+                            <pre class="mt-2 whitespace-pre-wrap break-all text-xs leading-5">{{ eco.snippet }}</pre>
+                        </div>
+                    </el-tab-pane>
+                </el-tabs>
             </template>
         </LayoutContent>
     </div>
@@ -91,6 +95,7 @@ import { MsgSuccess } from '@/utils/message';
 const { t, te } = useI18n();
 const loading = ref(false);
 const applyingKey = ref('');
+const activeTab = ref('');
 const ecosystems = ref<Mirror.Ecosystem[]>([]);
 const drafts = reactive<Record<string, Record<string, string>>>({});
 
@@ -121,10 +126,21 @@ const syncDrafts = (items: Mirror.Ecosystem[]) => {
     }
 };
 
+const ensureActiveTab = () => {
+    if (!ecosystems.value.length) {
+        activeTab.value = '';
+        return;
+    }
+    if (!ecosystems.value.some((eco) => eco.id === activeTab.value)) {
+        activeTab.value = ecosystems.value[0].id;
+    }
+};
+
 const load = async () => {
     const res = await listMirrors();
     ecosystems.value = res.data || [];
     syncDrafts(ecosystems.value);
+    ensureActiveTab();
 };
 
 const onPreset = async (ecosystem: string, presetId: string) => {
