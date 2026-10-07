@@ -31,6 +31,9 @@ AGENT_NAME=1panel-agent
 MACPANEL_PATH=$(BASE_PATH)/cmd/macpanel
 MACPANEL_NAME=macpanel
 
+MACPANEL_VERSION ?= v0.4.0
+MACPANEL_LDFLAGS = -s -w -X github.com/1Panel-dev/1Panel/pkg/platform/version.Version=$(MACPANEL_VERSION)
+
 # Embed build order (required for correct frontend assets in core/macpanel):
 #   1. make clean_assets          (optional)
 #   2. make build_frontend        Vue build -> core/cmd/server/web/assets/
@@ -59,7 +62,7 @@ build_agent_on_linux:
 build_for_darwin: build_frontend
 	mkdir -p $(BUILD_PATH)
 	cd $(MACPANEL_PATH) && CGO_ENABLED=0 GOOS=darwin GOARCH=$(DARWIN_GOARCH) $(GOBUILD) \
-		-trimpath -ldflags '-s -w' -o $(BUILD_PATH)/$(MACPANEL_NAME) .
+		-trimpath -ldflags '$(MACPANEL_LDFLAGS)' -o $(BUILD_PATH)/$(MACPANEL_NAME) .
 
 # Cross-compile Linux server binaries (separate core + agent)
 build_for_linux: build_frontend

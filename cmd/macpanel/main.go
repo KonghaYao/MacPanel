@@ -12,6 +12,7 @@ import (
 	adminCmd "github.com/1Panel-dev/1Panel/core/cmd/server/cmd"
 	coreServer "github.com/1Panel-dev/1Panel/core/server"
 	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
+	"github.com/1Panel-dev/1Panel/pkg/platform/version"
 	"github.com/spf13/cobra"
 )
 
@@ -61,7 +62,7 @@ func runUnified() {
 }
 
 func main() {
-	if err := paths.Bootstrap(""); err != nil {
+	if err := paths.Bootstrap(version.Version); err != nil {
 		fmt.Fprintf(os.Stderr, "macpanel init: %v\n", err)
 		os.Exit(1)
 	}

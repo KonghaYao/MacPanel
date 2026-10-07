@@ -9,15 +9,16 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/cmd/server/conf"
 	"github.com/1Panel-dev/1Panel/agent/global"
 	"github.com/1Panel-dev/1Panel/agent/utils/files"
-	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
 	"github.com/1Panel-dev/1Panel/agent/utils/xpack"
+	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
+	"github.com/1Panel-dev/1Panel/pkg/platform/version"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
 
 func Init() {
-	if err := paths.Bootstrap(""); err != nil {
+	if err := paths.Bootstrap(version.Version); err != nil {
 		panic(err)
 	}
 	mode := ""

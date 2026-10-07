@@ -10,6 +10,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/global"
 	"github.com/1Panel-dev/1Panel/core/utils/ctl_conf"
 	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
+	"github.com/1Panel-dev/1Panel/pkg/platform/version"
 	"github.com/gin-gonic/gin"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
@@ -213,7 +214,7 @@ func getLanguageFromDBInternal() string {
 }
 func getLanguageFrom1pctl() string {
 	if paths.IsDarwin() {
-		if err := paths.Bootstrap(""); err != nil {
+		if err := paths.Bootstrap(version.Version); err != nil {
 			return ""
 		}
 	}

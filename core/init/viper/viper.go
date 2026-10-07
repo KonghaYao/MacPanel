@@ -10,19 +10,20 @@ import (
 	"github.com/1Panel-dev/1Panel/core/global"
 	"github.com/1Panel-dev/1Panel/core/utils/ctl_conf"
 	"github.com/1Panel-dev/1Panel/pkg/platform/paths"
+	"github.com/1Panel-dev/1Panel/pkg/platform/version"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
 
 func Init() {
-	if err := paths.Bootstrap(""); err != nil {
+	if err := paths.Bootstrap(version.Version); err != nil {
 		panic(err)
 	}
 	baseDir := paths.LinuxDefaultBaseDir()
 	port := "9999"
 	mode := ""
-	version := "v2.0.0"
+	version := version.Version
 	username, password, entrance, language, edition := "", "", "", "zh", ""
 	v := viper.NewWithOptions()
 	v.SetConfigType("yaml")

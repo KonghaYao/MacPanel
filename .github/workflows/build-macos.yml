@@ -46,7 +46,13 @@ jobs:
         run: |
           go work sync
           mkdir -p build
-          cd cmd/macpanel && CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags '-s -w' -o ../../build/macpanel .
+          MACPANEL_VERSION="${GITHUB_REF#refs/tags/}"
+          if [[ ! "$MACPANEL_VERSION" =~ ^v ]]; then
+            MACPANEL_VERSION=$(grep -v '^#' VERSION | head -1 | sed 's/^/v/')
+          fi
+          cd cmd/macpanel && CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath \
+            -ldflags "-s -w -X github.com/1Panel-dev/1Panel/pkg/platform/version.Version=${MACPANEL_VERSION}" \
+            -o ../../build/macpanel .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

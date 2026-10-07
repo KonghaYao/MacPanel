@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	panelversion "github.com/1Panel-dev/1Panel/pkg/platform/version"
 	"runtime"
 	"strings"
 	"sync"
@@ -277,7 +279,7 @@ func bootstrap(version string) error {
 	}
 
 	if version == "" {
-		version = "v2.0.0"
+		version = panelversion.Version
 	}
 	password, err := generatePassword(16)
 	if err != nil {
