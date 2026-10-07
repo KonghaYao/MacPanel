@@ -91,9 +91,6 @@ func (b sshManagedBlock) contains(line int) bool {
 }
 
 func (u *SSHService) GetSSHInfo() (*dto.SSHInfo, error) {
-	if err := rejectDarwinFeature("sshd_config"); err != nil {
-		return nil, err
-	}
 	data := dto.SSHInfo{
 		AutoStart:              true,
 		IsExist:                true,
@@ -113,8 +110,11 @@ func (u *SSHService) GetSSHInfo() (*dto.SSHInfo, error) {
 }
 
 func (u *SSHService) OperateSSH(operation string) error {
-	if err := rejectDarwinFeature("sshd_config"); err != nil {
+	if err := rejectDarwinSSHEnableOperation(operation); err != nil {
 		return err
+	}
+	if skipDarwinSSHServiceRestart() {
+		return operateDarwinSSH(operation)
 	}
 	serviceName, err := loadServiceName()
 	if err != nil {
@@ -153,6 +153,9 @@ func (u *SSHService) OperateSSH(operation string) error {
 }
 
 func restartSSHService(serviceName string) error {
+	if skipDarwinSSHServiceRestart() {
+		return nil
+	}
 	if err := stopSSHSocketIfActive(serviceName); err != nil {
 		return err
 	}
@@ -215,14 +218,6 @@ func loadSSHSocketNames(serviceName string) []string {
 }
 
 func (u *SSHService) Update(req dto.SSHUpdate) error {
-	if err := rejectDarwinFeature("sshd_config"); err != nil {
-		return err
-	}
-	serviceName, err := loadServiceName()
-	if err != nil {
-		return err
-	}
-
 	directives, _, err := parseSSHConfigTree(sshPath)
 	if err != nil {
 		return err
@@ -246,10 +241,21 @@ func (u *SSHService) Update(req dto.SSHUpdate) error {
 		handleSSHPortUpdate(oldPortValue, req.NewValue)
 	}
 
+	if skipDarwinSSHServiceRestart() {
+		return nil
+	}
+	serviceName, err := loadServiceName()
+	if err != nil {
+		return err
+	}
 	return restartSSHService(serviceName)
 }
 
 func loadSSHServiceStatus(data *dto.SSHInfo) {
+	if skipDarwinSSHServiceRestart() {
+		loadDarwinSSHServiceStatus(data)
+		return
+	}
 	serviceName, err := loadServiceName()
 	if err != nil {
 		data.IsExist = false
@@ -417,9 +423,6 @@ func runWithOptionalSudo(sudo, name string, args ...string) (string, error) {
 }
 
 func (u *SSHService) SyncRootCert() error {
-	if err := rejectDarwinFeature("sshd_config"); err != nil {
-		return err
-	}
 	currentUser, err := user.Current()
 	if err != nil {
 		return fmt.Errorf("load current user failed, err: %v", err)
@@ -457,9 +460,6 @@ func (u *SSHService) SyncRootCert() error {
 }
 
 func (u *SSHService) CreateRootCert(req dto.RootCertOperate) error {
-	if err := rejectDarwinFeature("sshd_config"); err != nil {
-		return err
-	}
 	if cmd.CheckIllegal(req.EncryptionMode, req.PassPhrase) {
 		return buserr.New("ErrCmdIllegal")
 	}
@@ -558,9 +558,6 @@ func (u *SSHService) CreateRootCert(req dto.RootCertOperate) error {
 }
 
 func (u *SSHService) EditRootCert(req dto.RootCertOperate) error {
-	if err := rejectDarwinFeature("sshd_config"); err != nil {
-		return err
-	}
 	currentUser, err := user.Current()
 	if err != nil {
 		return fmt.Errorf("load current user failed, err: %v", err)
@@ -612,9 +609,6 @@ func (u *SSHService) EditRootCert(req dto.RootCertOperate) error {
 }
 
 func (u *SSHService) SearchRootCerts(req dto.SearchWithPage) (int64, interface{}, error) {
-	if err := rejectDarwinFeature("sshd_config"); err != nil {
-		return 0, nil, err
-	}
 	total, records, err := hostRepo.PageCert(req.Page, req.PageSize)
 	if err != nil {
 		return 0, nil, err
@@ -647,9 +641,6 @@ func (u *SSHService) SearchRootCerts(req dto.SearchWithPage) (int64, interface{}
 }
 
 func (u *SSHService) DeleteRootCerts(req dto.ForceDelete) error {
-	if err := rejectDarwinFeature("sshd_config"); err != nil {
-		return err
-	}
 	currentUser, err := user.Current()
 	if err != nil && !req.ForceDelete {
 		return fmt.Errorf("load current user failed, err: %v", err)
@@ -729,9 +720,6 @@ func listSSHLogFiles(baseDir string) ([]sshFileItem, error) {
 }
 
 func (u *SSHService) LoadLog(ctx *gin.Context, req dto.SearchSSHLog) (int64, []dto.SSHHistory, error) {
-	if err := rejectDarwinFeature("sshd_config"); err != nil {
-		return 0, nil, err
-	}
 	var data []dto.SSHHistory
 	fileList, err := listSSHLogFiles(defaultSSHLogDir)
 	if err != nil {
@@ -783,9 +771,6 @@ func (u *SSHService) LoadLog(ctx *gin.Context, req dto.SearchSSHLog) (int64, []d
 }
 
 func (u *SSHService) CleanLog() error {
-	if err := rejectDarwinFeature("sshd_config"); err != nil {
-		return err
-	}
 	return cleanSSHLogFiles(defaultSSHLogDir)
 }
 
@@ -821,9 +806,6 @@ func cleanSSHLogFiles(baseDir string) error {
 }
 
 func (u *SSHService) ExportLog(ctx *gin.Context, req dto.SearchSSHLog) (string, error) {
-	if err := rejectDarwinFeature("sshd_config"); err != nil {
-		return "", err
-	}
 	_, logs, err := u.LoadLog(ctx, req)
 	if err != nil {
 		return "", err
@@ -842,9 +824,6 @@ func (u *SSHService) ExportLog(ctx *gin.Context, req dto.SearchSSHLog) (string, 
 }
 
 func (u *SSHService) LoadSSHFile(name string) (string, error) {
-	if err := rejectDarwinFeature("sshd_config"); err != nil {
-		return "", err
-	}
 	var fileName string
 	switch name {
 	case "authKeys":
@@ -886,9 +865,6 @@ func (u *SSHService) LoadSSHFile(name string) (string, error) {
 }
 
 func (u *SSHService) UpdateByFile(req dto.SSHConfUpdate) error {
-	if err := rejectDarwinFeature("sshd_config"); err != nil {
-		return err
-	}
 	var fileName string
 	switch req.Key {
 	case "authKeys":
@@ -916,6 +892,9 @@ func (u *SSHService) UpdateByFile(req dto.SSHConfUpdate) error {
 		return err
 	}
 	if req.Key == "authKeys" {
+		return nil
+	}
+	if skipDarwinSSHServiceRestart() {
 		return nil
 	}
 	serviceName, err := loadServiceName()
