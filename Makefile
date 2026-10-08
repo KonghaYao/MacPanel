@@ -31,7 +31,7 @@ AGENT_NAME=1panel-agent
 MACPANEL_PATH=$(BASE_PATH)/cmd/macpanel
 MACPANEL_NAME=macpanel
 
-MACPANEL_VERSION ?= v0.4.1
+MACPANEL_VERSION ?= v0.4.5
 MACPANEL_LDFLAGS = -s -w -X github.com/1Panel-dev/1Panel/pkg/platform/version.Version=$(MACPANEL_VERSION)
 
 # Embed build order (required for correct frontend assets in core/macpanel):
