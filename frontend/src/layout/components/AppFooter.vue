@@ -2,27 +2,34 @@
     <div class="footer" :class="{ 'footer--mobile': isMobile }">
         <div class="footer-content">
             <div class="footer-copyright">
-                <a v-if="!isIntl && !isFxplay" href="https://fit2cloud.com/" target="_blank">
-                    Copyright © 2014-{{ year }} {{ $t('commons.fit2cloud') }}
-                </a>
-                <a v-else href="https://1panel.pro/" target="_blank">
-                    Copyright © {{ year }} {{ $t('commons.lingxia') }}
-                </a>
+                <span>
+                    Copyright © 2014-{{ year }} {{ $t('commons.fit2cloud') }} · MacPanel{{
+                        version ? ` ${version}` : ''
+                    }}
+                </span>
             </div>
             <FooterNavigation class="footer-navigation-panel" />
-            <SystemUpgrade class="footer-upgrade" />
+            <SystemUpgrade class="footer-upgrade" :show-version="false" />
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref } from 'vue';
 import SystemUpgrade from '@/components/system-upgrade/index.vue';
 import FooterNavigation from '@/components/footer-navigation/index.vue';
+import { getSettingBaseInfo } from '@/api/modules/setting';
 import { useGlobalStore } from '@/composables/useGlobalStore';
 
-const { isFxplay, isIntl, isMobile } = useGlobalStore();
+const { isMobile } = useGlobalStore();
 
 const year = new Date().getFullYear();
+const version = ref('');
+
+onMounted(async () => {
+    const res = await getSettingBaseInfo();
+    version.value = res.data.systemVersion;
+});
 </script>
 
 <style scoped lang="scss">

@@ -23,27 +23,19 @@ import {
 import type { FooterNavigationKey, FooterNavigationSetting } from './model';
 import { FOOTER_NAVIGATION_REFRESH_EVENT } from './event';
 
-const { docsUrl, isEE, isFxplay, isIntl } = useGlobalStore();
+const { isEE } = useGlobalStore();
 const setting = ref<FooterNavigationSetting | null>(null);
 let loadGeneration = 0;
 
-const defaults = computed(() => createDefaultFooterNavigationLinks(isIntl.value, docsUrl.value));
+const defaults = computed(() => createDefaultFooterNavigationLinks());
 const links = computed(() => mergeFooterNavigationLinks(setting.value, defaults.value));
 const labels: Record<FooterNavigationKey, string> = {
-    learnMore: 'license.knowMorePro',
-    forum: 'setting.forum',
-    documentation: 'setting.doc2',
     project: 'setting.project',
 };
 
 const visibleLinks = computed(() => {
     return footerNavigationKeys
-        .filter((key) => {
-            if (isFxplay.value && key !== 'documentation') {
-                return false;
-            }
-            return links.value[key].visible;
-        })
+        .filter((key) => links.value[key].visible)
         .map((key) => ({
             key,
             label: labels[key],

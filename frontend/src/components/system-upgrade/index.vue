@@ -11,10 +11,14 @@
                 <el-link v-else-if="isOffline" underline="never" type="primary" @click="to1Panel">
                     {{ $t('license.offLine') }}
                 </el-link>
-                <el-link v-else underline="never" type="primary" @click="toEdition">
-                    {{ $t('license.community') }}
-                </el-link>
-                <el-link underline="never" class="version" type="primary" @click="getVersionLog()">
+                <el-link
+                    v-if="showVersion"
+                    underline="never"
+                    class="version"
+                    :class="{ 'version-after-edition': isEE || isMasterPro || isOffline }"
+                    type="primary"
+                    @click="getVersionLog()"
+                >
                     {{ version }}
                 </el-link>
                 <el-badge
@@ -23,7 +27,12 @@
                     class="-mt-0.5"
                     :hidden="version === 'Waiting' || !hasNewVersion"
                 >
-                    <el-link class="ml-2" underline="never" type="primary" @click="onLoadUpgradeInfo">
+                    <el-link
+                        :class="{ 'ml-2': showVersion || isEE || isMasterPro || isOffline }"
+                        underline="never"
+                        type="primary"
+                        @click="onLoadUpgradeInfo"
+                    >
                         {{ $t('commons.button.update') }}
                     </el-link>
                 </el-badge>
@@ -44,6 +53,15 @@ import i18n from '@/lang';
 import { MsgSuccess } from '@/utils/message';
 import { onMounted, ref } from 'vue';
 import { useGlobalStore } from '@/composables/useGlobalStore';
+
+withDefaults(
+    defineProps<{
+        showVersion?: boolean;
+    }>(),
+    {
+        showVersion: true,
+    },
+);
 
 const { isOffline, isMasterPro, isEE, isIntl, isAdmin, hasNewVersion } = useGlobalStore();
 const upgradeRef = ref();
@@ -125,12 +143,15 @@ onMounted(() => {
     font-weight: 400;
 }
 .version {
-    margin-left: 8px;
+    margin-left: 0;
     font-size: 14px;
     color: var(--panel-color-primary-light-4);
     text-decoration: none;
     letter-spacing: 0.5px;
     cursor: pointer;
     font-family: auto;
+}
+.version-after-edition {
+    margin-left: 8px;
 }
 </style>

@@ -1,4 +1,4 @@
-export const footerNavigationKeys = ['learnMore', 'forum', 'documentation', 'project'] as const;
+export const footerNavigationKeys = ['project'] as const;
 
 export type FooterNavigationKey = (typeof footerNavigationKeys)[number];
 
@@ -22,19 +22,7 @@ export interface FooterNavigationSettingEditor {
     isDirty: () => boolean;
 }
 
-export const createDefaultFooterNavigationLinks = (isIntl: boolean, docsUrl: string): FooterNavigationLinks => ({
-    learnMore: {
-        visible: true,
-        url: isIntl ? 'https://1panel.pro/pricing' : 'https://1panel.cn/versions.html',
-    },
-    forum: {
-        visible: true,
-        url: isIntl ? 'https://github.com/1Panel-dev/1Panel/discussions' : 'https://bbs.fit2cloud.com/c/1p/7',
-    },
-    documentation: {
-        visible: true,
-        url: docsUrl.endsWith('/') ? docsUrl : `${docsUrl}/`,
-    },
+export const createDefaultFooterNavigationLinks = (): FooterNavigationLinks => ({
     project: {
         visible: true,
         url: 'https://github.com/1Panel-dev/1Panel',
