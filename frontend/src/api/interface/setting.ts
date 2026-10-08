@@ -263,6 +263,9 @@ export namespace Setting {
         latestVersion: string;
         releaseNote: string;
     }
+    export interface MiseUpgradeResult {
+        output: string;
+    }
 
     export interface License {
         licenseName: string;

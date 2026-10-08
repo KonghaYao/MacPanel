@@ -215,6 +215,9 @@ export const listReleases = () => {
 export const upgrade = (version: string) => {
     return http.post(`/core/settings/upgrade`, { version: version });
 };
+export const upgradeByMise = () => {
+    return http.post<Setting.MiseUpgradeResult>(`/core/settings/upgrade/mise`, {}, TimeoutEnum.T_10M);
+};
 
 // memo
 export const getMemo = () => {

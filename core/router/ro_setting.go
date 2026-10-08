@@ -38,6 +38,7 @@ func (s *SettingRouter) InitRouter(Router *gin.RouterGroup) {
 		settingRouter.GET("/ssl/info", baseApi.LoadFromCert)
 		settingRouter.POST("/ssl/download", baseApi.DownloadSSL)
 		settingRouter.POST("/upgrade", baseApi.Upgrade)
+		settingRouter.POST("/upgrade/mise", baseApi.UpgradeByMise)
 		settingRouter.POST("/upgrade/notes", baseApi.GetNotesByVersion)
 		settingRouter.GET("/upgrade/releases", baseApi.LoadRelease)
 		settingRouter.GET("/upgrade", baseApi.GetUpgradeInfo)

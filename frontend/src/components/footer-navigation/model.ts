@@ -25,7 +25,7 @@ export interface FooterNavigationSettingEditor {
 export const createDefaultFooterNavigationLinks = (): FooterNavigationLinks => ({
     project: {
         visible: true,
-        url: 'https://github.com/1Panel-dev/1Panel',
+        url: 'https://github.com/KonghaYao/MacPanel',
     },
 });
 

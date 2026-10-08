@@ -83,6 +83,7 @@ type IUpgradeService interface {
 	LoadNotes(req dto.Upgrade) (string, error)
 	SearchUpgrade() (*dto.UpgradeInfo, error)
 	LoadRelease() ([]dto.ReleasesNotes, error)
+	UpgradeByMise() (string, error)
 }
 
 func NewIUpgradeService() IUpgradeService {

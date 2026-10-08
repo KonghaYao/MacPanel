@@ -79,3 +79,12 @@ func (b *BaseApi) Upgrade(c *gin.Context) {
 	}
 	helper.Success(c)
 }
+
+func (b *BaseApi) UpgradeByMise(c *gin.Context) {
+	output, err := upgradeService.UpgradeByMise()
+	if err != nil {
+		helper.InternalServer(c, err)
+		return
+	}
+	helper.SuccessWithData(c, dto.MiseUpgradeResult{Output: output})
+}

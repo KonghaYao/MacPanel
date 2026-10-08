@@ -176,6 +176,10 @@ type Upgrade struct {
 	Version string `json:"version" validate:"required"`
 }
 
+type MiseUpgradeResult struct {
+	Output string `json:"output"`
+}
+
 type ReleasesNotes struct {
 	Version           string `json:"version"`
 	CreatedAt         string `json:"createdAt"`
