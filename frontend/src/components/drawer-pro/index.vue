@@ -167,3 +167,68 @@ const loadTooltip = () => {
     return i18n.global.t('commons.button.' + (isFullScreen.value ? 'quitFullscreen' : 'fullscreen'));
 };
 </script>
+
+<style lang="scss" scoped>
+:deep(.el-drawer__header:has(.terminal-toolbar)) {
+    gap: 8px;
+
+    > .el-page-header {
+        min-width: 0;
+    }
+
+    .el-page-header__header {
+        flex-wrap: nowrap;
+        align-items: center;
+        min-width: 0;
+        gap: 8px;
+    }
+
+    .el-page-header__left {
+        flex: 1 1 auto;
+        min-width: 0;
+        margin-right: 0;
+    }
+
+    .el-page-header__back,
+    .el-page-header__left .el-divider {
+        flex: 0 0 auto;
+    }
+
+    .el-page-header__content {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .el-page-header__extra {
+        display: flex;
+        align-items: center;
+        flex: 0 0 auto;
+        gap: 8px;
+    }
+
+    .el-page-header__extra .el-button,
+    .terminal-toolbar .el-button {
+        margin: 0;
+    }
+
+    .terminal-toolbar.is-inline {
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .terminal-toolbar-btn {
+        width: auto;
+        height: auto;
+        padding: 2px;
+    }
+
+    .terminal-toolbar-extra .el-button {
+        height: auto;
+        padding: 2px;
+    }
+}
+</style>
