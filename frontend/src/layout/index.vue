@@ -1,13 +1,13 @@
 <template>
     <div
-        :class="[classObj, { 'desktop-embed': desktopEmbed }]"
+        :class="classObj"
         class="app-wrapper relative"
         v-loading="loading"
         :element-loading-text="loadingText"
         fullscreen
     >
         <div v-if="classObj.mobile && classObj.openSidebar" class="drawer-bg" @click="handleClickOutside" />
-        <el-affix v-if="!classObj.mobile && !desktopEmbed" :offset="classObj.openMenuTabs ? 8 : 15" class="affix">
+        <el-affix v-if="!classObj.mobile" :offset="classObj.openMenuTabs ? 8 : 15" class="affix">
             <el-tooltip :content="menuStore.isCollapse ? $t('commons.button.expand') : $t('commons.button.collapse')">
                 <el-button
                     size="small"
@@ -19,7 +19,7 @@
                 ></el-button>
             </el-tooltip>
         </el-affix>
-        <div class="app-sidebar" v-if="!isFullScreen && !desktopEmbed">
+        <div class="app-sidebar" v-if="!isFullScreen">
             <Sidebar @menu-click="handleMenuClick" :menu-router="!classObj.openMenuTabs" @open-task="openTask" />
         </div>
 
@@ -35,21 +35,21 @@
             :gap="[watermark.gap, watermark.gap]"
         >
             <div class="main-container">
-                <mobile-header v-if="classObj.mobile && !desktopEmbed" />
-                <Tabs v-if="classObj.openMenuTabs && !desktopEmbed" />
+                <mobile-header v-if="classObj.mobile" />
+                <Tabs v-if="classObj.openMenuTabs" />
                 <app-main :keep-alive="classObj.openMenuTabs ? tabsStore.keepAliveTabs : null" class="app-main" />
-                <Footer class="app-footer" v-if="!isFullScreen && !desktopEmbed" />
+                <Footer class="app-footer" v-if="!isFullScreen" />
             </div>
         </el-watermark>
         <div class="main-container" v-else>
-            <mobile-header v-if="classObj.mobile && !desktopEmbed" />
-            <Tabs v-if="classObj.openMenuTabs && !desktopEmbed" />
+            <mobile-header v-if="classObj.mobile" />
+            <Tabs v-if="classObj.openMenuTabs" />
             <app-main :keep-alive="classObj.openMenuTabs ? tabsStore.keepAliveTabs : null" class="app-main" />
-            <Footer class="app-footer" v-if="!isFullScreen && !desktopEmbed" />
+            <Footer class="app-footer" v-if="!isFullScreen" />
         </div>
         <TaskList ref="taskListRef" />
-        <TerminalHost v-if="!desktopEmbed" />
-        <TerminalDock v-if="!desktopEmbed" />
+        <TerminalHost />
+        <TerminalDock />
     </div>
 </template>
 
@@ -67,7 +67,6 @@ import { useTheme } from '@/global/use-theme';
 import TaskList from '@/components/task-list/index.vue';
 import i18n from '@/lang';
 import { useGlobalStore } from '@/composables/useGlobalStore';
-import { isDesktopEmbed } from '@/utils/desktop-embed';
 
 const {
     globalStore,
@@ -100,7 +99,6 @@ const route = useRoute();
 const menuStore = MenuStore();
 
 const tabsStore = TabsStore();
-const desktopEmbed = isDesktopEmbed();
 
 const loading = ref(false);
 const loadingText = computed(() =>
@@ -192,7 +190,7 @@ onBeforeUnmount(() => {
     timer = null;
 });
 onMounted(() => {
-    if (!desktopEmbed && openMenuTabs.value && !tabsStore.activeTabPath) {
+    if (openMenuTabs.value && !tabsStore.activeTabPath) {
         handleMenuClick('/');
     }
 
@@ -243,6 +241,8 @@ onMounted(() => {
     overflow-x: hidden;
 }
 .app-main {
+    display: flex;
+    flex-direction: column;
     padding: 7px 20px;
     flex: 1;
     min-width: 0;
@@ -313,16 +313,6 @@ onMounted(() => {
     .main-container,
     .sidebar-container {
         transition: none;
-    }
-}
-
-.desktop-embed {
-    .main-container {
-        margin-left: 0 !important;
-        background: transparent;
-    }
-    .app-main {
-        padding: 8px 12px 12px;
     }
 }
 

@@ -23,17 +23,6 @@
                 <SubItem :menuList="routerMenus" :level="0" />
             </el-menu>
         </el-scrollbar>
-        <button
-            v-if="showMacDesktop"
-            type="button"
-            class="mac-desktop-entry"
-            :class="{ 'is-collapse': isCollapse }"
-            :title="$t('desktop.entry')"
-            @click="goDesktop"
-        >
-            <span class="mac-desktop-mark" />
-            <span v-if="!isCollapse">{{ $t('desktop.entry') }}</span>
-        </button>
         <Collapse :version="version" @open-task="openTask" @refresh="search" />
     </div>
 </template>
@@ -56,11 +45,7 @@ import { useGlobalStore } from '@/composables/useGlobalStore';
 const route = useRoute();
 const router = useRouter();
 const menuStore = MenuStore();
-const { currentNode, isAdmin, menuAccordion, permissions, platformFeatures, platformOS } = useGlobalStore();
-const showMacDesktop = computed(() => import.meta.env.DEV || platformOS.value === 'darwin');
-const goDesktop = () => {
-    router.push({ name: 'MacDesktop' });
-};
+const { currentNode, isAdmin, menuAccordion, permissions, platformFeatures } = useGlobalStore();
 const version = ref();
 
 const activeMenu = computed(() => {
@@ -354,39 +339,5 @@ watch(
 
 .ico {
     height: 20px !important;
-}
-
-.mac-desktop-entry {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 4px 10px 8px;
-    padding: 6px 10px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--el-menu-text-color);
-    cursor: pointer;
-    font-size: 13px;
-    text-align: left;
-
-    &:hover {
-        background: var(--el-menu-hover-bg-color);
-    }
-
-    &.is-collapse {
-        justify-content: center;
-        margin-inline: 8px;
-        padding-inline: 0;
-    }
-}
-
-.mac-desktop-mark {
-    width: 16px;
-    height: 16px;
-    flex: none;
-    border-radius: 4px;
-    background: linear-gradient(160deg, #7aa2ff, #f3c6a5);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 </style>

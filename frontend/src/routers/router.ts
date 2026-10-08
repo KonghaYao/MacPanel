@@ -66,14 +66,6 @@ menuList.unshift(homeRouter);
 export const routes: RouteRecordRaw[] = [
     homeRouter,
     {
-        path: '/v2',
-        name: 'MacDesktop',
-        component: () => import('@/views/desktop/index.vue'),
-        meta: {
-            title: 'desktop.entry',
-        },
-    },
-    {
         path: '/login',
         name: 'login',
         props: true,

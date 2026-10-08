@@ -7,7 +7,6 @@ import { loadProductProFromDB } from '@/utils/xpack';
 import i18n from '@/lang';
 import { MsgError } from '@/utils/message';
 import { TerminalDockSessionStore, TerminalSessionStore } from '@/store';
-import { isDesktopEmbed, markDesktopEmbed } from '@/utils/desktop-embed';
 
 const axiosCanceler = new AxiosCanceler();
 
@@ -31,7 +30,6 @@ const clearLoginStatus = () => {
 };
 
 router.beforeEach(async (to, from) => {
-    markDesktopEmbed(to);
     const { entrance, isEnterprise, isEnterpriseLicenseLoaded, isEnterpriseLicensed, isLogin, isOnRestart } =
         useGlobalStore();
     NProgress.start();
@@ -114,7 +112,6 @@ router.beforeEach(async (to, from) => {
 
     const cachedRoute = localStorage.getItem(activeMenuKey);
     if (
-        !isDesktopEmbed() &&
         to.meta.activeMenu &&
         to.meta.activeMenu != from.meta.activeMenu &&
         cachedRoute &&
@@ -139,11 +136,6 @@ router.beforeEach(async (to, from) => {
 });
 
 router.afterEach((to) => {
-    if (isDesktopEmbed()) {
-        isRedirecting = false;
-        NProgress.done();
-        return;
-    }
     if (to.meta.activeMenu && !to.meta.ignoreTab && !isRedirecting) {
         let notMathParam = true;
         if (to.matched.some((record) => record.path.includes(':'))) {
