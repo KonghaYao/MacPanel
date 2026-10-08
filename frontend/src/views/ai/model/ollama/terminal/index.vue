@@ -7,7 +7,23 @@
         :autoClose="false"
         :fullScreen="true"
     >
-        <Terminal class="mt-2" style="height: calc(100vh - 175px)" ref="terminalRef"></Terminal>
+        <template #extra>
+            <TerminalToolbar
+                inline
+                :can-copy="!!terminalRef?.ui?.canCopy"
+                show-reconnect
+                @search="terminalRef?.openSearch()"
+                @copy="terminalRef?.copySelection()"
+                @paste="terminalRef?.pasteClipboard()"
+                @clear="terminalRef?.clearScreen()"
+                @reconnect="reconnect"
+            />
+        </template>
+        <div class="terminal-pane">
+            <div class="terminal-pane-body">
+                <Terminal ref="terminalRef"></Terminal>
+            </div>
+        </div>
 
         <template #footer>
             <span class="dialog-footer">
@@ -22,6 +38,7 @@
 <script lang="ts" setup>
 import { nextTick, ref } from 'vue';
 import Terminal from '@/components/terminal/index.vue';
+import TerminalToolbar from '@/components/terminal/toolbar.vue';
 import { closeOllamaModel } from '@/api/modules/ai';
 
 const title = ref();
@@ -49,6 +66,12 @@ const initTerm = () => {
     });
 };
 
+const reconnect = async () => {
+    terminalRef.value?.onClose();
+    await nextTick();
+    initTerm();
+};
+
 const onClose = async () => {
     await closeOllamaModel(itemName.value)
         .then(() => {
@@ -68,3 +91,7 @@ defineExpose({
     acceptParams,
 });
 </script>
+
+<style lang="scss">
+@use '@/components/terminal/pane.scss';
+</style>

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="terminal-view">
         <el-card class="router_card">
             <el-radio-group v-model="activeNames" @change="handleChange">
                 <el-radio-button class="router_card_button" size="large" value="terminal">
@@ -17,17 +17,19 @@
             </el-radio-group>
         </el-card>
 
-        <div v-show="activeNames === 'terminal'">
-            <TerminalTab ref="terminalTabRef" />
-        </div>
-        <div v-if="isAdmin && activeNames === 'host'">
-            <HostTab ref="hostTabRef" />
-        </div>
-        <div v-if="activeNames === 'command'">
-            <CommandTab ref="commandTabRef" />
-        </div>
-        <div v-if="isAdmin && activeNames === 'setting'">
-            <SettingTab ref="settingTabRef" />
+        <div class="terminal-view-body">
+            <div v-show="activeNames === 'terminal'" class="terminal-view-fill">
+                <TerminalTab ref="terminalTabRef" />
+            </div>
+            <div v-if="isAdmin && activeNames === 'host'" class="terminal-view-fill">
+                <HostTab ref="hostTabRef" />
+            </div>
+            <div v-if="activeNames === 'command'" class="terminal-view-fill">
+                <CommandTab ref="commandTabRef" />
+            </div>
+            <div v-if="isAdmin && activeNames === 'setting'" class="terminal-view-fill">
+                <SettingTab ref="settingTabRef" />
+            </div>
         </div>
     </div>
 </template>
@@ -40,6 +42,7 @@ import SettingTab from '@/views/terminal/setting/index.vue';
 import { onMounted, ref } from 'vue';
 import { getTerminalInfo } from '@/api/modules/setting';
 import { TerminalStore } from '@/store';
+import { patchTerminalStore } from '@/components/terminal/options';
 import { useGlobalStore } from '@/composables/useGlobalStore';
 
 const terminalStore = TerminalStore();
@@ -67,19 +70,7 @@ const handleChange = (tab: any) => {
 
 const loadTerminalSetting = async () => {
     await getTerminalInfo().then((res) => {
-        terminalStore.$patch({
-            showTerminalButton: res.data.showTerminalButton !== 'Disable',
-            lineHeight: Number(res.data.lineHeight),
-            letterSpacing: Number(res.data.letterSpacing),
-            fontSize: Number(res.data.fontSize),
-            fontFamily: res.data.fontFamily || "Monaco, Menlo, Consolas, 'Courier New', monospace",
-            backgroundColor: res.data.backgroundColor || '#000000',
-            foregroundColor: res.data.foregroundColor || '#f5f5f5',
-            cursorBlink: res.data.cursorBlink,
-            cursorStyle: res.data.cursorStyle,
-            scrollback: Number(res.data.scrollback),
-            scrollSensitivity: Number(res.data.scrollSensitivity),
-        });
+        patchTerminalStore(terminalStore, res.data);
     });
 };
 
@@ -90,8 +81,32 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+.terminal-view {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
+
+.terminal-view-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.terminal-view-fill {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    overflow: auto;
+}
+
 .router_card {
     --el-card-padding: 0;
+    flex: 0 0 auto;
 }
 
 .router_card_button {

@@ -31,11 +31,7 @@ type LocalCommand struct {
 
 func NewCommand(name string, arg ...string) (*LocalCommand, error) {
 	cmd := exec.Command(name, arg...)
-	if term := os.Getenv("TERM"); term != "" {
-		cmd.Env = append(os.Environ(), "TERM="+term)
-	} else {
-		cmd.Env = append(os.Environ(), "TERM=xterm")
-	}
+	cmd.Env = InteractiveEnviron()
 	homeDir, _ := os.UserHomeDir()
 	cmd.Dir = homeDir
 

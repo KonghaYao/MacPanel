@@ -1,6 +1,39 @@
 <template>
-    <div class="terminal-shell">
-        <div ref="terminalElement" class="terminal-container"></div>
+    <div class="terminal-shell" @contextmenu="onContextMenu">
+        <div ref="terminalElement" class="terminal-container" :style="shellStyle"></div>
+        <div v-if="searchOpen" class="terminal-search" @contextmenu.stop>
+            <el-input
+                ref="searchInputRef"
+                v-model="searchText"
+                size="small"
+                :placeholder="$t('terminal.searchPlaceholder')"
+                @keydown.enter.exact.prevent="find(true)"
+                @keydown.shift.enter.prevent="find(false)"
+                @keydown.esc.prevent="closeSearch"
+                @input="find(true)"
+            />
+            <el-button text size="small" @click="find(false)">{{ $t('terminal.findPrev') }}</el-button>
+            <el-button text size="small" @click="find(true)">{{ $t('terminal.findNext') }}</el-button>
+            <el-button text size="small" @click="closeSearch">{{ $t('commons.button.close') }}</el-button>
+        </div>
+        <Teleport to="body">
+            <div
+                v-if="menu.open"
+                class="terminal-menu"
+                :style="{ left: `${menu.x}px`, top: `${menu.y}px` }"
+                @contextmenu.prevent
+            >
+            <button type="button" class="terminal-menu-item" :disabled="!ui.canCopy" @click="onMenuCopy">
+                {{ $t('commons.button.copy') }}
+            </button>
+            <button type="button" class="terminal-menu-item" @click="onMenuPaste">
+                {{ $t('terminal.paste') }}
+            </button>
+            <button type="button" class="terminal-menu-item" @click="onMenuSelectAll">
+                {{ $t('commons.button.selectAll') }}
+            </button>
+            </div>
+        </Teleport>
         <transition name="ai-mask-fade">
             <div v-if="aiNotice.loading" class="ai-notice-mask"></div>
         </transition>
@@ -17,10 +50,24 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, shallowRef, watch, onActivated, onBeforeUnmount, nextTick, computed, onMounted } from 'vue';
+import { ref, shallowRef, watch, onActivated, onBeforeUnmount, nextTick, computed, onMounted, reactive } from 'vue';
 import { Terminal } from '@xterm/xterm';
+import type { SearchAddon } from '@xterm/addon-search';
 import '@xterm/xterm/css/xterm.css';
 import { FitAddon } from '@xterm/addon-fit';
+import {
+    TERMINAL_DEFAULTS,
+    buildTerminalOptions,
+    buildTerminalTheme,
+    createSearchAddon,
+    cursorStyleOf,
+    loadClipboard,
+    loadUnicode11,
+    loadWebLinks,
+    loadWebgl,
+    searchDecorationOptions,
+    type TerminalLinkTarget,
+} from '@/components/terminal/options';
 import { decodeBase64, encodeBase64 } from '@/utils/base64';
 import { TerminalStore } from '@/store';
 import { MsgError } from '@/utils/message';
@@ -39,7 +86,18 @@ const CLOSE_ATTACHED_ELSEWHERE = 4409;
 const CLOSE_REVALIDATE = 4410;
 
 const terminalElement = ref<HTMLDivElement | null>(null);
+const searchInputRef = ref<{ focus: () => void } | null>(null);
 const fitAddon = new FitAddon();
+const searchAddon = shallowRef<SearchAddon>();
+const linkTarget: TerminalLinkTarget = { getElement: () => terminalElement.value };
+const ui = reactive({ canCopy: false });
+const searchOpen = ref(false);
+const searchText = ref('');
+const menu = reactive({ open: false, x: 0, y: 0 });
+let pending:
+    | { kind: 'connect'; endpoint: string; args: string }
+    | { kind: 'error'; message: string }
+    | null = null;
 const termReady = ref(false);
 const webSocketReady = ref(false);
 const term = shallowRef<Terminal>();
@@ -107,11 +165,7 @@ watch(
 );
 watch([backgroundColor, foregroundColor], ([newBackgroundColor, newForegroundColor]) => {
     if (!term.value) return;
-    term.value.options.theme = {
-        ...(term.value.options.theme || {}),
-        background: newBackgroundColor,
-        foreground: newForegroundColor,
-    };
+    term.value.options.theme = buildTerminalTheme(newBackgroundColor, newForegroundColor);
     applyTerminalBackground(newBackgroundColor);
 });
 const cursorStyle = computed(() => terminalStore.cursorStyle);
@@ -162,27 +216,34 @@ const acceptParams = (props: WsProps) => {
     });
 };
 
+const shellStyle = computed(() => ({
+    backgroundColor: terminalStore.backgroundColor || TERMINAL_DEFAULTS.backgroundColor,
+    '--terminal-bg': terminalStore.backgroundColor || TERMINAL_DEFAULTS.backgroundColor,
+}));
+
 const newTerm = () => {
-    const bg = terminalStore.backgroundColor || '#000000';
-    const fg = terminalStore.foregroundColor || '#f5f5f5';
-    term.value = new Terminal({
-        lineHeight: terminalStore.lineHeight || 1.2,
-        fontSize: terminalStore.fontSize || 12,
-        fontFamily: terminalStore.fontFamily || "Monaco, Menlo, Consolas, 'Courier New', monospace",
-        theme: {
-            background: bg,
-            foreground: fg,
-        },
-        cursorBlink: terminalStore.cursorBlink ? String(terminalStore.cursorBlink).toLowerCase() === 'enable' : true,
-        cursorStyle: terminalStore.cursorStyle ? getStyle() : 'underline',
-        scrollback: terminalStore.scrollback || 1000,
-        scrollSensitivity: terminalStore.scrollSensitivity || 6,
-    });
+    term.value = new Terminal(
+        buildTerminalOptions(
+            {
+                lineHeight: terminalStore.lineHeight,
+                letterSpacing: terminalStore.letterSpacing,
+                fontSize: terminalStore.fontSize,
+                fontFamily: terminalStore.fontFamily,
+                backgroundColor: terminalStore.backgroundColor,
+                foregroundColor: terminalStore.foregroundColor,
+                cursorBlink: String(terminalStore.cursorBlink).toLowerCase() === 'enable',
+                cursorStyle: cursorStyleOf(terminalStore.cursorStyle),
+                scrollback: terminalStore.scrollback,
+                scrollSensitivity: terminalStore.scrollSensitivity,
+            },
+            linkTarget,
+        ),
+    );
 };
 
 const applyTerminalBackground = (color: string) => {
     if (!terminalElement.value) return;
-    terminalElement.value.style.backgroundColor = color || '#000000';
+    terminalElement.value.style.backgroundColor = color || TERMINAL_DEFAULTS.backgroundColor;
     terminalElement.value.style.backgroundImage = '';
     terminalElement.value.style.backgroundSize = '';
     terminalElement.value.style.backgroundPosition = '';
@@ -190,32 +251,43 @@ const applyTerminalBackground = (color: string) => {
     terminalElement.value.style.imageRendering = '';
 };
 
-const getStyle = (): 'underline' | 'block' | 'bar' => {
-    switch (terminalStore.cursorStyle) {
-        case 'bar':
-            return 'bar';
-        case 'block':
-            return 'block';
-        default:
-            return 'underline';
-    }
-};
+const getStyle = (): 'underline' | 'block' | 'bar' => cursorStyleOf(terminalStore.cursorStyle);
 
 const init = (endpoint: string, args: string) => {
-    if (initTerminal(true)) {
-        initWebSocket(endpoint, args);
-    }
+    pending = { kind: 'connect', endpoint, args };
+    tryMount();
 };
 
 const initError = (errorInfo: string) => {
-    if (initTerminal(false)) {
-        term.value.write(errorInfo);
-    }
+    pending = { kind: 'error', message: errorInfo };
+    tryMount();
 };
+
+function tryMount() {
+    if (termReady.value || !pending || !terminalElement.value) {
+        return;
+    }
+    if (terminalElement.value.clientWidth <= 0 || terminalElement.value.clientHeight <= 0) {
+        return;
+    }
+    const job = pending;
+    if (!openTerminal(job.kind === 'connect')) {
+        return;
+    }
+    pending = null;
+    if (job.kind === 'error') {
+        term.value?.write(job.message);
+        return;
+    }
+    initWebSocket(job.endpoint, job.args);
+}
 
 function onClose(isKeepShow: boolean = false) {
     initWebSocketToken++;
+    pending = null;
     closing = true;
+    closeMenu();
+    closeSearch();
     stopReconnect();
     window.removeEventListener('resize', changeTerminalSize);
     if (resizeFrame !== undefined) {
@@ -237,32 +309,52 @@ function onClose(isKeepShow: boolean = false) {
     terminalSocket.value = undefined;
     if (!isKeepShow) {
         try {
-            term.value.dispose();
+            term.value?.dispose();
         } catch {}
-    }
-    if (terminalElement.value) {
-        terminalElement.value.innerHTML = '';
+        term.value = undefined;
+        searchAddon.value = undefined;
+        termReady.value = false;
+        ui.canCopy = false;
+        if (terminalElement.value) {
+            terminalElement.value.innerHTML = '';
+        }
     }
 }
 
 // terminal 相关代码 start
 
-const initTerminal = (online: boolean = false): boolean => {
+function openTerminal(online: boolean): boolean {
+    if (!terminalElement.value) {
+        return false;
+    }
     newTerm();
+    const current = term.value;
+    if (!current) {
+        return false;
+    }
     lastResizeColumns = 0;
     lastResizeRows = 0;
-    if (terminalElement.value) {
-        term.value.open(terminalElement.value);
-        applyTerminalBackground(terminalStore.backgroundColor);
-        term.value.loadAddon(fitAddon);
-        window.addEventListener('resize', changeTerminalSize);
-        if (online) {
-            term.value.onData((data) => onTermData(data));
-        }
-        termReady.value = true;
+    current.open(terminalElement.value);
+    applyTerminalBackground(terminalStore.backgroundColor);
+    loadUnicode11(current);
+    loadWebgl(current);
+    current.loadAddon(fitAddon);
+    fitAddon.fit();
+    searchAddon.value = createSearchAddon();
+    current.loadAddon(searchAddon.value);
+    loadWebLinks(current, linkTarget);
+    loadClipboard(current);
+    current.attachCustomKeyEventHandler(onKeyDown);
+    current.onSelectionChange(() => {
+        ui.canCopy = current.hasSelection();
+    });
+    window.addEventListener('resize', changeTerminalSize);
+    if (online) {
+        current.onData((data) => onTermData(data));
     }
-    return termReady.value;
-};
+    termReady.value = true;
+    return true;
+}
 
 function changeTerminalSize() {
     if (resizeFrame !== undefined) {
@@ -646,17 +738,137 @@ function showAINotice(level: string, message: string) {
 
 const resizeObserver = ref<ResizeObserver>();
 
+function onKeyDown(event: KeyboardEvent): boolean {
+    if (event.type !== 'keydown' || !term.value) {
+        return true;
+    }
+    const key = event.key.toLowerCase();
+    const command = event.metaKey;
+    const selection = term.value.hasSelection();
+    if (command && key === 'c' && selection) {
+        event.preventDefault();
+        copySelection().catch(reportClipboardError);
+        return false;
+    }
+    if (command && key === 'v') {
+        event.preventDefault();
+        pasteClipboard().catch(reportClipboardError);
+        return false;
+    }
+    if (command && key === 'f') {
+        event.preventDefault();
+        openSearch();
+        return false;
+    }
+    const mac = /Mac|iPhone|iPad/.test(navigator.userAgent);
+    if (!mac && event.ctrlKey && !event.metaKey && !event.altKey && key === 'c' && selection) {
+        event.preventDefault();
+        copySelection().catch(reportClipboardError);
+        return false;
+    }
+    return true;
+}
+
+async function copySelection() {
+    const text = term.value?.getSelection() ?? '';
+    if (!text) {
+        return;
+    }
+    await navigator.clipboard.writeText(text);
+}
+
+async function pasteClipboard() {
+    const text = await navigator.clipboard.readText();
+    if (!text || !term.value) {
+        return;
+    }
+    term.value.paste(text);
+}
+
+function reportClipboardError(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message) {
+        MsgError(message);
+    }
+}
+
+function openSearch() {
+    searchOpen.value = true;
+    nextTick(() => searchInputRef.value?.focus());
+}
+
+function closeSearch() {
+    searchOpen.value = false;
+    searchText.value = '';
+    searchAddon.value?.clearDecorations();
+}
+
+function find(forward: boolean) {
+    const addon = searchAddon.value;
+    if (!addon) {
+        return;
+    }
+    if (!searchText.value) {
+        addon.clearDecorations();
+        return;
+    }
+    if (forward) {
+        addon.findNext(searchText.value, searchDecorationOptions());
+    } else {
+        addon.findPrevious(searchText.value, searchDecorationOptions());
+    }
+}
+
+function closeMenu() {
+    menu.open = false;
+}
+
+function onContextMenu(event: MouseEvent) {
+    event.preventDefault();
+    ui.canCopy = !!term.value?.hasSelection();
+    menu.x = Math.min(event.clientX, window.innerWidth - 180);
+    menu.y = Math.min(event.clientY, window.innerHeight - 132);
+    menu.open = true;
+}
+
+function onMenuCopy() {
+    closeMenu();
+    copySelection().catch(reportClipboardError);
+}
+
+function onMenuPaste() {
+    closeMenu();
+    pasteClipboard().catch(reportClipboardError);
+}
+
+function onMenuSelectAll() {
+    term.value?.selectAll();
+    ui.canCopy = !!term.value?.hasSelection();
+    closeMenu();
+}
+
+function onWindowPointerDown(event: PointerEvent) {
+    const target = event.target;
+    if (target instanceof Node && (target as HTMLElement).closest?.('.terminal-menu')) {
+        return;
+    }
+    closeMenu();
+}
+
 onMounted(() => {
-    // 使用 ResizeObserver 监听容器大小变化
+    window.addEventListener('pointerdown', onWindowPointerDown);
     resizeObserver.value = new ResizeObserver(() => {
-        if (termReady.value && webSocketReady.value) {
-            changeTerminalSize();
+        if (!termReady.value) {
+            tryMount();
+            return;
         }
+        changeTerminalSize();
     });
 
     if (terminalElement.value) {
         resizeObserver.value.observe(terminalElement.value);
     }
+    tryMount();
 });
 
 defineExpose({
@@ -665,11 +877,16 @@ defineExpose({
     isWsOpen,
     sendMsg,
     getLatency: () => latency.value,
-    // re-fit after the element was moved back into a visible container
     refit: () => changeTerminalSize(),
+    ui,
+    openSearch,
+    copySelection: () => copySelection().catch(reportClipboardError),
+    pasteClipboard: () => pasteClipboard().catch(reportClipboardError),
+    clearScreen: () => term.value?.clear(),
 });
 
 onBeforeUnmount(() => {
+    window.removeEventListener('pointerdown', onWindowPointerDown);
     onClose();
     resizeObserver.value?.disconnect();
 });
@@ -683,6 +900,7 @@ onActivated(() => {
 .terminal-container {
     width: 100%;
     height: 100%;
+    background-color: var(--terminal-bg, #111827);
 }
 
 .terminal-shell {
@@ -775,35 +993,83 @@ onActivated(() => {
     opacity: 0;
 }
 
+.terminal-search {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    max-width: calc(100% - 24px);
+    padding: 6px;
+    border-radius: 8px;
+    background: rgba(17, 24, 39, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.terminal-menu {
+    position: fixed;
+    z-index: 4000;
+    min-width: 148px;
+    padding: 4px;
+    border-radius: 8px;
+    background: var(--el-bg-color-overlay);
+    border: 1px solid var(--el-border-color-light);
+    box-shadow: var(--el-box-shadow-light);
+}
+
+.terminal-menu-item {
+    display: block;
+    width: 100%;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--el-text-color-primary);
+    text-align: left;
+    cursor: pointer;
+}
+
+.terminal-menu-item:hover:not(:disabled) {
+    background: var(--el-fill-color-light);
+}
+
+.terminal-menu-item:disabled {
+    color: var(--el-text-color-disabled);
+    cursor: not-allowed;
+}
+
+:deep(.terminal-link-tooltip) {
+    position: absolute;
+    z-index: 8;
+    max-width: min(480px, 80%);
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgba(17, 24, 39, 0.94);
+    color: #e5e7eb;
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
+
 :deep(.xterm) {
-    padding: 5px !important;
-    background-color: transparent !important;
+    height: 100%;
+    padding: 0;
+    background-color: var(--terminal-bg, #111827);
 }
 
 :deep(.xterm .xterm-viewport) {
-    background-color: transparent !important;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1);
+    background-color: var(--terminal-bg, #111827) !important;
+    scrollbar-width: none;
 }
 
 :deep(.xterm .xterm-viewport::-webkit-scrollbar) {
-    width: 10px;
-    height: 10px;
-    background: rgba(255, 255, 255, 0.1);
-}
-
-:deep(.xterm .xterm-viewport::-webkit-scrollbar-thumb) {
-    border-radius: 6px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-    background-color: rgba(255, 255, 255, 0.3);
-}
-
-:deep(.xterm .xterm-viewport::-webkit-scrollbar-thumb:hover) {
-    background-color: rgba(255, 255, 255, 0.45);
-}
-
-:deep(.xterm .xterm-viewport::-webkit-scrollbar-corner) {
-    background: transparent;
+    width: 0;
+    height: 0;
+    display: none;
 }
 </style>

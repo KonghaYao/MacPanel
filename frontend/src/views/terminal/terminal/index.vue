@@ -3,7 +3,7 @@
         <el-tabs
             type="card"
             class="terminal-tabs"
-            style="background-color: var(--panel-terminal-tag-bg-color)"
+            :style="tabStyle"
             v-model="terminalValue"
             addable
             @tab-add="showConnections = !showConnections"
@@ -26,17 +26,12 @@
                         :show-after="300"
                     >
                         <span class="terminal-tab-label">
-                            <span v-if="item.status === 'online'" class="terminal-tab-status" aria-hidden="true">
-                                <span class="terminal-status-dot"></span>
+                            <span class="terminal-tab-status" aria-hidden="true">
+                                <span
+                                    class="terminal-status-dot"
+                                    :class="item.status === 'online' ? 'is-online' : 'is-offline'"
+                                ></span>
                             </span>
-                            <el-button
-                                v-else
-                                icon="Refresh"
-                                class="terminal-tab-reconnect"
-                                :aria-label="$t('commons.button.reconnect')"
-                                link
-                                @click.stop="onReconnect(item)"
-                            />
                             <span class="terminal-tab-title">{{ item.title }}</span>
                             <span
                                 v-if="item.key === terminalValue && item.status === 'online'"
@@ -50,13 +45,9 @@
                 <div
                     class="terminal-slot"
                     :ref="(el: any) => onSlot(item.key, el)"
-                    :style="{
-                        height: `calc(100vh - ${loadHeight()})`,
-                        'background-color': `var(--panel-logs-bg-color)`,
-                    }"
+                    :style="{ backgroundColor: terminalStore.backgroundColor }"
                 ></div>
-
-                <div class="flex items-center gap-2 w-full py-2 flex-wrap">
+                <div class="terminal-command-bar flex items-center gap-2 w-full py-2 flex-wrap">
                     <AiSetting v-if="!isMobile" class="shrink-0" />
                     <el-cascader
                         v-model="quickCmd"
@@ -105,29 +96,35 @@
             <template #add-icon>
                 <ConnectionMenu ref="connectionMenuRef" v-model="showConnections" :open-session="openConnection" />
             </template>
-            <div v-if="store.entries.length === 0">
-                <el-empty
-                    :style="{ height: `calc(100vh - ${loadEmptyHeight()})`, 'background-color': '#000' }"
-                    :description="$t('terminal.emptyTerminal')"
-                ></el-empty>
+            <div
+                v-if="store.entries.length === 0"
+                class="terminal-empty"
+                :style="{ backgroundColor: terminalStore.backgroundColor, color: terminalStore.foregroundColor }"
+            >
+                <span>{{ $t('terminal.emptyTerminal') }}</span>
+                <el-button type="primary" @click="openDefaultLocalConn">{{ $t('terminal.connectLocal') }}</el-button>
             </div>
         </el-tabs>
-        <div v-if="!isMobile" class="terminal-actions">
-            <el-tooltip :content="loadTooltip()" placement="top">
-                <el-button
-                    class="terminal-action"
-                    icon="FullScreen"
-                    text
-                    :aria-label="loadTooltip()"
-                    @click="toggleFullscreen"
-                />
-            </el-tooltip>
+        <div class="terminal-actions">
+            <TerminalToolbar
+                inline
+                :can-copy="activeCanCopy"
+                show-reconnect
+                :show-fullscreen="!isMobile"
+                :fullscreen-active="isFullScreen"
+                @search="activeInstance?.openSearch()"
+                @copy="activeInstance?.copySelection()"
+                @paste="activeInstance?.pasteClipboard()"
+                @clear="activeInstance?.clearScreen()"
+                @reconnect="onReconnect(activeEntry)"
+                @fullscreen="toggleFullscreen"
+            />
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted, onBeforeUnmount, onActivated, onDeactivated } from 'vue';
+import { computed, ref, watch, nextTick, onMounted, onBeforeUnmount, onActivated, onDeactivated } from 'vue';
 import screenfull from 'screenfull';
 import i18n from '@/lang';
 import { testByID, testLocalConn } from '@/api/modules/terminal';
@@ -136,12 +133,22 @@ import router from '@/routers';
 import { getCommandTree } from '@/api/modules/command';
 import { getAgentSettingInfo } from '@/api/modules/setting';
 import AiSetting from '@/views/terminal/setting/ai/index.vue';
-import { TerminalSessionStore } from '@/store';
+import { TerminalSessionStore, TerminalStore } from '@/store';
 import ConnectionMenu from '@/components/terminal/connection-menu/index.vue';
+import TerminalToolbar from '@/components/terminal/toolbar.vue';
 import type { TerminalConnectionOptions } from '@/components/terminal/connection-menu/types';
 
-const { isFullScreen, isMobile, isNodeAdmin, openMenuTabs } = useGlobalStore();
+const { isFullScreen, isMobile, isNodeAdmin } = useGlobalStore();
 const store = TerminalSessionStore();
+const terminalStore = TerminalStore();
+const activeInstance = computed(() => store.instances[terminalValue.value]);
+const activeEntry = computed(() => store.find(terminalValue.value));
+const activeCanCopy = computed(() => !!activeInstance.value?.ui?.canCopy);
+const tabStyle = computed(() => ({
+    backgroundColor: 'var(--panel-terminal-tag-bg-color)',
+    '--panel-terminal-tag-active-bg-color': terminalStore.backgroundColor,
+    '--panel-terminal-tag-active-text-color': terminalStore.foregroundColor,
+}));
 
 const connectionMenuRef = ref<InstanceType<typeof ConnectionMenu>>();
 
@@ -150,10 +157,6 @@ const toggleFullscreen = () => {
         screenfull.toggle();
     }
 };
-const loadTooltip = () => {
-    return i18n.global.t('commons.button.' + (isFullScreen.value ? 'quitFullscreen' : 'fullscreen'));
-};
-
 let timer: ReturnType<typeof setInterval> | null = null;
 const terminalValue = ref();
 
@@ -235,13 +238,6 @@ onDeactivated(() => {
     claim();
 });
 
-const loadHeight = () => {
-    return openMenuTabs.value ? '250px' : '210px';
-};
-const loadEmptyHeight = () => {
-    return openMenuTabs.value ? '201px' : '156px';
-};
-
 const handleTabsRemove = async (targetName: string, action: 'remove' | 'add') => {
     if (action !== 'remove') {
         return;
@@ -307,6 +303,9 @@ const openConnection = async (options: TerminalConnectionOptions) => {
 };
 
 const onReconnect = async (item: any) => {
+    if (!item) {
+        return;
+    }
     const nodeName = new URLSearchParams(item.args).get('operateNode') || undefined;
     const res = item.wsID === 0 ? await testLocalConn(nodeName) : await testByID(item.wsID);
     const cmd = initCmd.value;
@@ -342,13 +341,18 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .terminal-page {
-    --terminal-actions-width: 40px;
+    --terminal-actions-width: 190px;
     position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
     min-width: 0;
+    min-height: 0;
+    overflow: hidden;
     padding-top: 7px;
 
     &.is-mobile {
-        --terminal-actions-width: 0px;
+        --terminal-actions-width: 158px;
     }
 }
 
@@ -356,6 +360,7 @@ onMounted(() => {
     position: absolute;
     top: 7px;
     right: 0;
+    z-index: 2;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -363,26 +368,34 @@ onMounted(() => {
     height: var(--el-tabs-header-height, 40px);
 }
 
-.terminal-action {
-    width: 32px;
-    height: 32px;
-    margin: 0;
-    padding: 0;
-    border-radius: 6px;
-    color: var(--el-text-color-regular);
-
-    &:hover {
-        color: var(--el-color-primary);
-    }
-}
-
 .terminal-tabs {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+
     :deep(.el-tabs__header) {
         justify-content: flex-start;
         padding: 0 var(--terminal-actions-width) 0 0;
         min-height: var(--el-tabs-header-height);
         position: relative;
         margin: 0 0 3px 0;
+    }
+
+    :deep(.el-tabs__content) {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    :deep(.el-tab-pane) {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
     }
     :deep(.el-tabs__nav) {
         white-space: nowrap;
@@ -405,6 +418,9 @@ onMounted(() => {
         margin: 0;
         border: 0;
     }
+    :deep(.el-tabs__item) {
+        background-color: var(--panel-terminal-tag-bg-color);
+    }
     :deep(.el-tabs__item.is-active) {
         color: var(--panel-terminal-tag-active-text-color);
         background-color: var(--panel-terminal-tag-active-bg-color);
@@ -422,25 +438,7 @@ onMounted(() => {
             width: 14px;
             margin-left: 6px;
             right: 0;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity var(--el-transition-duration);
-        }
-
-        &.is-active,
-        &:hover,
-        &:focus-within {
-            .is-icon-close {
-                opacity: 1;
-                pointer-events: auto;
-            }
-        }
-
-        @media (hover: none), (pointer: coarse) {
-            .is-icon-close {
-                opacity: 1;
-                pointer-events: auto;
-            }
+            opacity: 1;
         }
     }
 }
@@ -469,10 +467,10 @@ onMounted(() => {
     height: 6px;
     border-radius: 50%;
     background-color: var(--el-color-success);
-}
 
-.terminal-tab-reconnect {
-    color: inherit;
+    &.is-offline {
+        background-color: var(--el-color-danger);
+    }
 }
 
 .terminal-tab-title {
@@ -493,7 +491,24 @@ onMounted(() => {
 }
 
 .terminal-slot {
+    flex: 1;
     width: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.terminal-command-bar {
+    flex: 0 0 auto;
+}
+
+.terminal-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    min-height: 0;
 }
 
 .vertical-tabs > .el-tabs__content {

@@ -17,6 +17,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import Terminal from '@/components/terminal/index.vue';
+import { patchTerminalStore } from '@/components/terminal/options';
 import { TerminalDockSessionStore, TerminalSessionStore, TerminalStore } from '@/store';
 import { getTerminalInfo } from '@/api/modules/setting';
 import { useGlobalStore } from '@/composables/useGlobalStore';
@@ -30,7 +31,7 @@ const { isAdmin } = useGlobalStore();
 onMounted(async () => {
     try {
         const res = await getTerminalInfo();
-        terminalStore.showTerminalButton = res.data.showTerminalButton !== 'Disable';
+        patchTerminalStore(terminalStore, res.data);
     } catch {}
     if (isAdmin.value && terminalStore.showTerminalButton) await dockStore.restore();
 });
@@ -39,12 +40,9 @@ onMounted(async () => {
 <style scoped>
 .terminal-host {
     position: fixed;
-    left: -10000px;
-    top: 0;
-    width: 1000px;
-    height: 600px;
+    width: 0;
+    height: 0;
     overflow: hidden;
-    visibility: hidden;
     pointer-events: none;
 }
 </style>

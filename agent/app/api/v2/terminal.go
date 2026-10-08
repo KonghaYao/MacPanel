@@ -344,7 +344,7 @@ func loadContainerTerminalCommand(c *gin.Context) (*terminal.LocalCommand, error
 	if err != nil {
 		return nil, err
 	}
-	return terminal.NewCommand("docker", initCmd...)
+	return terminal.NewCommand("docker", terminal.DockerExecArgs(initCmd)...)
 }
 
 func loadRedisInitCmd(c *gin.Context, redisType string) ([]string, error) {

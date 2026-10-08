@@ -8,8 +8,24 @@
         size="large"
         :fullScreen="true"
     >
+        <template #extra>
+            <TerminalToolbar
+                inline
+                :can-copy="!!terminalRef?.ui?.canCopy"
+                show-reconnect
+                @search="terminalRef?.openSearch()"
+                @copy="terminalRef?.copySelection()"
+                @paste="terminalRef?.pasteClipboard()"
+                @clear="terminalRef?.clearScreen()"
+                @reconnect="reconnect"
+            />
+        </template>
         <template #content>
-            <Terminal style="height: calc(100vh - 100px)" ref="terminalRef"></Terminal>
+            <div class="terminal-pane">
+                <div class="terminal-pane-body">
+                    <Terminal ref="terminalRef"></Terminal>
+                </div>
+            </div>
         </template>
     </DrawerPro>
 </template>
@@ -17,6 +33,7 @@
 <script lang="ts" setup>
 import { ref, nextTick } from 'vue';
 import Terminal from '@/components/terminal/index.vue';
+import TerminalToolbar from '@/components/terminal/toolbar.vue';
 
 const open = ref(false);
 const terminalRef = ref<InstanceType<typeof Terminal> | null>(null);
@@ -67,6 +84,12 @@ const initTerm = async () => {
     });
 };
 
+const reconnect = async () => {
+    terminalRef.value?.onClose();
+    await nextTick();
+    await initTerm();
+};
+
 function handleClose() {
     terminalRef.value?.onClose();
     open.value = false;
@@ -76,3 +99,7 @@ defineExpose({
     acceptParams,
 });
 </script>
+
+<style lang="scss">
+@use '@/components/terminal/pane.scss';
+</style>

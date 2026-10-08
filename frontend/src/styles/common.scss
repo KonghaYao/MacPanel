@@ -166,10 +166,18 @@ html {
     }
 }
 
-.xterm-viewport::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-    background-color: #000000;
+.xterm .xterm-viewport {
+    scrollbar-width: none;
+}
+
+.xterm .xterm-viewport::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
+
+.xterm .xterm-scrollable-element > .scrollbar > .slider {
+    border-radius: 4px;
 }
 
 .status-count {

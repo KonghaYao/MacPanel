@@ -27,12 +27,7 @@ type LocalCommand struct {
 
 func NewCommand(script string) (*LocalCommand, error) {
 	cmd := exec.Command("bash")
-	if term := os.Getenv("TERM"); term != "" {
-		cmd.Env = append(os.Environ(), "TERM="+term)
-	} else {
-		cmd.Env = append(os.Environ(), "TERM=xterm")
-	}
-	cmd.Env = append(cmd.Env, "INIT_SCRIPT="+script)
+	cmd.Env = append(InteractiveEnviron(), "INIT_SCRIPT="+script)
 	pty, err := pty.Start(cmd)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to start command")

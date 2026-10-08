@@ -8,15 +8,32 @@
         :size="isFullScreen ? 'full' : 'large'"
         :autoClose="false"
     >
+        <template #extra>
+            <TerminalToolbar
+                v-if="terminalOpen"
+                inline
+                :can-copy="!!terminalRef?.ui?.canCopy"
+                show-reconnect
+                @search="terminalRef?.openSearch()"
+                @copy="terminalRef?.copySelection()"
+                @paste="terminalRef?.pasteClipboard()"
+                @clear="terminalRef?.clearScreen()"
+                @reconnect="reConnect"
+            />
+        </template>
         <template #content>
-            <el-form label-position="top" @submit.prevent>
-                <el-form-item :label="$t('commons.table.user')" prop="user">
-                    <el-select v-model="form.user" :disabled="form.users.length <= 1" @change="reConnect">
-                        <el-option v-for="item in form.users" :key="item" :label="item" :value="item" />
-                    </el-select>
-                </el-form-item>
-            </el-form>
-            <Terminal class="terminal" ref="terminalRef" v-if="terminalOpen"></Terminal>
+            <div class="terminal-pane">
+                <el-form v-show="!terminalOpen" label-position="top" @submit.prevent>
+                    <el-form-item :label="$t('commons.table.user')" prop="user">
+                        <el-select v-model="form.user" :disabled="form.users.length <= 1" @change="reConnect">
+                            <el-option v-for="item in form.users" :key="item" :label="item" :value="item" />
+                        </el-select>
+                    </el-form-item>
+                </el-form>
+                <div v-if="terminalOpen" class="terminal-pane-body">
+                    <Terminal ref="terminalRef"></Terminal>
+                </div>
+            </div>
         </template>
         <template #footer>
             <span class="dialog-footer">
@@ -31,6 +48,7 @@
 <script lang="ts" setup>
 import { nextTick, reactive, ref } from 'vue';
 import Terminal from '@/components/terminal/index.vue';
+import TerminalToolbar from '@/components/terminal/toolbar.vue';
 import { useGlobalStore } from '@/composables/useGlobalStore';
 
 const { currentNode, isFullScreen } = useGlobalStore();
@@ -106,8 +124,6 @@ defineExpose({
 });
 </script>
 
-<style lang="scss" scoped>
-.terminal {
-    height: calc(100vh - 240px);
-}
+<style lang="scss">
+@use '@/components/terminal/pane.scss';
 </style>

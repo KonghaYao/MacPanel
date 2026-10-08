@@ -8,17 +8,34 @@
         :size="isFullScreen ? 'full' : 'large'"
         :autoClose="false"
     >
+        <template #extra>
+            <TerminalToolbar
+                v-if="terminalOpen"
+                inline
+                :can-copy="!!terminalRef?.ui?.canCopy"
+                show-reconnect
+                @search="terminalRef?.openSearch()"
+                @copy="terminalRef?.copySelection()"
+                @paste="terminalRef?.pasteClipboard()"
+                @clear="terminalRef?.clearScreen()"
+                @reconnect="reConnect"
+            />
+        </template>
         <template #content>
-            <el-form ref="formRef" :model="form" label-position="top" @submit.prevent>
-                <el-form-item :label="$t('commons.table.user')" prop="user">
-                    <el-input placeholder="root" clearable v-model="form.user" @keyup.enter="reConnect">
-                        <template #append>
-                            <el-button @click="reConnect">{{ $t('commons.button.conn') }}</el-button>
-                        </template>
-                    </el-input>
-                </el-form-item>
-            </el-form>
-            <Terminal class="terminal" ref="terminalRef" v-if="terminalOpen"></Terminal>
+            <div class="terminal-pane">
+                <el-form v-show="!terminalOpen" :model="form" label-position="top" @submit.prevent>
+                    <el-form-item :label="$t('commons.table.user')" prop="user">
+                        <el-input placeholder="root" clearable v-model="form.user" @keyup.enter="reConnect">
+                            <template #append>
+                                <el-button @click="reConnect">{{ $t('commons.button.conn') }}</el-button>
+                            </template>
+                        </el-input>
+                    </el-form-item>
+                </el-form>
+                <div v-if="terminalOpen" class="terminal-pane-body">
+                    <Terminal ref="terminalRef"></Terminal>
+                </div>
+            </div>
         </template>
         <template #footer>
             <span class="dialog-footer">
@@ -33,6 +50,7 @@
 <script lang="ts" setup>
 import { reactive, ref, nextTick } from 'vue';
 import Terminal from '@/components/terminal/index.vue';
+import TerminalToolbar from '@/components/terminal/toolbar.vue';
 import { useGlobalStore } from '@/composables/useGlobalStore';
 
 const { isFullScreen } = useGlobalStore();
@@ -98,8 +116,6 @@ defineExpose({
     acceptParams,
 });
 </script>
-<style lang="scss" scoped>
-.terminal {
-    height: calc(100vh - 180px);
-}
+<style lang="scss">
+@use '@/components/terminal/pane.scss';
 </style>

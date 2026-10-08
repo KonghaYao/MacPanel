@@ -1,0 +1,16 @@
+.terminal-pane {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: calc(100vh - 160px);
+}
+
+.terminal-pane-body {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.terminal-pane-body > * {
+    height: 100%;
+}

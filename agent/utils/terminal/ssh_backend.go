@@ -33,7 +33,7 @@ func newSSHBackend(client *gossh.Client, cols, rows int, initCmd string, out io.
 		gossh.TTY_OP_ISPEED: 14400,
 		gossh.TTY_OP_OSPEED: 14400,
 	}
-	if err := sshSession.RequestPty("xterm", rows, cols, modes); err != nil {
+	if err := sshSession.RequestPty("xterm-256color", rows, cols, modes); err != nil {
 		_ = sshSession.Close()
 		return nil, err
 	}

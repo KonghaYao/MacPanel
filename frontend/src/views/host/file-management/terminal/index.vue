@@ -7,10 +7,24 @@
         :autoClose="false"
         :fullScreen="true"
     >
+        <template #extra>
+            <TerminalToolbar
+                inline
+                :can-copy="!!terminalRef?.ui?.canCopy"
+                show-reconnect
+                @search="terminalRef?.openSearch()"
+                @copy="terminalRef?.copySelection()"
+                @paste="terminalRef?.pasteClipboard()"
+                @clear="terminalRef?.clearScreen()"
+                @reconnect="reconnect"
+            />
+        </template>
         <template #content>
-            <div class="terminal-container">
+            <div class="terminal-pane">
                 <el-alert :closable="false" :title="$t('terminal.localConnJump')" type="info" />
-                <Terminal class="terminal-content" ref="terminalRef"></Terminal>
+                <div class="terminal-pane-body">
+                    <Terminal ref="terminalRef"></Terminal>
+                </div>
                 <div class="quick-command">
                     <el-cascader
                         v-model="quickCmd"
@@ -32,11 +46,13 @@
 <script lang="ts" setup>
 import { ref, nextTick } from 'vue';
 import Terminal from '@/components/terminal/index.vue';
+import TerminalToolbar from '@/components/terminal/toolbar.vue';
 import { getCommandTree } from '@/api/modules/command';
 import i18n from '@/lang';
 
 const terminalVisible = ref(false);
 const terminalRef = ref<InstanceType<typeof Terminal> | null>(null);
+const cwd = ref('');
 
 let quickCmd = ref();
 const commandTree = ref();
@@ -46,6 +62,7 @@ interface DialogProps {
     command: string;
 }
 const acceptParams = async (params: DialogProps): Promise<void> => {
+    cwd.value = params.cwd;
     terminalVisible.value = true;
     loadCommandTree();
     await initTerm(params.cwd);
@@ -84,6 +101,12 @@ const onClose = () => {
     terminalRef.value?.onClose();
 };
 
+const reconnect = async () => {
+    onClose();
+    await nextTick();
+    await initTerm(cwd.value);
+};
+
 function handleClose() {
     onClose();
     terminalVisible.value = false;
@@ -94,18 +117,8 @@ defineExpose({
 });
 </script>
 
-<style scoped>
-.terminal-container {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 140px);
-}
-
-.terminal-content {
-    flex: 1;
-    overflow: hidden;
-    margin-top: 8px;
-}
+<style lang="scss">
+@use '@/components/terminal/pane.scss';
 
 .quick-command {
     flex-shrink: 0;

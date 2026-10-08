@@ -8,8 +8,24 @@
         size="large"
         :fullScreen="true"
     >
+        <template #extra>
+            <TerminalToolbar
+                v-if="terminalOpen"
+                inline
+                :can-copy="!!terminalRef?.ui?.canCopy"
+                show-reconnect
+                @search="terminalRef?.openSearch()"
+                @copy="terminalRef?.copySelection()"
+                @paste="terminalRef?.pasteClipboard()"
+                @clear="terminalRef?.clearScreen()"
+                @reconnect="reconnect"
+            >
+                <el-button link @click="onClose()">{{ $t('commons.button.disConn') }}</el-button>
+            </TerminalToolbar>
+        </template>
         <template #content>
-            <el-form ref="formRef" :model="form" label-position="top">
+            <div class="terminal-pane">
+            <el-form v-show="!terminalOpen" ref="formRef" :model="form" label-position="top">
                 <el-form-item :label="$t('menu.container')" prop="containerID" v-if="form.containerIDList.length > 1">
                     <el-select placeholder="container" clearable v-model="form.containerID">
                         <el-option v-for="item in form.containerIDList" :key="item" :label="item" :value="item" />
@@ -45,16 +61,14 @@
                     </el-select>
                 </el-form-item>
 
-                <el-button v-if="!terminalOpen" @click="initTerm(formRef)">
+                <el-button @click="initTerm(formRef)">
                     {{ $t('commons.button.conn') }}
                 </el-button>
-                <el-button v-else @click="onClose()">{{ $t('commons.button.disConn') }}</el-button>
-                <Terminal
-                    style="height: calc(100vh - 312px); margin-top: 18px"
-                    ref="terminalRef"
-                    v-if="terminalOpen"
-                ></Terminal>
             </el-form>
+            <div v-if="terminalOpen" class="terminal-pane-body">
+                <Terminal ref="terminalRef"></Terminal>
+            </div>
+            </div>
         </template>
     </DrawerPro>
 </template>
@@ -64,6 +78,7 @@ import { reactive, ref, nextTick } from 'vue';
 import { ElForm, FormInstance } from 'element-plus';
 import { Rules } from '@/global/form-rules';
 import Terminal from '@/components/terminal/index.vue';
+import TerminalToolbar from '@/components/terminal/toolbar.vue';
 import { useGlobalStore } from '@/composables/useGlobalStore';
 const { currentNode } = useGlobalStore();
 
@@ -126,6 +141,12 @@ const onClose = () => {
     terminalOpen.value = false;
 };
 
+const reconnect = async () => {
+    onClose();
+    await nextTick();
+    initTerm(formRef.value);
+};
+
 function handleClose() {
     onClose();
     terminalVisible.value = false;
@@ -135,3 +156,7 @@ defineExpose({
     acceptParams,
 });
 </script>
+
+<style lang="scss">
+@use '@/components/terminal/pane.scss';
+</style>

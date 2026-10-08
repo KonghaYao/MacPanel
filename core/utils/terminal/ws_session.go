@@ -81,7 +81,7 @@ func NewLogicSshWsSession(cols, rows int, sshClient *ssh.Client, wsConn *websock
 		ssh.TTY_OP_ISPEED: 14400,
 		ssh.TTY_OP_OSPEED: 14400,
 	}
-	if err := sshSession.RequestPty("xterm", rows, cols, modes); err != nil {
+	if err := sshSession.RequestPty("xterm-256color", rows, cols, modes); err != nil {
 		return nil, err
 	}
 	if err := sshSession.Shell(); err != nil {

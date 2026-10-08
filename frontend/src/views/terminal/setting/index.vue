@@ -66,7 +66,7 @@
                             </el-form-item>
 
                             <el-form-item>
-                                <div class="terminal" ref="terminalElement"></div>
+                                <div class="terminal-preview" ref="terminalElement"></div>
                             </el-form-item>
 
                             <el-form-item :label="$t('terminal.cursorBlink')">
@@ -98,7 +98,7 @@
                                 <el-input-number
                                     class="formInput"
                                     :step="1"
-                                    :min="0"
+                                    :min="1"
                                     :max="16"
                                     v-model="form.scrollSensitivity"
                                     @change="changeItem()"
@@ -159,6 +159,14 @@ import { Terminal } from '@xterm/xterm';
 import OperateDialog from '@/views/terminal/setting/default-conn/index.vue';
 import '@xterm/xterm/css/xterm.css';
 import { FitAddon } from '@xterm/addon-fit';
+import {
+    TERMINAL_DEFAULTS,
+    TERMINAL_PREVIEW_SAMPLE,
+    buildTerminalOptions,
+    buildTerminalTheme,
+    cursorStyleOf,
+    loadUnicode11,
+} from '@/components/terminal/options';
 import i18n from '@/lang';
 import { MsgSuccess } from '@/utils/message';
 import { TerminalDockSessionStore, TerminalStore } from '@/store';
@@ -174,34 +182,34 @@ const terminalElement = ref<HTMLDivElement | null>(null);
 const fitAddon = new FitAddon();
 const term = ref();
 const previewResizeObserver = ref<ResizeObserver>();
-const DEFAULT_FONT_FAMILY = "Monaco, Menlo, Consolas, 'Courier New', monospace";
+const DEFAULT_FONT_FAMILY = TERMINAL_DEFAULTS.fontFamily;
 const selectedFontFamilies = ref<string[]>([]);
 const fontFamilyOptions = [
-    { label: 'Monaco', value: 'Monaco' },
-    { label: 'Menlo', value: 'Menlo' },
-    { label: 'Consolas', value: 'Consolas' },
     { label: 'JetBrains Mono', value: "'JetBrains Mono'" },
+    { label: 'monospace', value: 'monospace' },
     { label: 'Fira Code', value: "'Fira Code'" },
     { label: 'Cascadia Code', value: "'Cascadia Code'" },
     { label: 'Source Code Pro', value: "'Source Code Pro'" },
     { label: 'Ubuntu Mono', value: "'Ubuntu Mono'" },
     { label: 'DejaVu Sans Mono', value: "'DejaVu Sans Mono'" },
+    { label: 'Monaco', value: 'Monaco' },
+    { label: 'Menlo', value: 'Menlo' },
+    { label: 'Consolas', value: 'Consolas' },
     { label: 'Courier New', value: "'Courier New'" },
-    { label: 'monospace', value: 'monospace' },
 ];
 
 const form = reactive({
     showTerminalButton: true,
-    lineHeight: 1.2,
-    letterSpacing: 1.2,
-    fontSize: 12,
+    lineHeight: TERMINAL_DEFAULTS.lineHeight,
+    letterSpacing: TERMINAL_DEFAULTS.letterSpacing,
+    fontSize: TERMINAL_DEFAULTS.fontSize,
     fontFamily: DEFAULT_FONT_FAMILY,
-    backgroundColor: '#000000',
-    foregroundColor: '#f5f5f5',
-    cursorBlink: 'Enable',
-    cursorStyle: 'underline',
-    scrollback: 1000,
-    scrollSensitivity: 6,
+    backgroundColor: TERMINAL_DEFAULTS.backgroundColor,
+    foregroundColor: TERMINAL_DEFAULTS.foregroundColor,
+    cursorBlink: TERMINAL_DEFAULTS.cursorBlink,
+    cursorStyle: TERMINAL_DEFAULTS.cursorStyle as 'block' | 'underline' | 'bar',
+    scrollback: TERMINAL_DEFAULTS.scrollback,
+    scrollSensitivity: TERMINAL_DEFAULTS.scrollSensitivity,
     showDefaultConn: false,
     defaultConn: '',
 });
@@ -270,13 +278,13 @@ const search = async (withReset?: boolean) => {
             form.fontSize = Number(res.data.fontSize);
             form.fontFamily = res.data.fontFamily || DEFAULT_FONT_FAMILY;
             selectedFontFamilies.value = splitFontFamily(form.fontFamily);
-            form.backgroundColor = res.data.backgroundColor || '#000000';
-            form.foregroundColor = res.data.foregroundColor || '#f5f5f5';
+            form.backgroundColor = res.data.backgroundColor || TERMINAL_DEFAULTS.backgroundColor;
+            form.foregroundColor = res.data.foregroundColor || TERMINAL_DEFAULTS.foregroundColor;
             form.cursorBlink = res.data.cursorBlink;
-            form.cursorStyle = res.data.cursorStyle;
+            form.cursorStyle = cursorStyleOf(res.data.cursorStyle);
             form.scrollback = Number(res.data.scrollback);
             form.scrollSensitivity = Number(res.data.scrollSensitivity);
-            terminalStore.fontFamily = res.data.fontFamily || '';
+            terminalStore.fontFamily = res.data.fontFamily || DEFAULT_FONT_FAMILY;
 
             if (withReset) {
                 changeItem();
@@ -353,33 +361,41 @@ const submitChangeShow = async () => {
         });
 };
 
-const iniTerm = () => {
-    const defaultFontFamily = "Monaco, Menlo, Consolas, 'Courier New', monospace";
-    const fontFamily = form.fontFamily || defaultFontFamily;
+const previewTarget = { getElement: () => terminalElement.value };
 
-    term.value = new Terminal({
-        lineHeight: 1.2,
-        fontSize: 12,
-        fontFamily: fontFamily,
-        theme: {
-            background: '#000000',
-            foreground: '#f5f5f5',
-        },
-        cursorBlink: true,
-        cursorStyle: 'block',
-        scrollback: 1000,
-        scrollSensitivity: 6,
-    });
+const iniTerm = () => {
+    if (!terminalElement.value) {
+        return;
+    }
+    if (term.value) {
+        term.value.dispose();
+        terminalElement.value.innerHTML = '';
+    }
+    term.value = new Terminal(buildTerminalOptions(previewSettings(), previewTarget));
     term.value.open(terminalElement.value);
     applyPreviewBackground();
+    loadUnicode11(term.value);
     term.value.loadAddon(fitAddon);
-    term.value.write('the first line \r\nthe second line');
+    term.value.write(TERMINAL_PREVIEW_SAMPLE);
     fitAddon.fit();
 };
 
+const previewSettings = () => ({
+    lineHeight: form.lineHeight,
+    letterSpacing: form.letterSpacing,
+    fontSize: form.fontSize,
+    fontFamily: form.fontFamily || DEFAULT_FONT_FAMILY,
+    backgroundColor: form.backgroundColor,
+    foregroundColor: form.foregroundColor,
+    cursorBlink: form.cursorBlink === 'Enable',
+    cursorStyle: cursorStyleOf(form.cursorStyle),
+    scrollback: form.scrollback,
+    scrollSensitivity: form.scrollSensitivity,
+});
+
 const applyPreviewBackground = () => {
     if (!terminalElement.value) return;
-    terminalElement.value.style.backgroundColor = form.backgroundColor || '#000000';
+    terminalElement.value.style.backgroundColor = form.backgroundColor || TERMINAL_DEFAULTS.backgroundColor;
     terminalElement.value.style.backgroundImage = '';
     terminalElement.value.style.backgroundSize = '';
     terminalElement.value.style.backgroundPosition = '';
@@ -388,39 +404,35 @@ const applyPreviewBackground = () => {
 };
 
 const changeItem = () => {
-    const defaultFontFamily = "Monaco, Menlo, Consolas, 'Courier New', monospace";
-    const fontFamily = form.fontFamily || defaultFontFamily;
-
-    term.value.options.lineHeight = form.lineHeight;
-    term.value.options.letterSpacing = form.letterSpacing;
-    term.value.options.fontSize = form.fontSize;
-    term.value.options.fontFamily = fontFamily;
-    term.value.options.theme = {
-        ...(term.value.options.theme || {}),
-        background: form.backgroundColor,
-        foreground: form.foregroundColor,
-    };
-    term.value.options.cursorBlink = form.cursorBlink === 'Enable';
-    term.value.options.cursorStyle = form.cursorStyle;
-    term.value.options.scrollback = form.scrollback;
-    term.value.options.scrollSensitivity = form.scrollSensitivity;
+    if (!term.value) {
+        return;
+    }
+    const settings = previewSettings();
+    term.value.options.lineHeight = settings.lineHeight;
+    term.value.options.letterSpacing = settings.letterSpacing;
+    term.value.options.fontSize = settings.fontSize;
+    term.value.options.fontFamily = settings.fontFamily;
+    term.value.options.theme = buildTerminalTheme(settings.backgroundColor, settings.foregroundColor);
+    term.value.options.cursorBlink = settings.cursorBlink;
+    term.value.options.cursorStyle = settings.cursorStyle;
+    term.value.options.scrollback = settings.scrollback;
+    term.value.options.scrollSensitivity = settings.scrollSensitivity;
     applyPreviewBackground();
-
     fitAddon.fit();
 };
 
 const onSetDefault = () => {
-    form.lineHeight = 1.2;
-    form.letterSpacing = 0;
-    form.fontSize = 12;
+    form.lineHeight = TERMINAL_DEFAULTS.lineHeight;
+    form.letterSpacing = TERMINAL_DEFAULTS.letterSpacing;
+    form.fontSize = TERMINAL_DEFAULTS.fontSize;
     form.fontFamily = DEFAULT_FONT_FAMILY;
     selectedFontFamilies.value = splitFontFamily(DEFAULT_FONT_FAMILY);
-    form.backgroundColor = '#000000';
-    form.foregroundColor = '#f5f5f5';
-    form.cursorBlink = 'Enable';
-    form.cursorStyle = 'block';
-    form.scrollback = 1000;
-    form.scrollSensitivity = 6;
+    form.backgroundColor = TERMINAL_DEFAULTS.backgroundColor;
+    form.foregroundColor = TERMINAL_DEFAULTS.foregroundColor;
+    form.cursorBlink = TERMINAL_DEFAULTS.cursorBlink;
+    form.cursorStyle = TERMINAL_DEFAULTS.cursorStyle;
+    form.scrollback = TERMINAL_DEFAULTS.scrollback;
+    form.scrollSensitivity = TERMINAL_DEFAULTS.scrollSensitivity;
 
     changeItem();
 };
@@ -475,8 +487,9 @@ defineExpose({
 .formInput {
     width: 100%;
 }
-.terminal {
+.terminal-preview {
     width: 100%;
-    height: 100px;
+    height: 240px;
+    overflow: hidden;
 }
 </style>

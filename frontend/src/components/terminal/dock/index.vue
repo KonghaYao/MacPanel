@@ -48,6 +48,7 @@
         </template>
 
         <template #content>
+            <div class="terminal-dock-body" :style="dockTabStyle">
             <div class="terminal-dock-toolbar">
                 <el-tabs
                     v-model="active"
@@ -67,38 +68,91 @@
                         </template>
                     </el-tab-pane>
                     <template #add-icon>
-                        <ConnectionMenu v-model="showConnections" :open-session="openConnection" />
+                        <ConnectionMenu
+                            ref="connectionMenuRef"
+                            v-model="showConnections"
+                            :open-session="openConnection"
+                        />
                     </template>
                 </el-tabs>
+                <TerminalToolbar
+                    v-if="store.entries.length"
+                    inline
+                    :can-copy="!!store.instances[active]?.ui?.canCopy"
+                    show-reconnect
+                    show-fullscreen
+                    :fullscreen-active="isFullScreen"
+                    @search="store.instances[active]?.openSearch()"
+                    @copy="store.instances[active]?.copySelection()"
+                    @paste="store.instances[active]?.pasteClipboard()"
+                    @clear="store.instances[active]?.clearScreen()"
+                    @reconnect="onReconnect"
+                    @fullscreen="toggleFullscreen"
+                />
             </div>
 
-            <div v-if="store.entries.length === 0" class="terminal-dock-empty">
-                {{ $t('terminal.emptyTerminal') }}
-            </div>
             <div
-                v-for="item in store.entries"
-                v-show="item.key === active"
-                :key="item.key"
-                class="terminal-dock-slot"
-                :ref="(el: any) => onSlot(item.key, el)"
-                @click="store.instances[item.key]?.refit()"
-            ></div>
+                v-if="store.entries.length === 0"
+                class="terminal-dock-empty"
+                :style="{ backgroundColor: terminalStore.backgroundColor, color: terminalStore.foregroundColor }"
+            >
+                <span>{{ $t('terminal.emptyTerminal') }}</span>
+                <el-button type="primary" @click="connectionMenuRef?.connectLocal()">
+                    {{ $t('terminal.connectLocal') }}
+                </el-button>
+            </div>
+            <template v-else>
+                <div
+                    v-for="item in store.entries"
+                    v-show="item.key === active"
+                    :key="item.key"
+                    class="terminal-dock-slot"
+                    :style="{ backgroundColor: terminalStore.backgroundColor }"
+                    :ref="(el: any) => onSlot(item.key, el)"
+                ></div>
+            </template>
+            </div>
         </template>
     </DialogPro>
 </template>
 
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import screenfull from 'screenfull';
 import i18n from '@/lang';
+import { testByID, testLocalConn } from '@/api/modules/terminal';
 import { TerminalDockSessionStore, TerminalStore } from '@/store';
 import { ElMessageBox } from 'element-plus';
 import ConnectionMenu from '@/components/terminal/connection-menu/index.vue';
+import TerminalToolbar from '@/components/terminal/toolbar.vue';
 import type { TerminalConnectionOptions } from '@/components/terminal/connection-menu/types';
 import { useGlobalStore } from '@/composables/useGlobalStore';
 
 const store = TerminalDockSessionStore();
 const terminalStore = TerminalStore();
-const { isAdmin } = useGlobalStore();
+const { isAdmin, isFullScreen } = useGlobalStore();
+const connectionMenuRef = ref<InstanceType<typeof ConnectionMenu>>();
+const dockTabStyle = computed(() => ({
+    '--terminal-tab-active-bg': terminalStore.backgroundColor,
+    '--terminal-tab-active-text': terminalStore.foregroundColor,
+}));
+
+const toggleFullscreen = () => {
+    if (screenfull.isEnabled) {
+        screenfull.toggle();
+    }
+};
+
+const onReconnect = async () => {
+    const item = store.find(active.value);
+    if (!item) {
+        return;
+    }
+    const nodeName = new URLSearchParams(item.args).get('operateNode') || undefined;
+    const res = item.wsID === 0 ? await testLocalConn(nodeName) : await testByID(item.wsID);
+    await store.reconnect(item.key, res.data ? '' : 'Failed to set up the connection. Please check the host information');
+    store.sync();
+};
 
 const open = ref(false);
 const active = ref('');
@@ -152,13 +206,17 @@ const onSlot = (key: string, el: HTMLElement | null) => {
         delete slotEls[key];
     }
 };
-const claim = () => {
+const claim = async () => {
     for (const item of store.entries) {
         if (open.value && item.key === active.value) {
             store.setSlot(item.key, slotEls[item.key] || null);
         } else if (store.slots[item.key] && store.slots[item.key] === slotEls[item.key]) {
             store.setSlot(item.key, null);
         }
+    }
+    await nextTick();
+    if (open.value && active.value) {
+        store.instances[active.value]?.refit();
     }
 };
 watch(active, () => nextTick(claim));
@@ -264,16 +322,30 @@ const closeAll = async () => {
     }
 }
 
+.terminal-dock-body {
+    display: flex;
+    flex-direction: column;
+    height: min(72vh, 760px);
+    min-height: 0;
+}
+
 .terminal-dock-toolbar {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 8px;
 }
 
 .terminal-dock-tabs {
     min-width: 0;
     flex: 1;
+
+    :deep(.el-tabs__item) {
+        background-color: var(--panel-terminal-tag-bg-color);
+    }
+    :deep(.el-tabs__item.is-active) {
+        color: var(--terminal-tab-active-text, #e5e7eb);
+        background-color: var(--terminal-tab-active-bg, #111827);
+    }
 
     :deep(.el-tabs__header) {
         justify-content: flex-start;
@@ -323,27 +395,17 @@ const closeAll = async () => {
 
 .terminal-dock-slot,
 .terminal-dock-empty {
-    height: 60vh;
+    flex: 1;
+    min-height: 0;
     overflow: hidden;
     border-radius: 6px;
 }
 
-.terminal-dock-slot {
-    background-color: var(--panel-logs-bg-color);
-}
-
 .terminal-dock-empty {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: var(--el-fill-color-extra-light);
-    color: var(--el-text-color-secondary);
-}
-
-@media (max-width: 768px) {
-    .terminal-dock-slot,
-    .terminal-dock-empty {
-        height: 70vh;
-    }
+    gap: 12px;
 }
 </style>

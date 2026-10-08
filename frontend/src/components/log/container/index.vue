@@ -74,6 +74,7 @@ import { cleanComposeLog, cleanContainerLog, DownloadFile } from '@/api/modules/
 import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import '@xterm/xterm/css/xterm.css';
+import { TERMINAL_DEFAULTS, buildTerminalOptions, loadUnicode11 } from '@/components/terminal/options';
 import i18n from '@/lang';
 import { dateFormatForName } from '@/utils/date';
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue';
@@ -204,35 +205,30 @@ const showEventSourceAuthError = (message: string) => {
 
 const initTerminal = () => {
     if (!terminalElement.value || term) return;
-    term = new Terminal({
-        cursorBlink: false,
-        cursorStyle: 'block',
-        disableStdin: true,
-        convertEol: true,
-        scrollback: MAX_VIEW_LINES,
-        fontSize: 14,
-        fontFamily: "'JetBrains Mono', Monaco, Menlo, Consolas, 'Courier New', monospace",
-        fontWeight: '500',
-        lineHeight: 1.2,
-        theme: {
-            background: '#111827',
-            foreground: '#e5e7eb',
-            cursor: '#e5e7eb',
-            black: '#111827',
-            brightBlack: '#6b7280',
-            red: '#f87171',
-            green: '#34d399',
-            yellow: '#fbbf24',
-            blue: '#60a5fa',
-            magenta: '#c084fc',
-            cyan: '#22d3ee',
-            white: '#e5e7eb',
-            brightWhite: '#f9fafb',
-            selectionBackground: 'rgba(102, 178, 255, 0.30)',
-            selectionInactiveBackground: 'rgba(102, 178, 255, 0.20)',
-        },
-    });
+    term = new Terminal(
+        buildTerminalOptions(
+            {
+                fontSize: TERMINAL_DEFAULTS.fontSize,
+                lineHeight: TERMINAL_DEFAULTS.lineHeight,
+                letterSpacing: TERMINAL_DEFAULTS.letterSpacing,
+                fontFamily: TERMINAL_DEFAULTS.fontFamily,
+                backgroundColor: TERMINAL_DEFAULTS.backgroundColor,
+                foregroundColor: TERMINAL_DEFAULTS.foregroundColor,
+                cursorBlink: false,
+                cursorStyle: 'block',
+                scrollback: MAX_VIEW_LINES,
+                scrollSensitivity: TERMINAL_DEFAULTS.scrollSensitivity,
+            },
+            { getElement: () => terminalElement.value },
+            {
+                disableStdin: true,
+                convertEol: true,
+                fontWeight: '500',
+            },
+        ),
+    );
     term.open(terminalElement.value);
+    loadUnicode11(term);
     term.loadAddon(fitAddon);
     fitAddon.fit();
     bindXTermEvents();
@@ -434,5 +430,12 @@ onUnmounted(() => {
 
 :deep(.xterm-viewport) {
     background-color: #111827 !important;
+    scrollbar-width: none;
+}
+
+:deep(.xterm-viewport::-webkit-scrollbar) {
+    width: 0;
+    height: 0;
+    display: none;
 }
 </style>

@@ -260,22 +260,22 @@ var AddPasskeyTrustedProxySetting = &gormigrate.Migration{
 var InitTerminalSetting = &gormigrate.Migration{
 	ID: "20240814-init-terminal-setting",
 	Migrate: func(tx *gorm.DB) error {
-		if err := tx.Create(&model.Setting{Key: "LineHeight", Value: "1.2"}).Error; err != nil {
+		if err := tx.Create(&model.Setting{Key: "LineHeight", Value: "1.1"}).Error; err != nil {
 			return err
 		}
 		if err := tx.Create(&model.Setting{Key: "LetterSpacing", Value: "0"}).Error; err != nil {
 			return err
 		}
-		if err := tx.Create(&model.Setting{Key: "FontSize", Value: "12"}).Error; err != nil {
+		if err := tx.Create(&model.Setting{Key: "FontSize", Value: "14"}).Error; err != nil {
 			return err
 		}
-		if err := tx.Create(&model.Setting{Key: "FontFamily", Value: "Monaco, Menlo, Consolas, 'Courier New', monospace"}).Error; err != nil {
+		if err := tx.Create(&model.Setting{Key: "FontFamily", Value: "'JetBrains Mono', monospace"}).Error; err != nil {
 			return err
 		}
-		if err := tx.Create(&model.Setting{Key: "BackgroundColor", Value: "#000000"}).Error; err != nil {
+		if err := tx.Create(&model.Setting{Key: "BackgroundColor", Value: "#111827"}).Error; err != nil {
 			return err
 		}
-		if err := tx.Create(&model.Setting{Key: "ForegroundColor", Value: "#f5f5f5"}).Error; err != nil {
+		if err := tx.Create(&model.Setting{Key: "ForegroundColor", Value: "#e5e7eb"}).Error; err != nil {
 			return err
 		}
 		if err := tx.Create(&model.Setting{Key: "CursorBlink", Value: constant.StatusEnable}).Error; err != nil {
@@ -287,7 +287,7 @@ var InitTerminalSetting = &gormigrate.Migration{
 		if err := tx.Create(&model.Setting{Key: "Scrollback", Value: "1000"}).Error; err != nil {
 			return err
 		}
-		if err := tx.Create(&model.Setting{Key: "ScrollSensitivity", Value: "6"}).Error; err != nil {
+		if err := tx.Create(&model.Setting{Key: "ScrollSensitivity", Value: "1"}).Error; err != nil {
 			return err
 		}
 		return nil
