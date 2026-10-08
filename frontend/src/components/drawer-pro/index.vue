@@ -168,8 +168,8 @@ const loadTooltip = () => {
 };
 </script>
 
-<style lang="scss" scoped>
-:deep(.el-drawer__header:has(.terminal-toolbar)) {
+<style lang="scss">
+.el-drawer__header:has(.terminal-toolbar) {
     gap: 8px;
 
     > .el-page-header {
