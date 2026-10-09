@@ -59,16 +59,14 @@ func (lcmd *LocalCommand) Write(p []byte) (n int, err error) {
 	return lcmd.pty.Write(p)
 }
 
+// Close terminates the shell and releases the pty.
+//
+// It must never write to the pty: keystrokes such as Ctrl-C/Ctrl-D/"exit" are
+// forwarded by whatever runs in the foreground (a tmux client, for example) to
+// the processes it manages, so disconnecting a terminal would kill the user's
+// tmux session instead of just detaching it.
 func (lcmd *LocalCommand) Close() error {
 	lcmd.closeOnce.Do(func() {
-		if lcmd.pty != nil {
-			_, _ = lcmd.pty.Write([]byte{3})
-			time.Sleep(50 * time.Millisecond)
-			_, _ = lcmd.pty.Write([]byte{4})
-			time.Sleep(50 * time.Millisecond)
-			_, _ = lcmd.pty.Write([]byte("exit\n"))
-			time.Sleep(50 * time.Millisecond)
-		}
 		if lcmd.cmd != nil && lcmd.cmd.Process != nil {
 			_ = lcmd.cmd.Process.Signal(syscall.SIGTERM)
 			time.Sleep(50 * time.Millisecond)
