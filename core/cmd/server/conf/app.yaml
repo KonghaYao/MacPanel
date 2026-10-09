@@ -8,7 +8,7 @@ base:
   port: 9999
   username: admin
   password: admin123
-  version: v0.4.5
+  version: v0.4.6
 
 log:
   level: debug
