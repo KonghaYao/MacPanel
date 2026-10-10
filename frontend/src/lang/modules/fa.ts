@@ -2305,6 +2305,7 @@ const message = {
         keyPassword: 'رمز عبور کلید خصوصی',
         emptyTerminal: 'در حال حاضر هیچ ترمینالی متصل نیست.',
         paste: 'چسباندن',
+        pasteUnavailable: 'مرورگر در HTTP اجازه خواندن کلیپ‌بورد را نمی‌دهد. برای چسباندن از ⌘V / Ctrl+V استفاده کنید.',
         clearScreen: 'پاک کردن',
         connectLocal: 'اتصال به این دستگاه',
         searchPlaceholder: 'جستجو',

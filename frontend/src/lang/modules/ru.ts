@@ -2341,6 +2341,7 @@ const message = {
         keyPassword: 'Пароль приватного ключа',
         emptyTerminal: 'В настоящее время нет подключенных терминалов.',
         paste: 'Вставить',
+        pasteUnavailable: 'Браузер запрещает чтение буфера обмена по HTTP. Используйте ⌘V / Ctrl+V.',
         clearScreen: 'Очистить',
         connectLocal: 'Подключить этот компьютер',
         searchPlaceholder: 'Поиск',

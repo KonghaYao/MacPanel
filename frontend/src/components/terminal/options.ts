@@ -1,9 +1,10 @@
 import type { ILinkHandler, ITerminalOptions, ITheme, Terminal } from '@xterm/xterm';
 import { Unicode11Addon } from '@xterm/addon-unicode11';
 import { WebglAddon } from '@xterm/addon-webgl';
-import { ClipboardAddon } from '@xterm/addon-clipboard';
+import { ClipboardAddon, type IClipboardProvider } from '@xterm/addon-clipboard';
 import { SearchAddon, type ISearchOptions } from '@xterm/addon-search';
 import { WebLinksAddon } from '@xterm/addon-web-links';
+import { canReadClipboard, readClipboardText, writeClipboardText } from '@/utils/clipboard-api';
 
 export const TERMINAL_FONT_FAMILY = "'JetBrains Mono', monospace";
 
@@ -202,8 +203,33 @@ export function loadWebgl(term: Terminal) {
     term.loadAddon(new WebglAddon());
 }
 
+/**
+ * Clipboard provider for the OSC 52 addon. Programs inside the terminal (tmux, vim, ...) use it to
+ * copy to the system clipboard. The bundled provider calls `navigator.clipboard` directly, which
+ * does not exist on plain HTTP origins, so route it through the terminal clipboard helpers instead.
+ */
+class TerminalClipboardProvider implements IClipboardProvider {
+    readText(selection: string): string | Promise<string> {
+        if (selection !== 'c' || !canReadClipboard()) {
+            return '';
+        }
+        return readClipboardText();
+    }
+
+    async writeText(selection: string, text: string): Promise<void> {
+        if (selection !== 'c' || !text) {
+            return;
+        }
+        try {
+            await writeClipboardText(text);
+        } catch {
+            // an OSC 52 write has no user gesture behind it, browsers may refuse it outside HTTPS
+        }
+    }
+}
+
 export function loadClipboard(term: Terminal) {
-    term.loadAddon(new ClipboardAddon());
+    term.loadAddon(new ClipboardAddon(undefined, new TerminalClipboardProvider()));
 }
 
 export function loadWebLinks(term: Terminal, target?: TerminalLinkTarget) {

@@ -2242,6 +2242,7 @@ const message = {
         keyPassword: '私钥密码',
         emptyTerminal: '暂无终端连接',
         paste: '粘贴',
+        pasteUnavailable: '浏览器在 HTTP 下禁止读取剪贴板，请使用 ⌘V / Ctrl+V 粘贴。',
         clearScreen: '清屏',
         connectLocal: '连接本机',
         searchPlaceholder: '搜索',

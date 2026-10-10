@@ -2344,6 +2344,7 @@ const message = {
         keyPassword: 'Private key password',
         emptyTerminal: 'No terminal is currently connected.',
         paste: 'Paste',
+        pasteUnavailable: 'The browser blocks clipboard reads on HTTP. Press ⌘V / Ctrl+V to paste.',
         clearScreen: 'Clear',
         connectLocal: 'Connect to this machine',
         searchPlaceholder: 'Search',

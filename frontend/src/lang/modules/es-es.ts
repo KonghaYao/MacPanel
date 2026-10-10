@@ -2368,6 +2368,7 @@ const message = {
         keyPassword: 'Contraseña de la clave privada',
         emptyTerminal: 'No hay ninguna terminal conectada actualmente.',
         paste: 'Pegar',
+        pasteUnavailable: 'El navegador bloquea la lectura del portapapeles en HTTP. Use ⌘V / Ctrl+V para pegar.',
         clearScreen: 'Limpiar',
         connectLocal: 'Conectar este equipo',
         searchPlaceholder: 'Buscar',

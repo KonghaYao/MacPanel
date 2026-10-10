@@ -2354,6 +2354,7 @@ const message = {
         keyPassword: 'Kata laluan kunci peribadi',
         emptyTerminal: 'Tiada terminal yang sedang disambungkan.',
         paste: 'Tampal',
+        pasteUnavailable: 'Pelayar menyekat bacaan papan keratan pada HTTP. Gunakan ⌘V / Ctrl+V untuk menampal.',
         clearScreen: 'Kosongkan',
         connectLocal: 'Sambung mesin ini',
         searchPlaceholder: 'Cari',

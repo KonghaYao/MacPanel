@@ -2262,6 +2262,7 @@ const message = {
         keyPassword: 'ລະຫັດຜ່ານ Private key',
         emptyTerminal: 'ຍັງບໍ່ມີ terminal ທີ່ເຊື່ອມຕໍ່.',
         paste: 'ວາງ',
+        pasteUnavailable: 'HTTP ເບຣົາເຊີບໍ່ໃຫ້ອ່ານຄລິບບອດ, ກະລຸນາໃຊ້ ⌘V / Ctrl+V ເພື່ອວາງ.',
         clearScreen: 'ລ້າງໜ້າຈໍ',
         connectLocal: 'ເຊື່ອມຕໍ່ເຄື່ອງນີ້',
         searchPlaceholder: 'ຄົ້ນຫາ',

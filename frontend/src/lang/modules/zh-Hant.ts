@@ -2195,6 +2195,7 @@ const message = {
         keyPassword: '私鑰密碼',
         emptyTerminal: '暫無終端連接',
         paste: '貼上',
+        pasteUnavailable: '瀏覽器在 HTTP 下禁止讀取剪貼簿，請使用 ⌘V / Ctrl+V 貼上。',
         clearScreen: '清屏',
         connectLocal: '連接本機',
         searchPlaceholder: '搜尋',

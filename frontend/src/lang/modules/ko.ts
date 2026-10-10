@@ -2280,6 +2280,7 @@ const message = {
         keyPassword: '개인 키 비밀번호',
         emptyTerminal: '현재 연결된 터미널이 없습니다.',
         paste: '붙여넣기',
+        pasteUnavailable: 'HTTP에서는 브라우저가 클립보드 읽기를 차단합니다. ⌘V / Ctrl+V로 붙여넣으세요.',
         clearScreen: '화면 지우기',
         connectLocal: '이 기기에 연결',
         searchPlaceholder: '검색',

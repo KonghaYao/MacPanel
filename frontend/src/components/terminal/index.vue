@@ -1,7 +1,8 @@
 <template>
-    <div class="terminal-shell" @contextmenu="onContextMenu">
+    <!-- Right click is inert here: no custom menu and no native browser menu. -->
+    <div class="terminal-shell" @contextmenu.prevent @mousedown.right.prevent>
         <div ref="terminalElement" class="terminal-container" :style="shellStyle"></div>
-        <div v-if="searchOpen" class="terminal-search" @contextmenu.stop>
+        <div v-if="searchOpen" class="terminal-search">
             <el-input
                 ref="searchInputRef"
                 v-model="searchText"
@@ -16,24 +17,6 @@
             <el-button text size="small" @click="find(true)">{{ $t('terminal.findNext') }}</el-button>
             <el-button text size="small" @click="closeSearch">{{ $t('commons.button.close') }}</el-button>
         </div>
-        <Teleport to="body">
-            <div
-                v-if="menu.open"
-                class="terminal-menu"
-                :style="{ left: `${menu.x}px`, top: `${menu.y}px` }"
-                @contextmenu.prevent
-            >
-            <button type="button" class="terminal-menu-item" :disabled="!ui.canCopy" @click="onMenuCopy">
-                {{ $t('commons.button.copy') }}
-            </button>
-            <button type="button" class="terminal-menu-item" @click="onMenuPaste">
-                {{ $t('terminal.paste') }}
-            </button>
-            <button type="button" class="terminal-menu-item" @click="onMenuSelectAll">
-                {{ $t('commons.button.selectAll') }}
-            </button>
-            </div>
-        </Teleport>
         <transition name="ai-mask-fade">
             <div v-if="aiNotice.loading" class="ai-notice-mask"></div>
         </transition>
@@ -68,9 +51,10 @@ import {
     searchDecorationOptions,
     type TerminalLinkTarget,
 } from '@/components/terminal/options';
-import { decodeBase64, encodeBase64 } from '@/utils/base64';
+import { createBase64StreamDecoder, encodeBase64 } from '@/utils/base64';
 import { TerminalStore } from '@/store';
 import { MsgError } from '@/utils/message';
+import { canReadClipboard, readClipboardText, writeClipboardText } from '@/utils/clipboard-api';
 import { checkStreamAuth } from '@/utils/stream-auth';
 import { useGlobalStore } from '@/composables/useGlobalStore';
 import i18n from '@/lang';
@@ -93,17 +77,16 @@ const linkTarget: TerminalLinkTarget = { getElement: () => terminalElement.value
 const ui = reactive({ canCopy: false });
 const searchOpen = ref(false);
 const searchText = ref('');
-const menu = reactive({ open: false, x: 0, y: 0 });
-let pending:
-    | { kind: 'connect'; endpoint: string; args: string }
-    | { kind: 'error'; message: string }
-    | null = null;
+let pending: { kind: 'connect'; endpoint: string; args: string } | { kind: 'error'; message: string } | null = null;
 const termReady = ref(false);
 const webSocketReady = ref(false);
 const term = shallowRef<Terminal>();
 const terminalSocket = ref<WebSocket>();
 const heartbeatTimer = ref<NodeJS.Timer>();
 let initWebSocketToken = 0;
+// Output arrives as independent base64 chunks; decode them as one byte stream so that a multi-byte
+// UTF-8 character split across two reads is not turned into a replacement character.
+let decodeOutput = createBase64StreamDecoder();
 const latency = ref(0);
 // Reconnect state. Only terminals that received a session hello reconnect;
 // the agent keeps a dirty-disconnected session alive for a short grace period.
@@ -286,7 +269,6 @@ function onClose(isKeepShow: boolean = false) {
     initWebSocketToken++;
     pending = null;
     closing = true;
-    closeMenu();
     closeSearch();
     stopReconnect();
     window.removeEventListener('resize', changeTerminalSize);
@@ -327,6 +309,7 @@ function openTerminal(online: boolean): boolean {
     if (!terminalElement.value) {
         return false;
     }
+    decodeOutput = createBase64StreamDecoder();
     newTerm();
     const current = term.value;
     if (!current) {
@@ -503,7 +486,7 @@ const onWSReceive = (message: MessageEvent) => {
     switch (wsMsg.type) {
         case 'cmd': {
             if (wsMsg.data) {
-                let receiveMsg = decodeBase64(wsMsg.data);
+                let receiveMsg = decodeOutput(wsMsg.data);
                 if (hideInitCmdEcho.value) {
                     receiveMsg = stripInitCmdEchoLine(receiveMsg);
                 }
@@ -528,6 +511,7 @@ const onWSReceive = (message: MessageEvent) => {
             revalidating = false;
             reconnectDelay = 1000;
             sessionId.value = wsMsg.id || '';
+            decodeOutput = createBase64StreamDecoder();
             if (wasReconnect && !wasRevalidate) {
                 // replay is a tail of recent output, start from a clean screen
                 term.value?.reset();
@@ -744,24 +728,15 @@ function onKeyDown(event: KeyboardEvent): boolean {
     }
     const key = event.key.toLowerCase();
     const command = event.metaKey;
-    const selection = term.value.hasSelection();
-    if (command && key === 'c' && selection) {
-        event.preventDefault();
-        copySelection().catch(reportClipboardError);
-        return false;
-    }
-    if (command && key === 'v') {
-        event.preventDefault();
-        pasteClipboard().catch(reportClipboardError);
-        return false;
-    }
+    // ⌘C and ⌘V are deliberately left to the browser: xterm picks up the native copy/paste events
+    // from its own textarea, and unlike the async Clipboard API those also work on plain HTTP.
     if (command && key === 'f') {
         event.preventDefault();
         openSearch();
         return false;
     }
     const mac = /Mac|iPhone|iPad/.test(navigator.userAgent);
-    if (!mac && event.ctrlKey && !event.metaKey && !event.altKey && key === 'c' && selection) {
+    if (!mac && event.ctrlKey && !event.metaKey && !event.altKey && key === 'c' && term.value.hasSelection()) {
         event.preventDefault();
         copySelection().catch(reportClipboardError);
         return false;
@@ -774,11 +749,17 @@ async function copySelection() {
     if (!text) {
         return;
     }
-    await navigator.clipboard.writeText(text);
+    await writeClipboardText(text);
 }
 
 async function pasteClipboard() {
-    const text = await navigator.clipboard.readText();
+    if (!canReadClipboard()) {
+        // the browser handles ⌘V / Ctrl+V itself, keep the terminal focused for it
+        term.value?.focus();
+        MsgError(i18n.global.t('terminal.pasteUnavailable'));
+        return;
+    }
+    const text = await readClipboardText();
     if (!text || !term.value) {
         return;
     }
@@ -819,44 +800,7 @@ function find(forward: boolean) {
     }
 }
 
-function closeMenu() {
-    menu.open = false;
-}
-
-function onContextMenu(event: MouseEvent) {
-    event.preventDefault();
-    ui.canCopy = !!term.value?.hasSelection();
-    menu.x = Math.min(event.clientX, window.innerWidth - 180);
-    menu.y = Math.min(event.clientY, window.innerHeight - 132);
-    menu.open = true;
-}
-
-function onMenuCopy() {
-    closeMenu();
-    copySelection().catch(reportClipboardError);
-}
-
-function onMenuPaste() {
-    closeMenu();
-    pasteClipboard().catch(reportClipboardError);
-}
-
-function onMenuSelectAll() {
-    term.value?.selectAll();
-    ui.canCopy = !!term.value?.hasSelection();
-    closeMenu();
-}
-
-function onWindowPointerDown(event: PointerEvent) {
-    const target = event.target;
-    if (target instanceof Node && (target as HTMLElement).closest?.('.terminal-menu')) {
-        return;
-    }
-    closeMenu();
-}
-
 onMounted(() => {
-    window.addEventListener('pointerdown', onWindowPointerDown);
     resizeObserver.value = new ResizeObserver(() => {
         if (!termReady.value) {
             tryMount();
@@ -886,7 +830,6 @@ defineExpose({
 });
 
 onBeforeUnmount(() => {
-    window.removeEventListener('pointerdown', onWindowPointerDown);
     onClose();
     resizeObserver.value?.disconnect();
 });
@@ -1006,38 +949,6 @@ onActivated(() => {
     border-radius: 8px;
     background: rgba(17, 24, 39, 0.94);
     border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.terminal-menu {
-    position: fixed;
-    z-index: 4000;
-    min-width: 148px;
-    padding: 4px;
-    border-radius: 8px;
-    background: var(--el-bg-color-overlay);
-    border: 1px solid var(--el-border-color-light);
-    box-shadow: var(--el-box-shadow-light);
-}
-
-.terminal-menu-item {
-    display: block;
-    width: 100%;
-    padding: 6px 10px;
-    border: 0;
-    border-radius: 6px;
-    background: transparent;
-    color: var(--el-text-color-primary);
-    text-align: left;
-    cursor: pointer;
-}
-
-.terminal-menu-item:hover:not(:disabled) {
-    background: var(--el-fill-color-light);
-}
-
-.terminal-menu-item:disabled {
-    color: var(--el-text-color-disabled);
-    cursor: not-allowed;
 }
 
 :deep(.terminal-link-tooltip) {

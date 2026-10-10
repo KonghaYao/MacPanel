@@ -2348,6 +2348,7 @@ const message = {
         keyPassword: 'Özel anahtar şifresi',
         emptyTerminal: 'Şu anda bağlı terminal yok.',
         paste: 'Yapıştır',
+        pasteUnavailable: 'Tarayıcı HTTP üzerinde panoyu okumayı engelliyor. Yapıştırmak için ⌘V / Ctrl+V kullanın.',
         clearScreen: 'Temizle',
         connectLocal: 'Bu makineye bağlan',
         searchPlaceholder: 'Ara',

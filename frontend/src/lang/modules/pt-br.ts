@@ -2362,6 +2362,8 @@ const message = {
         keyPassword: 'Senha da chave privada',
         emptyTerminal: 'Nenhum terminal está conectado no momento.',
         paste: 'Colar',
+        pasteUnavailable:
+            'O navegador bloqueia a leitura da área de transferência em HTTP. Use ⌘V / Ctrl+V para colar.',
         clearScreen: 'Limpar',
         connectLocal: 'Conectar esta máquina',
         searchPlaceholder: 'Pesquisar',

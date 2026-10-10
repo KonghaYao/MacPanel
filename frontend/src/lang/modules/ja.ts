@@ -2311,6 +2311,8 @@ const message = {
         keyPassword: '秘密キーパスワード',
         emptyTerminal: '現在接続されている端子はありません。',
         paste: '貼り付け',
+        pasteUnavailable:
+            'HTTP ではブラウザーがクリップボードの読み取りを許可しません。⌘V / Ctrl+V で貼り付けてください。',
         clearScreen: 'クリア',
         connectLocal: 'このマシンに接続',
         searchPlaceholder: '検索',
