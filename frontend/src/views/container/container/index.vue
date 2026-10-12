@@ -86,6 +86,16 @@
                             </el-text>
 
                             <div class="float-right">
+                                <el-tooltip :content="$t('menu.monitor')">
+                                    <el-button
+                                        class="container-monitor-button"
+                                        link
+                                        size="large"
+                                        type="primary"
+                                        icon="TrendCharts"
+                                        @click="onMonitor(row)"
+                                    />
+                                </el-tooltip>
                                 <el-tooltip
                                     :content="row.isPinned ? $t('commons.table.unpin') : $t('commons.table.pin')"
                                 >
@@ -358,7 +368,7 @@
                         card-type="button"
                         fix
                         width="220px"
-                        :ellipsis="3"
+                        :ellipsis="2"
                         :buttons="buttons"
                         :label="$t('commons.table.operate')"
                         :fixed="isMobile ? false : 'right'"
