@@ -1954,3 +1954,27 @@ var FixDarwinLocalSSHConn = &gormigrate.Migration{
 		return nil
 	},
 }
+
+var AddContainerMonitor = &gormigrate.Migration{
+	ID: "20261013-container-monitor",
+	Migrate: func(tx *gorm.DB) error {
+		return global.ContainerMonitorDB.AutoMigrate(&model.MonitorContainer{})
+	},
+}
+
+var AddContainerMonitorSettings = &gormigrate.Migration{
+	ID: "20261013-container-monitor-settings",
+	Migrate: func(tx *gorm.DB) error {
+		settings := []model.Setting{
+			{Key: "ContainerMonitorStatus", Value: constant.StatusEnable},
+			{Key: "ContainerMonitorInterval", Value: "60"},
+			{Key: "ContainerMonitorStoreDays", Value: "7"},
+		}
+		for _, setting := range settings {
+			if err := tx.Where("key = ?", setting.Key).FirstOrCreate(&setting).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	},
+}

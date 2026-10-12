@@ -2139,6 +2139,16 @@ const message = {
     monitor: {
         hostMonitor: 'ການຕິດຕາມໂຮສ',
         gpuMonitor: 'ການຕິດຕາມ GPU',
+        containerMonitor: 'Container Monitoring',
+        live: 'Live',
+        history: 'History',
+        historyEmpty: 'No data was collected in this time range. Check that container monitoring is enabled.',
+        aggregation: 'Aggregation',
+        avg: 'Average',
+        max: 'Maximum',
+        containerStopped:
+            'The container is not running, live metrics are unavailable. Switch to History to review collected data.',
+        timeRange: 'Time Range',
         vllmMonitor: 'ການຕິດຕາມ vLLM',
         globalFilter: 'ຕົວກອງທົ່ວໂລກ',
         enableMonitor: 'ສະຖານະການຕິດຕາມ',

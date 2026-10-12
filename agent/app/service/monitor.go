@@ -57,6 +57,8 @@ type IMonitorService interface {
 	LoadVLLMMonitorData(req dto.MonitorVLLMSearch) (dto.MonitorVLLMData, error)
 	LoadVLLMCurrent(ctx context.Context, req dto.MonitorVLLMCurrent) (model.MonitorVLLM, error)
 	CleanVLLMMonitor(req dto.MonitorVLLMClean) error
+	LoadContainerMonitorData(req dto.MonitorContainerSearch) (dto.MonitorContainerData, error)
+	CleanContainerMonitor(req dto.MonitorContainerClean) error
 	LoadGPUOptions() dto.MonitorGPUOptions
 	LoadGPUMonitorData(req dto.MonitorGPUSearch) (dto.MonitorGPUData, error)
 
@@ -336,16 +338,16 @@ func (m *MonitorService) UpdateSetting(key, value string) error {
 	monitorSettingMutex.Lock()
 	defer monitorSettingMutex.Unlock()
 	switch key {
-	case "MonitorStatus", "GPUMonitorStatus", "VLLMMonitorStatus":
+	case "MonitorStatus", "GPUMonitorStatus", "VLLMMonitorStatus", "ContainerMonitorStatus":
 		if value != constant.StatusEnable && value != constant.StatusDisable {
 			return fmt.Errorf("invalid monitoring status")
 		}
-	case "MonitorInterval", "GPUMonitorInterval", "VLLMMonitorInterval":
+	case "MonitorInterval", "GPUMonitorInterval", "VLLMMonitorInterval", "ContainerMonitorInterval":
 		interval, err := strconv.Atoi(value)
 		if err != nil || interval < 10 || interval > 43200 {
 			return fmt.Errorf("monitoring interval must be between 10 and 43200 seconds")
 		}
-	case "MonitorStoreDays", "GPUMonitorStoreDays", "VLLMMonitorStoreDays":
+	case "MonitorStoreDays", "GPUMonitorStoreDays", "VLLMMonitorStoreDays", "ContainerMonitorStoreDays":
 		days, err := strconv.Atoi(value)
 		if err != nil || days < 1 {
 			return fmt.Errorf("monitoring retention must be a positive integer")
@@ -426,6 +428,30 @@ func (m *MonitorService) UpdateSetting(key, value string) error {
 				return err
 			}
 		}
+	case "ContainerMonitorStatus":
+		if value == constant.StatusEnable && global.ContainerMonitorCronID == 0 {
+			interval, err := settingRepo.GetValueByKey("ContainerMonitorInterval")
+			if err != nil {
+				return err
+			}
+			if err := StartContainerMonitor(interval); err != nil {
+				return err
+			}
+		}
+		if value == constant.StatusDisable && global.ContainerMonitorCronID != 0 {
+			global.Cron.Remove(global.ContainerMonitorCronID)
+			global.ContainerMonitorCronID = 0
+		}
+	case "ContainerMonitorInterval":
+		status, err := settingRepo.GetValueByKey("ContainerMonitorStatus")
+		if err != nil {
+			return err
+		}
+		if status == constant.StatusEnable {
+			if err := StartContainerMonitor(value); err != nil {
+				return err
+			}
+		}
 	}
 	return settingRepo.Update(key, value)
 }
@@ -438,6 +464,10 @@ func (m *MonitorService) CleanData(monitorType string) error {
 		gpuMonitorMutex.Lock()
 		defer gpuMonitorMutex.Unlock()
 		return monitorRepo.CleanGPU()
+	case "container":
+		containerMonitorMutex.Lock()
+		defer containerMonitorMutex.Unlock()
+		return containerMonitorRepo.CleanAll()
 	default:
 		return fmt.Errorf("unsupported monitoring cleanup type: %s", monitorType)
 	}

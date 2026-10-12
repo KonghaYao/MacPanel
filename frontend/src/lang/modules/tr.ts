@@ -2223,6 +2223,16 @@ const message = {
     monitor: {
         hostMonitor: 'Ana Makine İzleme',
         gpuMonitor: 'GPU İzleme',
+        containerMonitor: 'Konteyner İzleme',
+        live: 'Canlı',
+        history: 'Geçmiş',
+        historyEmpty: 'Bu zaman aralığında veri toplanmadı. Konteyner izlemenin açık olduğundan emin olun.',
+        aggregation: 'Toplama',
+        avg: 'Ortalama',
+        max: 'Maksimum',
+        containerStopped:
+            'Konteyner çalışmıyor, canlı veriler kullanılamaz. Toplanan veriler için Geçmiş sekmesine geçin.',
+        timeRange: 'Zaman Aralığı',
         vllmMonitor: 'vLLM İzleme',
         globalFilter: 'Genel Filtre',
         enableMonitor: 'İzleme Durumu',

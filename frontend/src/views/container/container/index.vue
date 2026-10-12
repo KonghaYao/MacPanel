@@ -358,7 +358,7 @@
                         card-type="button"
                         fix
                         width="220px"
-                        :ellipsis="2"
+                        :ellipsis="3"
                         :buttons="buttons"
                         :label="$t('commons.table.operate')"
                         :fixed="isMobile ? false : 'right'"
@@ -830,7 +830,11 @@ const onImportCreate = () => {
 
 const dialogMonitorRef = ref();
 const onMonitor = (row: any) => {
-    dialogMonitorRef.value!.acceptParams({ containerID: row.containerID, container: row.name });
+    dialogMonitorRef.value!.acceptParams({
+        containerID: row.containerID,
+        container: row.name,
+        state: row.state,
+    });
 };
 
 const dialogTerminalRef = ref();
@@ -993,9 +997,6 @@ const buttons = [
     },
     {
         label: i18n.global.t('menu.monitor'),
-        disabled: (row: Container.ContainerInfo) => {
-            return row.state !== 'running';
-        },
         click: (row: Container.ContainerInfo) => {
             onMonitor(row);
         },

@@ -2182,6 +2182,16 @@ const message = {
     monitor: {
         hostMonitor: 'نظارت میزبان',
         gpuMonitor: 'نظارت GPU',
+        containerMonitor: 'نظارت بر کانتینر',
+        live: 'زنده',
+        history: 'تاریخچه',
+        historyEmpty: 'در این بازه زمانی داده‌ای جمع‌آوری نشده است. بررسی کنید که نظارت بر کانتینر فعال باشد.',
+        aggregation: 'تجمیع',
+        avg: 'میانگین',
+        max: 'بیشینه',
+        containerStopped:
+            'کانتینر در حال اجرا نیست و داده‌های زنده در دسترس نیستند. برای داده‌های جمع‌آوری‌شده به زبانه تاریخچه بروید.',
+        timeRange: 'بازه زمانی',
         vllmMonitor: 'نظارت vLLM',
         globalFilter: 'فیلتر جهانی',
         enableMonitor: 'وضعیت نظارت',

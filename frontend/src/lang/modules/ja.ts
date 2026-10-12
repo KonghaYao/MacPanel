@@ -2186,6 +2186,16 @@ const message = {
     monitor: {
         hostMonitor: 'ホスト監視',
         gpuMonitor: 'GPU 監視',
+        containerMonitor: 'コンテナ監視',
+        live: 'リアルタイム',
+        history: '履歴',
+        historyEmpty: 'この期間のデータがありません。コンテナ監視が有効か確認してください。',
+        aggregation: '集計方法',
+        avg: '平均',
+        max: '最大',
+        containerStopped:
+            'コンテナが実行されていないためリアルタイムデータを表示できません。履歴タブで収集済みのデータを確認できます。',
+        timeRange: '期間',
         vllmMonitor: 'vLLM 監視',
         globalFilter: 'グローバルフィルター',
         enableMonitor: '監視ステータス',

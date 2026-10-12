@@ -159,6 +159,61 @@
                                     </template>
                                 </el-input>
                             </el-form-item>
+                            <el-divider />
+                            <h3 class="mb-4">{{ $t('monitor.containerMonitor') }}</h3>
+                            <el-form-item :label="$t('monitor.enableMonitor')" prop="containerMonitorStatus">
+                                <el-switch
+                                    v-permission
+                                    v-node-admin
+                                    @change="onSaveStatus('ContainerMonitorStatus', form.containerMonitorStatus)"
+                                    v-model="form.containerMonitorStatus"
+                                    active-value="Enable"
+                                    inactive-value="Disable"
+                                />
+                            </el-form-item>
+                            <el-form-item :label="$t('monitor.storeDays')" prop="containerMonitorStoreDays">
+                                <el-input disabled v-model="form.containerMonitorStoreDays">
+                                    <template #append>
+                                        <el-button
+                                            v-permission
+                                            v-node-admin
+                                            @click="
+                                                onChangeStoreDays(
+                                                    'ContainerMonitorStoreDays',
+                                                    form.containerMonitorStoreDays,
+                                                )
+                                            "
+                                            icon="Setting"
+                                        >
+                                            {{ $t('commons.button.set') }}
+                                        </el-button>
+                                    </template>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item :label="$t('monitor.interval')" prop="containerMonitorIntervalItem">
+                                <el-input disabled v-model="form.containerMonitorIntervalItem">
+                                    <template #append>
+                                        <el-button
+                                            v-permission
+                                            v-node-admin
+                                            @click="
+                                                onChangeInterval(
+                                                    'ContainerMonitorInterval',
+                                                    form.containerMonitorInterval,
+                                                )
+                                            "
+                                            icon="Setting"
+                                        >
+                                            {{ $t('commons.button.set') }}
+                                        </el-button>
+                                    </template>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button v-permission v-node-admin @click="onClean('container')" icon="Delete">
+                                    {{ $t('monitor.cleanMonitor') }}
+                                </el-button>
+                            </el-form-item>
                         </el-col>
                     </el-row>
                 </el-form>
@@ -194,6 +249,10 @@ const form = reactive({
     vllmMonitorStoreDays: 30,
     vllmMonitorInterval: 300,
     vllmMonitorIntervalItem: '',
+    containerMonitorStatus: 'Disable',
+    containerMonitorStoreDays: 30,
+    containerMonitorInterval: 300,
+    containerMonitorIntervalItem: '',
     monitorStatus: 'Disable',
     monitorStoreDays: 30,
     monitorInterval: 300,
@@ -219,6 +278,11 @@ const search = async () => {
     form.vllmMonitorInterval = Number(res.data.vllmMonitorInterval);
     const vllmInterval = splitTimeFromSecond(form.vllmMonitorInterval);
     form.vllmMonitorIntervalItem = transTimeUnit(vllmInterval.timeItem + vllmInterval.timeUnit);
+    form.containerMonitorStatus = res.data.containerMonitorStatus;
+    form.containerMonitorStoreDays = Number(res.data.containerMonitorStoreDays);
+    form.containerMonitorInterval = Number(res.data.containerMonitorInterval);
+    const containerInterval = splitTimeFromSecond(form.containerMonitorInterval);
+    form.containerMonitorIntervalItem = transTimeUnit(containerInterval.timeItem + containerInterval.timeUnit);
     form.monitorStatus = res.data.monitorStatus;
     form.monitorInterval = Number(res.data.monitorInterval);
     const item = splitTimeFromSecond(form.monitorInterval);
@@ -230,7 +294,10 @@ const search = async () => {
     form.defaultIO = res.data.defaultIO === 'all' ? i18n.global.t('commons.table.all') : res.data.defaultIO;
 };
 
-const onSaveStatus = async (key: 'MonitorStatus' | 'GPUMonitorStatus' | 'VLLMMonitorStatus', value: string) => {
+const onSaveStatus = async (
+    key: 'MonitorStatus' | 'GPUMonitorStatus' | 'VLLMMonitorStatus' | 'ContainerMonitorStatus',
+    value: string,
+) => {
     loading.value = true;
     await updateMonitorSetting(key, value)
         .then(() => {
@@ -243,10 +310,16 @@ const onSaveStatus = async (key: 'MonitorStatus' | 'GPUMonitorStatus' | 'VLLMMon
         });
 };
 
-const onChangeStoreDays = (key: 'MonitorStoreDays' | 'GPUMonitorStoreDays' | 'VLLMMonitorStoreDays', value: number) => {
+const onChangeStoreDays = (
+    key: 'MonitorStoreDays' | 'GPUMonitorStoreDays' | 'VLLMMonitorStoreDays' | 'ContainerMonitorStoreDays',
+    value: number,
+) => {
     daysRef.value.acceptParams({ key, monitorStoreDays: value });
 };
-const onChangeInterval = (key: 'MonitorInterval' | 'GPUMonitorInterval' | 'VLLMMonitorInterval', value: number) => {
+const onChangeInterval = (
+    key: 'MonitorInterval' | 'GPUMonitorInterval' | 'VLLMMonitorInterval' | 'ContainerMonitorInterval',
+    value: number,
+) => {
     const interval = splitTimeFromSecond(value);
     intervalRef.value.acceptParams({ key, timeItem: interval.timeItem, timeUnit: interval.timeUnit });
 };
@@ -257,8 +330,10 @@ const onChangeIO = () => {
     ioRef.value.acceptParams({ defaultIO: form.defaultIO });
 };
 
-const onClean = async (type: 'host' | 'gpu') => {
-    const name = i18n.global.t(type === 'host' ? 'monitor.hostMonitor' : 'monitor.gpuMonitor');
+const onClean = async (type: 'host' | 'gpu' | 'container') => {
+    const name = i18n.global.t(
+        type === 'host' ? 'monitor.hostMonitor' : type === 'gpu' ? 'monitor.gpuMonitor' : 'monitor.containerMonitor',
+    );
     ElMessageBox.confirm(i18n.global.t('monitor.cleanHelper', [name]), i18n.global.t('monitor.cleanMonitor'), {
         confirmButtonText: i18n.global.t('commons.button.confirm'),
         cancelButtonText: i18n.global.t('commons.button.cancel'),

@@ -196,6 +196,31 @@ export namespace Container {
         networkTX: number;
         shotTime: Date;
     }
+    export interface ContainerMonitorSearch {
+        containerName: string;
+        startTime: Date;
+        endTime: Date;
+        aggregation: string;
+    }
+    export interface ContainerMonitorPoint {
+        createdAt: Date;
+        containerID: string;
+        containerName: string;
+        cpuPercent: number;
+        memory: number;
+        memoryLimit: number;
+        memoryPercent: number;
+        cache: number;
+        ioRead: number;
+        ioWrite: number;
+        networkRX: number;
+        networkTX: number;
+    }
+    export interface ContainerMonitorData {
+        sampleCount: number;
+        bucketSeconds: number;
+        points: Array<ContainerMonitorPoint>;
+    }
     export interface ContainerInspect {
         id: string;
         type: string;

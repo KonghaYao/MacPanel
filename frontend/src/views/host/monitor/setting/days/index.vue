@@ -26,7 +26,7 @@ import { updateMonitorSetting } from '@/api/modules/host';
 const emit = defineEmits<{ (e: 'search'): void }>();
 
 interface DialogProps {
-    key: 'MonitorStoreDays' | 'GPUMonitorStoreDays' | 'VLLMMonitorStoreDays';
+    key: 'MonitorStoreDays' | 'GPUMonitorStoreDays' | 'VLLMMonitorStoreDays' | 'ContainerMonitorStoreDays';
     monitorStoreDays: number;
 }
 const settingKey = ref<DialogProps['key']>('MonitorStoreDays');

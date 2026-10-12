@@ -71,6 +71,9 @@ export namespace Host {
         vllmMonitorStatus: string;
         vllmMonitorStoreDays: string;
         vllmMonitorInterval: string;
+        containerMonitorStatus: string;
+        containerMonitorStoreDays: string;
+        containerMonitorInterval: string;
         defaultNetwork: string;
         defaultIO: string;
         monitorStatus: string;
