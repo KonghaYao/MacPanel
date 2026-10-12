@@ -110,3 +110,21 @@ type MonitorVLLM struct {
 	RequestLatencyP95     *float64 `json:"requestLatencyP95"`
 	RequestLatencyP99     *float64 `json:"requestLatencyP99"`
 }
+
+type MonitorContainer struct {
+	ID            uint      `json:"-" gorm:"primarykey;autoIncrement"`
+	CreatedAt     time.Time `json:"createdAt" gorm:"index:idx_monitor_container_name_time"`
+	ContainerName string    `json:"containerName" gorm:"index:idx_monitor_container_name_time"`
+	ContainerID   string    `json:"containerID"`
+
+	CPUPercent    float64 `json:"cpuPercent"`
+	Memory        float64 `json:"memory"`
+	MemoryLimit   float64 `json:"memoryLimit"`
+	MemoryPercent float64 `json:"memoryPercent"`
+	Cache         float64 `json:"cache"`
+
+	IORead    float64 `json:"ioRead"`
+	IOWrite   float64 `json:"ioWrite"`
+	NetworkRX float64 `json:"networkRX"`
+	NetworkTX float64 `json:"networkTX"`
+}

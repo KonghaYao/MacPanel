@@ -100,6 +100,12 @@ export const containerListStats = (currentNode?: string) => {
 export const containerStats = (id: string) => {
     return http.get<Container.ContainerStats>(`/containers/stats/${id}`);
 };
+export const loadContainerMonitor = (params: Container.ContainerMonitorSearch) => {
+    return http.post<Container.ContainerMonitorData>(`/containers/monitor/search`, params, TimeoutEnum.T_60S);
+};
+export const cleanContainerMonitor = (params: { containerName: string }) => {
+    return http.post(`/containers/monitor/clean`, params, TimeoutEnum.T_60S);
+};
 export const containerRename = (params: Container.ContainerRename) => {
     return http.post(`/containers/rename`, params);
 };

@@ -34,7 +34,7 @@ import { transferTimeToSecond } from '@/utils/validate';
 const emit = defineEmits<{ (e: 'search'): void }>();
 
 interface DialogProps {
-    key: 'MonitorInterval' | 'GPUMonitorInterval' | 'VLLMMonitorInterval';
+    key: 'MonitorInterval' | 'GPUMonitorInterval' | 'VLLMMonitorInterval' | 'ContainerMonitorInterval';
     timeItem: number;
     timeUnit: string;
 }

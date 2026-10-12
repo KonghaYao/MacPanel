@@ -86,6 +86,16 @@
                             </el-text>
 
                             <div class="float-right">
+                                <el-tooltip :content="$t('menu.monitor')">
+                                    <el-button
+                                        class="container-monitor-button"
+                                        link
+                                        size="large"
+                                        type="primary"
+                                        icon="TrendCharts"
+                                        @click="onMonitor(row)"
+                                    />
+                                </el-tooltip>
                                 <el-tooltip
                                     :content="row.isPinned ? $t('commons.table.unpin') : $t('commons.table.pin')"
                                 >
@@ -830,7 +840,11 @@ const onImportCreate = () => {
 
 const dialogMonitorRef = ref();
 const onMonitor = (row: any) => {
-    dialogMonitorRef.value!.acceptParams({ containerID: row.containerID, container: row.name });
+    dialogMonitorRef.value!.acceptParams({
+        containerID: row.containerID,
+        container: row.name,
+        state: row.state,
+    });
 };
 
 const dialogTerminalRef = ref();
@@ -993,9 +1007,6 @@ const buttons = [
     },
     {
         label: i18n.global.t('menu.monitor'),
-        disabled: (row: Container.ContainerInfo) => {
-            return row.state !== 'running';
-        },
         click: (row: Container.ContainerInfo) => {
             onMonitor(row);
         },

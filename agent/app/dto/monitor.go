@@ -30,21 +30,24 @@ type Process struct {
 }
 
 type MonitorSetting struct {
-	GPUMonitorStatus     string `json:"gpuMonitorStatus"`
-	GPUMonitorStoreDays  string `json:"gpuMonitorStoreDays"`
-	GPUMonitorInterval   string `json:"gpuMonitorInterval"`
-	VLLMMonitorStatus    string `json:"vllmMonitorStatus"`
-	VLLMMonitorStoreDays string `json:"vllmMonitorStoreDays"`
-	VLLMMonitorInterval  string `json:"vllmMonitorInterval"`
-	MonitorStatus        string `json:"monitorStatus"`
-	MonitorStoreDays     string `json:"monitorStoreDays"`
-	MonitorInterval      string `json:"monitorInterval"`
-	DefaultNetwork       string `json:"defaultNetwork"`
-	DefaultIO            string `json:"defaultIO"`
+	GPUMonitorStatus          string `json:"gpuMonitorStatus"`
+	GPUMonitorStoreDays       string `json:"gpuMonitorStoreDays"`
+	GPUMonitorInterval        string `json:"gpuMonitorInterval"`
+	VLLMMonitorStatus         string `json:"vllmMonitorStatus"`
+	VLLMMonitorStoreDays      string `json:"vllmMonitorStoreDays"`
+	VLLMMonitorInterval       string `json:"vllmMonitorInterval"`
+	ContainerMonitorStatus    string `json:"containerMonitorStatus"`
+	ContainerMonitorStoreDays string `json:"containerMonitorStoreDays"`
+	ContainerMonitorInterval  string `json:"containerMonitorInterval"`
+	MonitorStatus             string `json:"monitorStatus"`
+	MonitorStoreDays          string `json:"monitorStoreDays"`
+	MonitorInterval           string `json:"monitorInterval"`
+	DefaultNetwork            string `json:"defaultNetwork"`
+	DefaultIO                 string `json:"defaultIO"`
 }
 
 type MonitorSettingUpdate struct {
-	Key   string `json:"key" validate:"required,oneof=MonitorStatus MonitorStoreDays MonitorInterval GPUMonitorStatus GPUMonitorStoreDays GPUMonitorInterval VLLMMonitorStatus VLLMMonitorStoreDays VLLMMonitorInterval DefaultNetwork DefaultIO"`
+	Key   string `json:"key" validate:"required,oneof=MonitorStatus MonitorStoreDays MonitorInterval GPUMonitorStatus GPUMonitorStoreDays GPUMonitorInterval VLLMMonitorStatus VLLMMonitorStoreDays VLLMMonitorInterval ContainerMonitorStatus ContainerMonitorStoreDays ContainerMonitorInterval DefaultNetwork DefaultIO"`
 	Value string `json:"value"`
 }
 
@@ -148,5 +151,22 @@ type MonitorVLLMClean struct {
 }
 
 type MonitorClean struct {
-	Type string `json:"type" validate:"required,oneof=host gpu"`
+	Type string `json:"type" validate:"required,oneof=host gpu container"`
+}
+
+type MonitorContainerSearch struct {
+	ContainerName string    `json:"containerName" validate:"required"`
+	StartTime     time.Time `json:"startTime" validate:"required"`
+	EndTime       time.Time `json:"endTime" validate:"required"`
+	Aggregation   string    `json:"aggregation" validate:"omitempty,oneof=avg max"`
+}
+
+type MonitorContainerData struct {
+	SampleCount   int64                    `json:"sampleCount"`
+	BucketSeconds int64                    `json:"bucketSeconds"`
+	Points        []model.MonitorContainer `json:"points"`
+}
+
+type MonitorContainerClean struct {
+	ContainerName string `json:"containerName"`
 }

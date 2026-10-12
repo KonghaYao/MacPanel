@@ -2160,6 +2160,16 @@ const message = {
     monitor: {
         hostMonitor: '호스트 모니터링',
         gpuMonitor: 'GPU 모니터링',
+        containerMonitor: '컨테이너 모니터링',
+        live: '실시간',
+        history: '기록',
+        historyEmpty: '이 기간에 수집된 데이터가 없습니다. 컨테이너 모니터링이 켜져 있는지 확인하세요.',
+        aggregation: '집계 방식',
+        avg: '평균',
+        max: '최대',
+        containerStopped:
+            '컨테이너가 실행 중이 아니어서 실시간 데이터를 볼 수 없습니다. 기록 탭에서 수집된 데이터를 확인하세요.',
+        timeRange: '기간',
         vllmMonitor: 'vLLM 모니터링',
         globalFilter: '전역 필터',
         enableMonitor: '모니터링 상태',

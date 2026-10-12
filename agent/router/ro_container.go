@@ -12,6 +12,8 @@ func (s *ContainerRouter) InitRouter(Router *gin.RouterGroup) {
 	baseApi := v2.ApiGroupApp.BaseApi
 	{
 		baRouter.GET("/stats/:id", baseApi.ContainerStats)
+		baRouter.POST("/monitor/search", baseApi.LoadContainerMonitor)
+		baRouter.POST("/monitor/clean", baseApi.CleanContainerMonitor)
 
 		baRouter.POST("", baseApi.ContainerCreate)
 		baRouter.POST("/update", baseApi.ContainerUpdate)

@@ -2230,6 +2230,16 @@ const message = {
     monitor: {
         hostMonitor: 'Monitoramento do host',
         gpuMonitor: 'Monitoramento da GPU',
+        containerMonitor: 'Monitoramento de contêineres',
+        live: 'Tempo real',
+        history: 'Histórico',
+        historyEmpty: 'Nenhum dado coletado neste período. Verifique se o monitoramento de contêineres está ativado.',
+        aggregation: 'Agregação',
+        avg: 'Média',
+        max: 'Máximo',
+        containerStopped:
+            'O contêiner não está em execução, os dados em tempo real não estão disponíveis. Acesse a aba Histórico.',
+        timeRange: 'Intervalo de tempo',
         vllmMonitor: 'Monitoramento do vLLM',
         globalFilter: 'Filtro Global',
         enableMonitor: 'Status de Monitoramento',

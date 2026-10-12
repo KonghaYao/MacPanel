@@ -117,6 +117,8 @@ func agentDBMigrations() []*gormigrate.Migration {
 		migrations.FixDarwinLocalSSHConn,
 		migrations.AddS3ConnectionTable,
 		migrations.AddSSHHostTable,
+		migrations.AddContainerMonitor,
+		migrations.AddContainerMonitorSettings,
 	}
 }
 

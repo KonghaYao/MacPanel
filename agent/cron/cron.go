@@ -60,6 +60,17 @@ func Run() {
 		}
 	}
 
+	var containerStatus, containerInterval model.Setting
+	if err := global.DB.Where("key = ?", "ContainerMonitorStatus").First(&containerStatus).Error; err != nil {
+		global.LOG.Errorf("Load container monitoring status failed: %v", err)
+	} else if containerStatus.Value == constant.StatusEnable {
+		if err := global.DB.Where("key = ?", "ContainerMonitorInterval").First(&containerInterval).Error; err != nil {
+			global.LOG.Errorf("Load container monitoring interval failed: %v", err)
+		} else if err := service.StartContainerMonitor(containerInterval.Value); err != nil {
+			global.LOG.Errorf("Start container monitoring failed: %v", err)
+		}
+	}
+
 	if _, err := global.Cron.AddJob("@daily", job.NewWebsiteJob()); err != nil {
 		global.LOG.Errorf("can not add  website corn job: %s", err.Error())
 	}

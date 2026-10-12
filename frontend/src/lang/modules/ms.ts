@@ -2224,6 +2224,16 @@ const message = {
     monitor: {
         hostMonitor: 'Pemantauan Hos',
         gpuMonitor: 'Pemantauan GPU',
+        containerMonitor: 'Pemantauan Kontena',
+        live: 'Masa nyata',
+        history: 'Sejarah',
+        historyEmpty: 'Tiada data dikumpul dalam julat masa ini. Pastikan pemantauan kontena dihidupkan.',
+        aggregation: 'Pengagregatan',
+        avg: 'Purata',
+        max: 'Maksimum',
+        containerStopped:
+            'Kontena tidak berjalan, data masa nyata tidak tersedia. Beralih ke tab Sejarah untuk data yang dikumpul.',
+        timeRange: 'Julat masa',
         vllmMonitor: 'Pemantauan vLLM',
         globalFilter: 'Penapis Global',
         enableMonitor: 'Status Pemantauan',
