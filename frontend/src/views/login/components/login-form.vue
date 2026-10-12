@@ -388,6 +388,7 @@ import { syncAuthInfo } from '@/utils/rbac';
 import { adjustColorToRGBA } from '@/utils/color';
 import { useGlobalStore } from '@/composables/useGlobalStore';
 import { submitSAML2Navigation } from '@/utils/saml2';
+import { applyPanelTitle } from '@/utils/panel-title';
 
 const emit = defineEmits<{
     (e: 'external-login-ready'): void;
@@ -922,7 +923,7 @@ const getSetting = async () => {
             loginVerify();
         }
 
-        document.title = res.data.panelName;
+        applyPanelTitle();
         i18n.warnHtmlMessage = false;
         openMenuTabs.value = res.data.menuTabs === 'Enable';
         menuAccordion.value = res.data.menuAccordion === 'Enable';
@@ -999,7 +1000,7 @@ onMounted(async () => {
     if (!ignoreCaptcha.value) {
         loginVerify();
     }
-    document.title = themeConfig.value.panelName;
+    applyPanelTitle();
     nextTick(() => {
         userNameRef.value?.focus();
     });
