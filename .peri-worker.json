@@ -1,0 +1,7 @@
+{
+  "checks": [
+    { "id": "go-build", "label": "Go 构建（agent + pkg/platform）", "command": "go", "args": ["build", "./agent/...", "./pkg/platform/..."], "timeoutMs": 600000 },
+    { "id": "go-vet", "label": "Go 静态检查（agent + pkg/platform）", "command": "go", "args": ["vet", "./agent/...", "./pkg/platform/..."], "timeoutMs": 600000 },
+    { "id": "go-test", "label": "Go 单元测试（agent）", "command": "go", "args": ["test", "./agent/..."], "timeoutMs": 600000 }
+  ]
+}
