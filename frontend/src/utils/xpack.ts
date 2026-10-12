@@ -10,6 +10,7 @@ import {
     updateXpackSettingByKey as updateXpackSettingByKeyFromExtension,
 } from '@/extensions/xpack';
 import { GlobalStore } from '@/store';
+import { applyPanelTitle } from '@/utils/panel-title';
 import faviconUrl from '@/assets/images/favicon.svg';
 
 let switchThemeFn: (() => void) | undefined;
@@ -41,7 +42,7 @@ async function getColoredFavicon(url: string, color: string) {
 
 export async function initFavicon() {
     const globalStore = GlobalStore();
-    document.title = globalStore.themeConfig.panelName;
+    applyPanelTitle();
     const favicon = globalStore.themeConfig.favicon;
     const isPro = globalStore.isXpackOrEE;
     const themeColor = globalStore.themeConfig.primary;
@@ -82,7 +83,7 @@ export async function getXpackSetting() {
 const loadDataFromDB = async () => {
     const globalStore = GlobalStore();
     const res = await getSettingBaseInfo();
-    document.title = res.data.panelName;
+    applyPanelTitle();
     globalStore.entrance = res.data.securityEntrance;
     globalStore.openMenuTabs = res.data.menuTabs === 'Enable';
     globalStore.menuAccordion = res.data.menuAccordion === 'Enable';

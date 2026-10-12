@@ -19,6 +19,7 @@ import i18n, { ensureFallbackLocale, loadLocaleMessages } from '@/lang/index';
 import pinia from '@/store/index';
 import SvgIcon from './components/svg-icon/svg-icon.vue';
 import Components from '@/components';
+import { applyPanelTitle } from '@/utils/panel-title';
 
 import directives from '@/directives/index';
 
@@ -41,6 +42,7 @@ const bootstrap = async () => {
     app.use(Components);
     app.use(directives);
 
+    applyPanelTitle();
     app.mount('#app');
 };
 

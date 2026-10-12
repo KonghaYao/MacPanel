@@ -127,6 +127,7 @@ import { preloadImage } from '@/utils/browser';
 import { adjustColorToRGBA } from '@/utils/color';
 import { getXpackSettingForTheme } from '@/utils/xpack';
 import { copyText } from '@/utils/clipboard';
+import { applyPanelTitle } from '@/utils/panel-title';
 import i18n from '@/lang';
 import CommunityRestoreDialog from './community-restore/index.vue';
 
@@ -235,7 +236,7 @@ const loadLoginTheme = async () => {
         theme: res.data.theme,
         panelName: res.data.panelName,
     };
-    document.title = res.data.panelName;
+    applyPanelTitle();
     applyLoginThemeColor();
     if (!isEnterprise.value) {
         router.replace(isLogin.value ? { name: 'home' } : { name: 'entrance', params: { code: entrance.value } });
